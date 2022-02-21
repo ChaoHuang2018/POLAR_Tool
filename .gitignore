@@ -1,5 +1,5 @@
 # Flow* is not included
-!flowstar/
+flowstar/
 
 # temo files
 *.tmp
