@@ -1,4 +1,4 @@
-#include "../flowstar-toolbox/UnivariatePolynomial.h"
+#include "../flowstar/UnivariatePolynomial.h"
 
 using namespace flowstar;
 using namespace std;

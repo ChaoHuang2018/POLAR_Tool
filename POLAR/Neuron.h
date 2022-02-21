@@ -1,7 +1,7 @@
 #ifndef NEURON_H_
 #define NEURON_H_
 
-#include "../flowstar-toolbox/Continuous.h"
+#include "../flowstar/Continuous.h"
 #include "PolarSetting.h"
 #include "BernsteinPoly.h"
 

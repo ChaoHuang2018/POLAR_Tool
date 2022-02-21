@@ -997,10 +997,10 @@ void TaylorModel<DATA_TYPE>::LieDerivative(TaylorModel<DATA_TYPE> & result, cons
 	expansion.LieDerivative(result.expansion, f);
 
 	Interval I;
-	expansion.ctrunc(I, domain, order);
+	result.expansion.ctrunc(I, domain, order);
 
-	expansion.cutoff(cutoff_threshold);
-	remainder += I;
+	result.expansion.cutoff(cutoff_threshold);
+	result.remainder += I;
 }
 
 template <class DATA_TYPE>
@@ -3581,10 +3581,9 @@ template <class DATA_TYPE>
 void TaylorModelVec<DATA_TYPE>::normalize(std::vector<Interval> & domain, const Interval & cutoff_threshold)
 {
 	unsigned int domainDim = domain.size();
-	unsigned int rangeDim = tms.size();
 
 	// compute the center of the original domain and make it origin-centered
-	std::vector<Real> center(rangeDim);
+	std::vector<Real> center(domainDim - 1);
 	for(unsigned int i=1; i<domainDim; ++i)		// we omit the time dimension
 	{
 		Real c;
@@ -3593,7 +3592,7 @@ void TaylorModelVec<DATA_TYPE>::normalize(std::vector<Interval> & domain, const 
 	}
 
 	// compute the scalars
-	Matrix<DATA_TYPE> coefficients(rangeDim, domainDim);
+	Matrix<DATA_TYPE> coefficients(domainDim-1, domainDim);
 
 	for(unsigned int i=1; i<domainDim; ++i)
 	{
@@ -3603,7 +3602,7 @@ void TaylorModelVec<DATA_TYPE>::normalize(std::vector<Interval> & domain, const 
 	}
 
 	TaylorModelVec<DATA_TYPE> newVars(coefficients);
-	for(unsigned int i=0; i<rangeDim; ++i)
+	for(unsigned int i=0; i<domainDim-1; ++i)
 	{
 		TaylorModel<DATA_TYPE> tmTemp(center[i], domainDim);
 		newVars.tms[i] += tmTemp;

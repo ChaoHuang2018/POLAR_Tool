@@ -1,3 +1,9 @@
+# Flow* is not included
+!flowstar/
+
+# temo files
+*.tmp
+
 # Prerequisites
 *.d
 

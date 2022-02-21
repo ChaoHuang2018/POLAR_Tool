@@ -125,10 +125,18 @@ int main(int argc, char *argv[])
 		tmv_input.tms.push_back(tmv_temp.tms[0]);
 		tmv_input.tms.push_back(tmv_temp.tms[1]);
 
+
 		// taylor propagation
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Berns", "Concrete");
 		TaylorModelVec<Real> tmv_output;
-        nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+
+		// not using symbolic remainder
+//        nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+
+        // using symbolic remainder
+		nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+
+
 		Matrix<Interval> rm1(1, 1);
 		tmv_output.Remainder(rm1);
 		cout << "Neural network taylor remainder: " << rm1 << endl;
@@ -144,7 +152,7 @@ int main(int argc, char *argv[])
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
 			initial_set = result.fp_end_of_time;
-			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
+			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl << endl;
 		}
 		else
 		{
@@ -176,23 +184,6 @@ int main(int argc, char *argv[])
 	{
 		reach_result = "Verification result: No(35)";
 	}
-
-/*
-	vector<Interval> end_box;
-	string reach_result;
-	reach_result = "Verification result: Unknown(35)";
-	result.fp_end_of_time.intEval(end_box, order, setting.tm_setting.cutoff_threshold);
-
-	if (end_box[0].inf() >= 0.0 && end_box[0].sup() <= 0.2 && end_box[1].inf() >= 0.05 && end_box[1].sup() <= 0.3)
-	{
-		reach_result = "Verification result: Yes(35)";
-	}
-
-	if (end_box[0].inf() >= 0.2 || end_box[0].sup() <= 0.0 || end_box[1].inf() >= 0.3 || end_box[1].sup() <= 0.05)
-	{
-		reach_result = "Verification result: No(35)";
-	}
-*/
 
 
 	time(&end_timer);
