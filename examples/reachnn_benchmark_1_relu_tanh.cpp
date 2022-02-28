@@ -6,6 +6,9 @@ using namespace flowstar;
 
 int main(int argc, char *argv[])
 {
+    
+    intervalNumPrecision = 600;
+    
 	// Declaration of the state variables.
 	unsigned int numVars = 3;
 
@@ -41,7 +44,7 @@ int main(int argc, char *argv[])
 	setting.setTime(0.2);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-8);
+	setting.setCutoffThreshold(1e-12);
 
 	// print out the steps
 	setting.printOff();
@@ -84,7 +87,7 @@ int main(int argc, char *argv[])
 
 	// the order in use
 	// unsigned int order = 5;
-	Interval cutoff_threshold(-1e-12, 1e-12);
+	Interval cutoff_threshold(-1e-10, 1e-10);
 	unsigned int bernstein_order = stoi(argv[3]);
 	unsigned int partition_num = 4000;
 
@@ -131,10 +134,10 @@ int main(int argc, char *argv[])
 		TaylorModelVec<Real> tmv_output;
 
 		// not using symbolic remainder
-//        nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+        nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
 
         // using symbolic remainder
-		nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+//		nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
 
 
 		Matrix<Interval> rm1(1, 1);

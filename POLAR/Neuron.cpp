@@ -57,6 +57,7 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 	// cout << "up: " << up << endl;
 	TaylorModel<Real> tmTemp(up.coefficients[up.coefficients.size() - 1], domain.size());
 
+    // cout << "cut: " << setting.tm_setting.cutoff_threshold << endl;
 	for (int i = up.coefficients.size() - 2; i >= 0; --i)
 	{
 		tmTemp.mul_ctrunc_assign(input, domain, taylor_order, setting.tm_setting.cutoff_threshold);
@@ -64,16 +65,38 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 		TaylorModel<Real> tmTemp2(up.coefficients[i], domain.size());
 		tmTemp += tmTemp2;
 	}
-
+    
 	TaylorModel<Real> result_berns;
 	result_berns = tmTemp;
 	result_berns.remainder += rem;
+    
+    cout << "result_berns: " << result_berns.remainder << endl;
+    
 
 	// cout << "Berns time: " << seconds << " seconds" << endl;
-
+    Variables vars;
+    vars.declareVar("t");
+    int x0_id = vars.declareVar("x0");
+    int x1_id = vars.declareVar("x1");
+    int x2_id = vars.declareVar("x2");
+    int x3_id = vars.declareVar("x3");
+    int x4_id = vars.declareVar("x4");
+    int x5_id = vars.declareVar("x5");
+    int u0_id = vars.declareVar("u0");
+    int u1_id = vars.declareVar("u1");
+    int u2_id = vars.declareVar("u2");
+    
 	TaylorModel<Real> tmTemp1 = (input) * (-1);
+    tmTemp1.output(cout, vars);
+    cout << endl;
 	TaylorModel<Real> tmTemp2;
+    cout << "domain: " << domain[0] << ", " << domain[1] << endl;
+    cout << "taylor_order: " << taylor_order << endl;
+    cout << "setting.tm_setting.cutoff_threshold: " << setting.tm_setting.cutoff_threshold << endl;
 	tmTemp1.exp_taylor(tmTemp2, domain, taylor_order, setting.tm_setting.cutoff_threshold, setting.g_setting);
+    tmTemp2.output(cout, vars);
+    
+    cout << "tmTemp2: " << tmTemp2.remainder << endl;
 
 	// cout << "tmTemp2: " << tmTemp2.expansion.terms.size() << endl;
 	tmTemp2 += 1;
@@ -82,6 +105,8 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 	TaylorModel<Real> result_taylor;
 	tmTemp2.rec_taylor(result_taylor, domain, taylor_order, setting.tm_setting.cutoff_threshold, setting.g_setting);
 
+    cout << "result_taylor: " << result_taylor.remainder << endl;
+    // exit(0);
 	// cout << "Taylor time: " << seconds << " seconds" << endl;
 
 	if (neuron_approx_type == "Berns")
@@ -105,6 +130,7 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 			// cout << "Taylor" << endl;
 		}
 	}
+    cout << "after activation, remainder: " << result.remainder << endl;
 }
 
 void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
@@ -145,11 +171,13 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     // cout << "11111111" << endl;
     if (tmTemp2.expansion.terms.size() == 0)
     {
-        tmTemp2.expansion.terms.push_back(Real(0));
-        //cout << tmTemp2.expansion.terms.size() << endl;
-        //cout << tmTemp2.remainder << endl;
+        Polynomial<Real> tmp_poly(1, domain.size());
+        tmTemp2.expansion = tmp_poly;
+    } else
+    {
+        tmTemp2 += 1;
     }
-    tmTemp2 += 1;
+    // tmTemp2 += 1;
 
     TaylorModel<Real> tmTemp3;
     tmTemp2.rec_taylor(tmTemp3, domain, taylor_order, setting.tm_setting.cutoff_threshold, setting.g_setting);
@@ -207,40 +235,43 @@ void Neuron::relu_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
         TaylorModel<Real> tmTemp2(up.coefficients[i], domain.size());
         tmTemp += tmTemp2;
     }
+    
+    
     result = tmTemp;
     // cout << "Coeff length: " << result.expansion.terms.size() << endl;
     result.remainder += rem;
+    cout << "after activation, remainder: " << result.remainder << endl;
 }
 
 void Neuron::affine_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
 {
-    unsigned int taylor_order = polar_setting.get_taylor_order();
-    unsigned int bernstein_order = polar_setting.get_bernstein_order();
-    unsigned int partition_num = polar_setting.get_partition_num();
-    string neuron_approx_type = polar_setting.get_neuron_approx_type();
-    string remainder_type = polar_setting.get_remainder_type();
+    result = input;
     
-    Interval tmRange;
-    input.intEval(tmRange, domain);
-    
-    vector<Real> coe;
-    coe.push_back(Real(0.0));
-    coe.push_back(Real(1.0));
-    UnivariatePolynomial<Real> up(coe);
-
-    Interval rem(0);
-
-    TaylorModel<Real> tmTemp(up.coefficients[up.coefficients.size() - 1], domain.size());
-
-    for (int i = up.coefficients.size() - 2; i >= 0; --i)
-    {
-        tmTemp.mul_ctrunc_assign(input, domain, taylor_order, setting.tm_setting.cutoff_threshold);
-
-        TaylorModel<Real> tmTemp2(up.coefficients[i], domain.size());
-        tmTemp += tmTemp2;
-    }
-    result = tmTemp;
-    // cout << "Coeff length: " << result.expansion.terms.size() << endl;
-    result.remainder += rem;
+//    unsigned int taylor_order = polar_setting.get_taylor_order();
+//    unsigned int bernstein_order = polar_setting.get_bernstein_order();
+//    unsigned int partition_num = polar_setting.get_partition_num();
+//    string neuron_approx_type = polar_setting.get_neuron_approx_type();
+//    string remainder_type = polar_setting.get_remainder_type();
+//
+//    vector<Real> coe;
+//    coe.push_back(Real(0.0));
+//    coe.push_back(Real(1.0));
+//    UnivariatePolynomial<Real> up(coe);
+//
+//    Interval rem(0);
+//
+//    TaylorModel<Real> tmTemp(up.coefficients[up.coefficients.size() - 1], domain.size());
+//
+//    for (int i = up.coefficients.size() - 2; i >= 0; --i)
+//    {
+//
+//        tmTemp.mul_ctrunc_assign(input, domain, taylor_order, setting.tm_setting.cutoff_threshold);
+//
+//        TaylorModel<Real> tmTemp2(up.coefficients[i], domain.size());
+//        tmTemp += tmTemp2;
+//    }
+//    result = tmTemp;
+//    // cout << "Coeff length: " << result.expansion.terms.size() << endl;
+//    result.remainder += rem;
 }
 

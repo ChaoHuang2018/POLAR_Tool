@@ -7,7 +7,10 @@ CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: reachnn_benchmark_1_relu_tanh
+all: nn_attitude_control_sigmoid reachnn_benchmark_1_relu_tanh
+
+nn_attitude_control_sigmoid: nn_attitude_control_sigmoid.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 reachnn_benchmark_1_relu_tanh: reachnn_benchmark_1_relu_tanh.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
@@ -23,5 +26,5 @@ reachnn_benchmark_1_relu_tanh: reachnn_benchmark_1_relu_tanh.o
 
 
 clean:
-	rm -f *.o reachnn_benchmark_1_relu_tanh
+	rm -f *.o reachnn_benchmark_1_relu_tanh nn_attitude_control_sigmoid
 

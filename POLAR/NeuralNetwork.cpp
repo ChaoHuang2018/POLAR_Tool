@@ -38,7 +38,10 @@ void Layer::post_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &in
     
     for (unsigned int i = 0; i < input.tms.size(); ++i)
     {
+        cout << "------"
+             << "Neuron " << i << " -------" << endl;
         TaylorModel<Real> tmTemp;
+        cout << "Input remainder: " << input.tms[i].remainder << endl;
         neuron_list[i].taylor_model_approx(tmTemp, input.tms[i], domain, polar_setting, setting);
         result.tms.push_back(tmTemp);
     }
@@ -73,9 +76,19 @@ NeuralNetwork::NeuralNetwork(string filename)
     getline(input, line);
     num_of_outputs = stoi(line);
     getline(input, line);
-    num_of_hidden_layers = stoi(line);
+//    try
+//    {
+//        input >> num_of_hidden_layers;
+//    }
+//    catch (...)
+//    {
+//        cout << "aaa" << endl;
+//    }
+     num_of_hidden_layers = stoi(line);
 
-    // cout << "num_of_inputs" << num_of_inputs << ", " << num_of_outputs << ", " << num_of_hidden_layers;
+//    cout << "num_of_inputs" << num_of_inputs << ", " << num_of_outputs << ", " << num_of_hidden_layers << endl;
+//
+//    exit(0);
 
     std::vector<int> network_structure(num_of_hidden_layers + 1, 0);
     for (int idx = 0; idx < num_of_hidden_layers; idx++)
@@ -154,19 +167,45 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
     tmv_all_layer.push_back(input);
     for (int s = 0; s < num_of_hidden_layers + 1; s++)
     {
+        //cout << "num_of_hidden_layersL: " << num_of_hidden_layers << endl;
         cout << "------------- Layer " << s << " starts. -------------" << endl;
         Layer layer = layers[s];
         
         TaylorModelVec<Real> tmvTemp_pre;
         layer.pre_activate(tmvTemp_pre, tmv_all_layer[s], domain);
         
+        
         TaylorModelVec<Real> tmvTemp_post;
         layer.post_activate(tmvTemp_post, tmvTemp_pre, domain, polar_setting, setting);
 
         tmv_all_layer.push_back(tmvTemp_post);
+        
     }
 
+    // cout << "size: " << tmv_all_layer.size() << endl;
     result = tmv_all_layer.back();
+    
+    Variables vars;
+    int x0_id = vars.declareVar("x0");
+    int x1_id = vars.declareVar("x1");
+    int x2_id = vars.declareVar("x2");
+    int x3_id = vars.declareVar("x3");
+    int x4_id = vars.declareVar("x4");
+    int x5_id = vars.declareVar("x5");
+    int u0_id = vars.declareVar("u0");
+    int u1_id = vars.declareVar("u1");
+    int u2_id = vars.declareVar("u2");
+    cout << "----------Before scale and offset: ----------" << endl;
+    cout << "output taylor 0: " << endl;
+    result.tms[0].output(cout, vars);
+    cout << endl;
+    cout << "output taylor 1: " << endl;
+    result.tms[1].output(cout, vars);
+    cout << endl;
+    cout << "output taylor 2: " << endl;
+    result.tms[2].output(cout, vars);
+    cout << endl;
+    cout << "--------------------" << endl;
 
     Matrix<Real> offset_vector(num_of_outputs, 1);
     for (int i = 0; i < num_of_outputs; i++)
