@@ -149,8 +149,14 @@ int main(int argc, char *argv[])
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
 
 
-//		dynamics.reach(result, setting, initial_set, unsafeSet);
-		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        if (if_symbo == 0)
+        {
+            dynamics.reach(result, setting, initial_set, unsafeSet);
+        }
+        else
+        {
+            dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        }
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{

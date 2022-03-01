@@ -189,8 +189,14 @@ int main(int argc, char *argv[])
         initial_set.tmvPre.tms[u2_id] = tmv_output.tms[2];
         cout << "TM -- Propagation" << endl;
 
-        // dynamics.reach(result, setting, initial_set, unsafeSet);
-        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        if (if_symbo == 0)
+        {
+            dynamics.reach(result, setting, initial_set, unsafeSet);
+        }
+        else
+        {
+            dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        }
         cout << "dynamics taylor 0: " << endl;
         result.fp_end_of_time.tmvPre.tms[0].output(cout, vars);
         cout << endl;
