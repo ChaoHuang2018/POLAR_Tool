@@ -189,8 +189,8 @@ int main(int argc, char *argv[])
         initial_set.tmvPre.tms[u2_id] = tmv_output.tms[2];
         cout << "TM -- Propagation" << endl;
 
-        dynamics.reach(result, setting, initial_set, unsafeSet);
-//        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        // dynamics.reach(result, setting, initial_set, unsafeSet);
+        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
         cout << "dynamics taylor 0: " << endl;
         result.fp_end_of_time.tmvPre.tms[0].output(cout, vars);
         cout << endl;
@@ -242,13 +242,13 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x1");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x0_x1_" + to_string(if_symbo), result);
+    plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x0_x1_new_" + to_string(if_symbo), result);
 
 	plot_setting.setOutputDims("x2", "x3");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x2_x3_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x2_x3_new_" + to_string(if_symbo), result);
 
 	plot_setting.setOutputDims("x4", "x5");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x4_x5_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x4_x5_new_" + to_string(if_symbo), result);
 
 	return 0;
 }
