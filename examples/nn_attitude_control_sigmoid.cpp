@@ -247,13 +247,13 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-    plot_setting.setOutputDims("x0", "x1");
+    plot_setting.setOutputDims("x0", "x3");
     plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x0_x1_new_" + to_string(if_symbo), result);
 
-	plot_setting.setOutputDims("x2", "x3");
+	plot_setting.setOutputDims("x1", "x4");
 	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x2_x3_new_" + to_string(if_symbo), result);
 
-	plot_setting.setOutputDims("x4", "x5");
+	plot_setting.setOutputDims("x2", "x5");
 	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x4_x5_new_" + to_string(if_symbo), result);
 
 	return 0;
