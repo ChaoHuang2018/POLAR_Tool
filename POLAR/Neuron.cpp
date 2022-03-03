@@ -74,6 +74,7 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
     
 
 	// cout << "Berns time: " << seconds << " seconds" << endl;
+/*  
     Variables vars;
     vars.declareVar("t");
     int x0_id = vars.declareVar("x0");
@@ -85,18 +86,19 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
     int u0_id = vars.declareVar("u0");
     int u1_id = vars.declareVar("u1");
     int u2_id = vars.declareVar("u2");
-    
+*/    
 	TaylorModel<Real> tmTemp1 = (input) * (-1);
-    tmTemp1.output(cout, vars);
-    cout << endl;
+//    tmTemp1.output(cout, vars);
+//    cout << endl;
 	TaylorModel<Real> tmTemp2;
-    cout << "domain: " << domain[0] << ", " << domain[1] << endl;
-    cout << "taylor_order: " << taylor_order << endl;
-    cout << "setting.tm_setting.cutoff_threshold: " << setting.tm_setting.cutoff_threshold << endl;
+//    cout << "domain: " << domain[0] << ", " << domain[1] << endl;
+//    cout << "taylor_order: " << taylor_order << endl;
+//    cout << "setting.tm_setting.cutoff_threshold: " << setting.tm_setting.cutoff_threshold << endl;
 	tmTemp1.exp_taylor(tmTemp2, domain, taylor_order, setting.tm_setting.cutoff_threshold, setting.g_setting);
-    tmTemp2.output(cout, vars);
+//    tmTemp2.output(cout, vars);
     
-    cout << "tmTemp2: " << tmTemp2.remainder << endl;
+//    cout << "tmTemp2: " << tmTemp2.remainder << endl;
+    cout << "11111" << endl;
 
 	// cout << "tmTemp2: " << tmTemp2.expansion.terms.size() << endl;
 	tmTemp2 += 1;
