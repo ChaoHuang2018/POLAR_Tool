@@ -10,6 +10,8 @@ int main(int argc, char *argv[])
 	string benchmark_name = "reachnn_benchmark_1_" + net_name;
 	// Declaration of the state variables.
 	unsigned int numVars = 3;
+	
+    intervalNumPrecision = 600;
 
 	Variables vars;
 
@@ -98,10 +100,6 @@ int main(int argc, char *argv[])
 	double seconds;
 	time(&start_timer);
 
-	vector<string> state_vars;
-	state_vars.push_back("x0");
-	state_vars.push_back("x1");
-
 	if (if_symbo == 0)
 	{
 		cout << "High order abstraction starts." << endl;
@@ -119,13 +117,13 @@ int main(int argc, char *argv[])
 		//initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
 		TaylorModelVec<Real> tmv_input;
 
-		// tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
-		// tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
 
-		TaylorModelVec<Real> tmv_temp;
-		initial_set.compose(tmv_temp, order, cutoff_threshold);
-		tmv_input.tms.push_back(tmv_temp.tms[0]);
-		tmv_input.tms.push_back(tmv_temp.tms[1]);
+		// TaylorModelVec<Real> tmv_temp;
+		// initial_set.compose(tmv_temp, order, cutoff_threshold);
+		// tmv_input.tms.push_back(tmv_temp.tms[0]);
+		// tmv_input.tms.push_back(tmv_temp.tms[1]);
 
 
 		// taylor propagation
@@ -150,12 +148,15 @@ int main(int argc, char *argv[])
 
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
 
-		if(if_symbo == 0){
-			dynamics.reach(result, setting, initial_set, unsafeSet);
-		}
-		else{
-			dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
-		}
+		// if(if_symbo == 0){
+		// 	dynamics.reach(result, setting, initial_set, unsafeSet);
+		// }
+		// else{
+		// 	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+		// }
+
+		// Always using symbolic remainder
+		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -186,11 +187,11 @@ int main(int argc, char *argv[])
 
 	if(b)
 	{
-		reach_result = "Verification result: Yes(35)";
+		reach_result = "Verification result: Yes(" + to_string(steps) + ")";
 	}
 	else
 	{
-		reach_result = "Verification result: No(35)";
+		reach_result = "Verification result: No(" + to_string(steps) + ")";
 	}
 
 

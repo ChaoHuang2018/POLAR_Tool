@@ -11,6 +11,8 @@ int main(int argc, char *argv[])
 	// Declaration of the state variables.
 	unsigned int numVars = 3;
 
+	intervalNumPrecision = 600;
+
 	Variables vars;
 
 	int x0_id = vars.declareVar("x0");
@@ -37,7 +39,7 @@ int main(int argc, char *argv[])
 	unsigned int order = stoi(argv[4]);
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.01, order);
+	setting.setFixedStepsize(stod(argv[7]), order);
 
 	// time horizon for a single control step
 	setting.setTime(0.2);
@@ -119,17 +121,17 @@ int main(int argc, char *argv[])
 		//initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
 		TaylorModelVec<Real> tmv_input;
 
-		// tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
-		// tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
 
-		TaylorModelVec<Real> tmv_temp;
-		initial_set.compose(tmv_temp, order, cutoff_threshold);
-		tmv_input.tms.push_back(tmv_temp.tms[0]);
-		tmv_input.tms.push_back(tmv_temp.tms[1]);
+		// TaylorModelVec<Real> tmv_temp;
+		// initial_set.compose(tmv_temp, order, cutoff_threshold);
+		// tmv_input.tms.push_back(tmv_temp.tms[0]);
+		// tmv_input.tms.push_back(tmv_temp.tms[1]);
 
 
 		// taylor propagation
-        PolarSetting polar_setting(order, bernstein_order, partition_num, "Berns", "Concrete");
+        PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
 		TaylorModelVec<Real> tmv_output;
 
 		if(if_symbo == 0){
@@ -150,12 +152,15 @@ int main(int argc, char *argv[])
 
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
 
-		if(if_symbo == 0){
-			dynamics.reach(result, setting, initial_set, unsafeSet);
-		}
-		else{
-			dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
-		}
+		// if(if_symbo == 0){
+		// 	dynamics.reach(result, setting, initial_set, unsafeSet);
+		// }
+		// else{
+		// 	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+		// }
+
+		// Always using symbolic remainder
+		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -186,11 +191,11 @@ int main(int argc, char *argv[])
 
 	if(b)
 	{
-		reach_result = "Verification result: Yes(35)";
+		reach_result = "Verification result: Yes(" + to_string(steps) + ")";
 	}
 	else
 	{
-		reach_result = "Verification result: No(35)";
+		reach_result = "Verification result: No(" + to_string(steps) + ")";
 	}
 
 
