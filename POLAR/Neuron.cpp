@@ -184,7 +184,14 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     TaylorModel<Real> tmTemp3;
     tmTemp2.rec_taylor(tmTemp3, domain, taylor_order, setting.tm_setting.cutoff_threshold, setting.g_setting);
     TaylorModel<Real> tmTemp4 = tmTemp3 * (-2);
-    tmTemp4 += 1;
+    if (tmTemp4.expansion.terms.size() == 0)
+    {
+        Polynomial<Real> tmp_poly(1, domain.size());
+        tmTemp4.expansion = tmp_poly;
+    } else
+    {
+        tmTemp4 += 1;
+    }
 
     result_taylor = tmTemp4;
 
