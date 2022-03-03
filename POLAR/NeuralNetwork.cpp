@@ -184,28 +184,6 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
 
     // cout << "size: " << tmv_all_layer.size() << endl;
     result = tmv_all_layer.back();
-    
-    Variables vars;
-    int x0_id = vars.declareVar("x0");
-    int x1_id = vars.declareVar("x1");
-    int x2_id = vars.declareVar("x2");
-    int x3_id = vars.declareVar("x3");
-    int x4_id = vars.declareVar("x4");
-    int x5_id = vars.declareVar("x5");
-    int u0_id = vars.declareVar("u0");
-    int u1_id = vars.declareVar("u1");
-    int u2_id = vars.declareVar("u2");
-    cout << "----------Before scale and offset: ----------" << endl;
-    cout << "output taylor 0: " << endl;
-    result.tms[0].output(cout, vars);
-    cout << endl;
-    cout << "output taylor 1: " << endl;
-    result.tms[1].output(cout, vars);
-    cout << endl;
-    cout << "output taylor 2: " << endl;
-    result.tms[2].output(cout, vars);
-    cout << endl;
-    cout << "--------------------" << endl;
 
     Matrix<Real> offset_vector(num_of_outputs, 1);
     for (int i = 0; i < num_of_outputs; i++)

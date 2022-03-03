@@ -27,12 +27,12 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
-	Expression<Real> deriv_x0("u0/4 + x1*x2/4", vars); // theta_r = 0
-	Expression<Real> deriv_x1("u1/2 - 3*x0*x2/2", vars);
+	Expression<Real> deriv_x0("0.25*(u0 + x1*x2)", vars); // theta_r = 0
+	Expression<Real> deriv_x1("0.5*(u1 - 3*x0*x2)", vars);
 	Expression<Real> deriv_x2("u2 + 2*x0*x1", vars);
-	Expression<Real> deriv_x3("x1*(x3^2/2 + x4^2/2 + x5^2/2 - x5/2) + x2*(x3^2/2 + x4^2/2 + x4/2 + x5^2/2) + x0*(x3^2/2 + x4^2/2 + x5^2/2 + 1/2)", vars);
-	Expression<Real> deriv_x4("x0*(x3^2/2 + x4^2/2 + x5^2/2 + x5/2) + x2*(x3^2/2 - x3/2 + x4^2/2 + x5^2/2) + x1*(x3^2/2 + x4^2/2 + x5^2/2 + 1/2)", vars);
-	Expression<Real> deriv_x5("x0*(x3^2/2 + x4^2/2 - x4/2 + x5^2/2) + x1*(x3^2/2 + x3/2 + x4^2/2 + x5^2/2) + x2*(x3^2/2 + x4^2/2 + x5^2/2 + 1/2)", vars);
+	Expression<Real> deriv_x3("0.5*x1*(x3^2 + x4^2 + x5^2 - x5) + 0.5*x2*(x3^2 + x4^2 + x4 + x5^2) + 0.5*x0*(x3^2 + x4^2 + x5^2 + 1)", vars);
+	Expression<Real> deriv_x4("0.5*x0*(x3^2 + x4^2 + x5^2 + x5) + 0.5*x2*(x3^2 - x3 + x4^2 + x5^2) + 0.5*x1*(x3^2 + x4^2 + x5^2 + 1)", vars);
+	Expression<Real> deriv_x5("0.5*x0*(x3^2 + x4^2 - x4 + x5^2) + 0.5*x1*(x3^2 + x3 + x4^2 + x5^2) + 0.5*x2*(x3^2 + x4^2 + x5^2 + 1)", vars);
 	Expression<Real> deriv_u0("0", vars);
 	Expression<Real> deriv_u1("0", vars);
 	Expression<Real> deriv_u2("0", vars);
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
 	setting.prepare();
     //setting.g_setting.prepareForReachability(15);
-    cout << "--------" << setting.g_setting.factorial_rec.size() << ", " << setting.g_setting.power_4.size() << ", " << setting.g_setting.double_factorial.size() << endl;
+  //  cout << "--------" << setting.g_setting.factorial_rec.size() << ", " << setting.g_setting.power_4.size() << ", " << setting.g_setting.double_factorial.size() << endl;
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -127,14 +127,6 @@ int main(int argc, char *argv[])
 	double seconds;
 	time(&start_timer);
 
-	vector<string> state_vars;
-	state_vars.push_back("x0");
-	state_vars.push_back("x1");
-	state_vars.push_back("x2");
-	state_vars.push_back("x3");
-	state_vars.push_back("x4");
-	state_vars.push_back("x5");
-
 	if (if_symbo == 0)
 	{
 		cout << "High order abstraction starts." << endl;
@@ -157,33 +149,29 @@ int main(int argc, char *argv[])
 			tmv_input.tms.push_back(initial_set.tmvPre.tms[i]);
 		}
 
+
 		// taylor propagation
         // taylor propagation
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
         TaylorModelVec<Real> tmv_output;
 
-        // not using symbolic remainder
-        nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
-        
-        cout << "output taylor 0: " << endl;
-        tmv_output.tms[0].output(cout, vars);
-        cout << endl;
-        cout << "output taylor 1: " << endl;
-        tmv_output.tms[1].output(cout, vars);
-        cout << endl;
-        cout << "output taylor 2: " << endl;
-        tmv_output.tms[2].output(cout, vars);
-        cout << endl;
+        if (if_symbo == 0)
+        {
+            // not using symbolic remainder
+            nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+        }
+        else
+        {
+            // using symbolic remainder
+            nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+        }
 
-        // using symbolic remainder
-        // nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
-        
         // tmv_output.output(cout, vars);
 		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
 		tmv_output.Remainder(rm1);
 		cout << "Neural network taylor remainder: " << rm1 << endl;
 
-		
+
         initial_set.tmvPre.tms[u0_id] = tmv_output.tms[0];
         initial_set.tmvPre.tms[u1_id] = tmv_output.tms[1];
         initial_set.tmvPre.tms[u2_id] = tmv_output.tms[2];
@@ -197,15 +185,6 @@ int main(int argc, char *argv[])
         {
             dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
         }
-        cout << "dynamics taylor 0: " << endl;
-        result.fp_end_of_time.tmvPre.tms[0].output(cout, vars);
-        cout << endl;
-        cout << "dynamics taylor 1: " << endl;
-        result.fp_end_of_time.tmvPre.tms[1].output(cout, vars);
-        cout << endl;
-        cout << "dynamics taylor 2: " << endl;
-        result.fp_end_of_time.tmvPre.tms[2].output(cout, vars);
-        cout << endl;
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -214,6 +193,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			printf("Terminated due to too large overestimation.\n");
+			break;
 		}
 	}
 
@@ -247,14 +227,14 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-    plot_setting.setOutputDims("x0", "x3");
-    plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x0_x1_new_" + to_string(if_symbo), result);
+    plot_setting.setOutputDims("x0", "x1");
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x0_x1_" + to_string(if_symbo), result);
 
-	plot_setting.setOutputDims("x1", "x4");
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x2_x3_new_" + to_string(if_symbo), result);
+	plot_setting.setOutputDims("x2", "x3");
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x2_x3_" + to_string(if_symbo), result);
 
-	plot_setting.setOutputDims("x2", "x5");
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x4_x5_new_" + to_string(if_symbo), result);
+	plot_setting.setOutputDims("x4", "x5");
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x4_x5_" + to_string(if_symbo), result);
 
 	return 0;
 }
