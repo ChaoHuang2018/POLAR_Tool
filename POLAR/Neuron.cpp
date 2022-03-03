@@ -98,7 +98,6 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 //    tmTemp2.output(cout, vars);
     
 //    cout << "tmTemp2: " << tmTemp2.remainder << endl;
-    cout << "11111" << endl;
 
 	// cout << "tmTemp2: " << tmTemp2.expansion.terms.size() << endl;
 	tmTemp2 += 1;

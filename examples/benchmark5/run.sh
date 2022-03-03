@@ -1,0 +1,9 @@
+make &&\
+./reachnn_benchmark_5 0.01 10 4 6 0 sigmoid 0.005 &&\
+./reachnn_benchmark_5 0.01 10 4 6 0 tanh 0.005 &&\
+./reachnn_benchmark_5 0.01 10 4 6 0 relu 0.005 &&\
+./reachnn_benchmark_5 0.01 10 4 6 0 relu_tanh 0.005 &&\
+./reachnn_benchmark_5 0.01 10 4 6 1 sigmoid 0.005 &&\
+./reachnn_benchmark_5 0.01 10 4 6 1 tanh 0.005 &&\
+./reachnn_benchmark_5 0.01 10 4 6 1 relu 0.005 &&\
+./reachnn_benchmark_5 0.01 10 4 6 1 relu_tanh 0.005
