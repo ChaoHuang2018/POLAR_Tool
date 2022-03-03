@@ -185,35 +185,39 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
     // cout << "size: " << tmv_all_layer.size() << endl;
     result = tmv_all_layer.back();
     
-    Variables vars;
-    int x0_id = vars.declareVar("x0");
-    int x1_id = vars.declareVar("x1");
-    int x2_id = vars.declareVar("x2");
-    int x3_id = vars.declareVar("x3");
-    int x4_id = vars.declareVar("x4");
-    int x5_id = vars.declareVar("x5");
-    int u0_id = vars.declareVar("u0");
-    int u1_id = vars.declareVar("u1");
-    int u2_id = vars.declareVar("u2");
-    cout << "----------Before scale and offset: ----------" << endl;
-    cout << "output taylor 0: " << endl;
-    result.tms[0].output(cout, vars);
-    cout << endl;
-    cout << "output taylor 1: " << endl;
-    result.tms[1].output(cout, vars);
-    cout << endl;
-    cout << "output taylor 2: " << endl;
-    result.tms[2].output(cout, vars);
-    cout << endl;
-    cout << "--------------------" << endl;
+    // Variables vars;
+    // int x0_id = vars.declareVar("x0");
+    // int x1_id = vars.declareVar("x1");
+    // int x2_id = vars.declareVar("x2");
+    // int x3_id = vars.declareVar("x3");
+    // int x4_id = vars.declareVar("x4");
+    // int x5_id = vars.declareVar("x5");
+    // int u0_id = vars.declareVar("u0");
+    // int u1_id = vars.declareVar("u1");
+    // int u2_id = vars.declareVar("u2");
+    // cout << "----------Before scale and offset: ----------" << endl;
+    // cout << "output taylor 0: " << endl;
+    // result.tms[0].output(cout, vars);
+    // cout << endl;
+    // cout << "output taylor 1: " << endl;
+    // result.tms[1].output(cout, vars);
+    // cout << endl;
+    // cout << "output taylor 2: " << endl;
+    // result.tms[2].output(cout, vars);
+    // cout << endl;
+    // cout << "--------------------" << endl;
 
-    Matrix<Real> offset_vector(num_of_outputs, 1);
     for (int i = 0; i < num_of_outputs; i++)
     {
-        offset_vector[i][0] = -offset;
+        if (result.tms[i].expansion.terms.size() == 0)
+        {
+            Polynomial<Real> tmp_poly(-offset, domain.size());
+            result.tms[i].expansion = tmp_poly;
+        } else
+        {
+            result.tms[i].expansion -= offset;
+        }
     }
-    // cout << "offset: " << offset << endl;
-    result += offset_vector;
 
     Matrix<Real> scalar(num_of_outputs, num_of_outputs);
     for (int i = 0; i < num_of_outputs; i++)
@@ -445,15 +449,17 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
 
     // cout << tmv_output.tms.size() << endl;
 
-    Matrix<Real> offset_vector(num_of_outputs, 1);
     for (int i = 0; i < num_of_outputs; i++)
     {
-        offset_vector[i][0] = -1.0 * offset;
+        if (tmv_output.tms[i].expansion.terms.size() == 0)
+        {
+            Polynomial<Real> tmp_poly(-offset, domain.size());
+            tmv_output.tms[i].expansion = tmp_poly;
+        } else
+        {
+            tmv_output.tms[i].expansion -= offset;
+        }
     }
-    //cout << tmv_output.tms.size() << endl;
-    //cout << offset.rows() << endl;
-
-    tmv_output += offset_vector;
 
     Matrix<Real> scalar(num_of_outputs, num_of_outputs);
     for (int i = 0; i < num_of_outputs; i++)
