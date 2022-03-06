@@ -240,25 +240,16 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
 {
     Interval intUnit(-1, 1);
 
-    TaylorModelVec<Real> tmv_layer_input = input;
 
-    Flowpipe fp_layer_input(tmv_layer_input, domain, setting.tm_setting.cutoff_threshold);
+    Flowpipe fp_layer_input(input, domain, setting.tm_setting.cutoff_threshold);
 
 
     Symbolic_Remainder symbolic_remainder(fp_layer_input, 0);
 
-/*
-    int numOfCtl = domain.size() - input.tms.size();
-
-    for(int i=0; i<numOfCtl; ++i)
-    {
-        symbolic_remainder.polynomial_of_initial_set.pop_back();
-    }
-*/
 
     unsigned int numOfLayers = num_of_hidden_layers + 1;
 
-    unsigned int layer_input_dim = fp_layer_input.tmv.tms.size();// - numOfCtl;
+    unsigned int layer_input_dim = fp_layer_input.tmv.tms.size();
 
 
     for (unsigned int K = 0; true; ++K)
@@ -278,9 +269,6 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
         {
             Layer layer = layers[K];
             Matrix<Real> weight = layer.get_weight();
-
- //           cout << weight.rows() << "\t" << weight.cols() << endl;
- //           cout << fp_layer_input.tmvPre.tms.size() << endl;
             tmv_of_x0 = weight * fp_layer_input.tmvPre;
         }
 
@@ -312,12 +300,12 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
         TaylorModelVec<Real> x0_linear, x0_other;
         tmv_of_x0.decompose(x0_linear, x0_other);
 
-        Matrix<Real> Phi_L_i(rangeDim, layer_input_dim);
+        Matrix<Real> Phi_L_i(rangeDim, fp_layer_input.tmv.tms.size());
 
         x0_linear.linearCoefficients(Phi_L_i);
-//cout << Phi_L_i.cols() << "\t" << symbolic_remainder.scalars.size() << endl;
-        Matrix<Real> local_trans_linear = Phi_L_i;
+
         Phi_L_i.right_scale_assign(symbolic_remainder.scalars);
+
         // compute the remainder part under the linear transformation
         Matrix<Interval> J_i(rangeDim, 1);
 
@@ -340,11 +328,9 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
         // compute the local initial set
         if (symbolic_remainder.J.size() > 0)
         {
- //            cout << symbolic_remainder.Phi_L[0].cols() << endl;
- //            cout << symbolic_remainder.polynomial_of_initial_set.size() << endl;
             // compute the polynomial part under the linear transformation
 
-            std::vector<Polynomial<Real>> initial_linear = symbolic_remainder.Phi_L[0] * symbolic_remainder.polynomial_of_initial_set;
+            std::vector<Polynomial<Real> > initial_linear = symbolic_remainder.Phi_L[0] * symbolic_remainder.polynomial_of_initial_set;
 
             // compute the other part
             std::vector<Interval> tmvPolyRange;
@@ -353,9 +339,6 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
 
             fp_layer_output.tmv.Remainder(J_ip1);
 
-            Matrix<Interval> x0_rem(rangeDim, 1);
-            tmv_of_x0.Remainder(x0_rem);
-            J_ip1 += x0_rem;
 
             for (int i = 0; i < rangeDim; ++i)
             {
@@ -389,7 +372,8 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
 
             for (int i = 0; i < tmv_output.tms.size(); ++i)
             {
-                tmv_output.tms[i] += const_of_x0[i];
+            	Polynomial<Real> tmp_poly(const_of_x0[i], domain.size());
+                tmv_output.tms[i].expansion += tmp_poly;
             }
 
             break;
@@ -403,7 +387,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
             symbolic_remainder.scalars.resize(rangeDim, 0);
         }
 
-        for (int i = 0; i < rangeDim; ++i)
+        for (int i = 0; i < range_of_x0.size(); ++i)
         {
             Real sup;
             range_of_x0[i].mag(sup);
@@ -420,11 +404,11 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
                 Real tmp = 1 / sup;
                 invS.push_back(tmp);
                 symbolic_remainder.scalars[i] = tmp;
-                // range_of_x0[i] = intUnit;
             }
         }
 
         fp_layer_output.tmv.scale_assign(invS);
+
 
         for (int i = 0; i < rangeDim; ++i)
         {
@@ -443,10 +427,6 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
 
         fp_layer_input.tmv = fp_layer_output.tmv;
         fp_layer_input.tmvPre = fp_layer_output.tmvPre;
-
-        layer_input_dim = layer.get_weight().rows();
-
-
     }
 
     // cout << tmv_output.tms.size() << endl;
@@ -466,9 +446,10 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
     Matrix<Real> scalar(num_of_outputs, num_of_outputs);
     for (int i = 0; i < num_of_outputs; i++)
     {
-        scalar[i][i] = scale_factor;
+ //       scalar[i][i] = scale_factor;
+        tmv_output.tms[i] *= scale_factor;
     }
-    tmv_output = scalar * tmv_output;
+   // tmv_output = scalar * tmv_output;
 
     Interval box;
     tmv_output.tms[0].intEval(box, domain);
