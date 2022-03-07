@@ -176,10 +176,10 @@ int main(int argc, char *argv[])
 
 
 	vector<Constraint> targetSet;
-	Constraint c1("x0 - 0.2", vars);		// x0 <= 0.2
-	Constraint c2("-x0", vars);				// x0 >= 0
-	Constraint c3("x1 - 0.3", vars);		// x1 <= 0.3
-	Constraint c4("-x1 + 0.05", vars);		// x1 >= 0.05
+	Constraint c1("x0 - 0.1", vars);		// x0 <= 0.1
+	Constraint c2("-x0 - 0.3", vars);		// x0 >= -0.3
+	Constraint c3("x1 - 0.5", vars);		// x1 <= 0.5
+	Constraint c4("-x1 - 0.35", vars);		// x1 >= -0.35
 
 	targetSet.push_back(c1);
 	targetSet.push_back(c2);

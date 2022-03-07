@@ -177,9 +177,9 @@ int main(int argc, char *argv[])
 
 
 	vector<Constraint> targetSet;
-	Constraint c1("x0 - 0.2", vars);		// x0 <= 0.2
-	Constraint c2("-x0", vars);				// x0 >= 0
-	Constraint c3("x1 - 0.3", vars);		// x1 <= 0.3
+	Constraint c1("x0 + 0.15", vars);		// x0 <= -0.15
+	Constraint c2("-x0 - 0.43", vars);		// x0 >= -0.43
+	Constraint c3("x1 - 0.22", vars);		// x1 <= 0.22
 	Constraint c4("-x1 + 0.05", vars);		// x1 >= 0.05
 
 	targetSet.push_back(c1);

@@ -181,16 +181,30 @@ int main(int argc, char *argv[])
 
 
 	vector<Constraint> targetSet;
-	Constraint c1("x0 - 0.2", vars);		// x0 <= 0.2
-	Constraint c2("-x0", vars);				// x0 >= 0
-	Constraint c3("x1 - 0.3", vars);		// x1 <= 0.3
-	Constraint c4("-x1 + 0.05", vars);		// x1 >= 0.05
+    if (net_name == "relu" || net_name == "relu_tanh")
+    {
+        Constraint c1("x0 + 0.1", vars);		// x0 <= -0.1
+        Constraint c2("-x0 - 0.2", vars);		// x0 >= -0.2
+        Constraint c3("x1 - 0.05", vars);		// x1 <= 0.05
+        Constraint c4("-x1", vars);		        // x1 >= 0.0
 
-	targetSet.push_back(c1);
-	targetSet.push_back(c2);
-	targetSet.push_back(c3);
-	targetSet.push_back(c4);
+        targetSet.push_back(c1);
+        targetSet.push_back(c2);
+        targetSet.push_back(c3);
+        targetSet.push_back(c4);
+    }
+    else
+    {
+        Constraint c1("x0 - 0.05", vars);		// x0 <= 0.05
+        Constraint c2("-x0 - 0.05", vars);		// x0 >= -0.05
+        Constraint c3("x1", vars);		        // x1 <= 0.0
+        Constraint c4("-x1 - 0.05", vars);		// x1 >= -0.05
 
+        targetSet.push_back(c1);
+        targetSet.push_back(c2);
+        targetSet.push_back(c3);
+        targetSet.push_back(c4);
+    }
 	bool b = result.fp_end_of_time.isInTarget(targetSet, setting);
 	string reach_result;
 
