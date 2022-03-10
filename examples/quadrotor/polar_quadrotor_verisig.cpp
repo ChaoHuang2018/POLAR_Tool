@@ -8,6 +8,8 @@ int main(int argc, char *argv[])
 {
 	// Declaration of the state variables.
 	unsigned int numVars = 9;
+	
+	intervalNumPrecision = 600;
 
 	Variables vars;
 
@@ -54,7 +56,7 @@ int main(int argc, char *argv[])
 	unsigned int order = stoi(argv[4]);
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.0001, order);
+	setting.setFixedStepsize(0.001, order);
 
 	// time horizon for a single control step
 	setting.setTime(0.01);
@@ -151,20 +153,24 @@ int main(int argc, char *argv[])
 		//initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
 		TaylorModelVec<Real> tmv_input;
 
-		// tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
-		// tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[2]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[3]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[4]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[5]);
 
-		TaylorModelVec<Real> tmv_temp;
-		initial_set.compose(tmv_temp, order, cutoff_threshold);
-		tmv_input.tms.push_back(tmv_temp.tms[0]);
-		tmv_input.tms.push_back(tmv_temp.tms[1]);
-		tmv_input.tms.push_back(tmv_temp.tms[2]);
-		tmv_input.tms.push_back(tmv_temp.tms[3]);
-		tmv_input.tms.push_back(tmv_temp.tms[4]);
-		tmv_input.tms.push_back(tmv_temp.tms[5]);
+		// TaylorModelVec<Real> tmv_temp;
+		// initial_set.compose(tmv_temp, order, cutoff_threshold);
+		// tmv_input.tms.push_back(tmv_temp.tms[0]);
+		// tmv_input.tms.push_back(tmv_temp.tms[1]);
+		// tmv_input.tms.push_back(tmv_temp.tms[2]);
+		// tmv_input.tms.push_back(tmv_temp.tms[3]);
+		// tmv_input.tms.push_back(tmv_temp.tms[4]);
+		// tmv_input.tms.push_back(tmv_temp.tms[5]);
 
 		// taylor propagation
-        PolarSetting polar_setting(order, bernstein_order, partition_num, "Berns", "Concrete");
+        PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
 		TaylorModelVec<Real> tmv_output;
 
 		if(if_symbo == 0){
@@ -185,12 +191,15 @@ int main(int argc, char *argv[])
 		initial_set.tmvPre.tms[u2_id] = tmv_output.tms[1];
 		initial_set.tmvPre.tms[u3_id] = tmv_output.tms[2];
 
-		if(if_symbo == 0){
-			dynamics.reach(result, setting, initial_set, unsafeSet);
-		}
-		else{
-			dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
-		}
+		// if(if_symbo == 0){
+		// 	dynamics.reach(result, setting, initial_set, unsafeSet);
+		// }
+		// else{
+		// 	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+		// }
+
+		// Always using symbolic remainder
+		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -200,8 +209,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			printf("Terminated due to too large overestimation.\n");
-			// return 1;
-			break;
+			return 1;
 		}
 	}
 
@@ -226,29 +234,12 @@ int main(int argc, char *argv[])
 
 	if(b)
 	{
-		reach_result = "Verification result: Yes(35)";
+		reach_result = "Verification result: Yes(" + to_string(steps) + ")";
 	}
 	else
 	{
-		reach_result = "Verification result: No(35)";
+		reach_result = "Verification result: No(" + to_string(steps) + ")";
 	}
-
-/*
-	vector<Interval> end_box;
-	string reach_result;
-	reach_result = "Verification result: Unknown(35)";
-	result.fp_end_of_time.intEval(end_box, order, setting.tm_setting.cutoff_threshold);
-
-	if (end_box[0].inf() >= 0.0 && end_box[0].sup() <= 0.2 && end_box[1].inf() >= 0.05 && end_box[1].sup() <= 0.3)
-	{
-		reach_result = "Verification result: Yes(35)";
-	}
-
-	if (end_box[0].inf() >= 0.2 || end_box[0].sup() <= 0.0 || end_box[1].inf() >= 0.3 || end_box[1].sup() <= 0.05)
-	{
-		reach_result = "Verification result: No(35)";
-	}
-*/
 
 
 	time(&end_timer);
@@ -258,7 +249,6 @@ int main(int argc, char *argv[])
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting(vars);
-	plot_setting.setOutputDims("x1", "x2");
 
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if (mkres < 0 && errno != EEXIST)
@@ -269,7 +259,7 @@ int main(int argc, char *argv[])
 
 	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/polar_quadrotor_verisig_" + to_string(if_symbo) + ".txt");
+	ofstream result_output("./outputs/polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
 	{
 		result_output << reach_result << endl;
@@ -277,7 +267,17 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(if_symbo), result);
+	// plot_setting.setOutputDims("x1", "x2");
+	// plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo), result);
+
+    plot_setting.setOutputDims("x1", "x4");
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo), result);
+
+	plot_setting.setOutputDims("x2", "x5");
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo), result);
+
+	plot_setting.setOutputDims("x3", "x6");
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo), result);
 
 	return 0;
 }
