@@ -60,7 +60,7 @@ for i in range(b.shape[0]):
         f.write(str(w[j][i]) + os.linesep)
     f.write(str(b[i]) + os.linesep)
 
-# min(-x, 1)
+# min(x, 1)= - max(-x, -1)
 w = np.zeros([num_inputs, 4 * num_inputs])
 b = np.zeros([4 * num_inputs])
 for i in range(num_inputs):
@@ -69,7 +69,7 @@ for i in range(num_inputs):
             w[i][j] = -1.
         else:
             w[i][j] = 1
-        b[j + 4 * i] = 1. - 2. * (j % 2)
+        b[j + 4 * i] = 2. * (j % 2) - 1. 
 for i in range(b.shape[0]):
     for j in range(w.shape[0]):
         f.write(str(w[j][i]) + os.linesep)
