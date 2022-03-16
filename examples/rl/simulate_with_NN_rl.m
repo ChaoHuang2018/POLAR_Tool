@@ -1,7 +1,7 @@
 %nn_rl;
 Ts = 1;  % Sample Time
 N = 3;    % Prediction horizon
-Duration = 5; % Simulation horizon
+Duration = 500; % Simulation horizon
 
 pos_radius = 100;
 ang_radius = 360;

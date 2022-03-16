@@ -8,7 +8,7 @@ wbs = conf['default_policy']
 
 f.close()
 
-f = open("./rl_tanh256x256", 'w')
+f = open("./rl_tanh256x256_mat", 'w')
 
 num_inputs = wbs['default_policy/fc_1/kernel'].shape[0]
 f.write("{}".format(num_inputs) + os.linesep)
@@ -36,12 +36,12 @@ for activ in activs:
 w = np.zeros([num_inputs, 4 * num_inputs])
 b = np.zeros([4 * num_inputs])
 for i in range(num_inputs):
-    for j in range(4 * num_inputs):
+    for j in range(4):
         if j % 4 == 0 or (j % 4 == 3):
-            w[i][j] = 1.
+            w[i][j + 4 * i] = 1.
         else:
-            w[i][j] = -1
-        b[j] =  1. - 2. * (j % 2) 
+            w[i][j + 4 * i] = -1
+        b[j + 4 * i] = 2. * (j % 2) - 1. 
 for i in range(b.shape[0]):
     for j in range(w.shape[0]):
         f.write(str(w[j][i]) + os.linesep)
@@ -49,12 +49,12 @@ for i in range(b.shape[0]):
 w = np.zeros([4 * num_inputs, num_inputs])
 b = np.zeros([num_inputs])
 for i in range(num_inputs):
-    for j in range(4 * num_inputs):
+    for j in range(4):
         if j % 4 != 1:
-            w[j][i] = -0.5
+            w[j + 4 * i][i] = 0.5
         else:
-            w[j][i] = 0.5
-        b[i] = 0.
+            w[j + 4 * i][i] = -0.5
+    b[i] = 0.
 for i in range(b.shape[0]):
     for j in range(w.shape[0]):
         f.write(str(w[j][i]) + os.linesep)
@@ -64,12 +64,12 @@ for i in range(b.shape[0]):
 w = np.zeros([num_inputs, 4 * num_inputs])
 b = np.zeros([4 * num_inputs])
 for i in range(num_inputs):
-    for j in range(4 * num_inputs):
+    for j in range(4):
         if j % 4 == 0 or (j % 4 == 3):
             w[i][j] = -1.
         else:
             w[i][j] = 1
-        b[j] = 2. * (j % 2) - 1.
+        b[j + 4 * i] = 1. - 2. * (j % 2)
 for i in range(b.shape[0]):
     for j in range(w.shape[0]):
         f.write(str(w[j][i]) + os.linesep)
@@ -77,12 +77,12 @@ for i in range(b.shape[0]):
 w = np.zeros([4 * num_inputs, num_inputs])
 b = np.zeros([num_inputs])
 for i in range(num_inputs):
-    for j in range(4 * num_inputs):
+    for j in range(4):
         if j % 4 != 1:
-            w[j][i] = -0.5
+            w[j + 4 * i][i] = -0.5
         else:
-            w[j][i] = 0.5
-        b[i] = 0.
+            w[j + 4 * i][i] = 0.5
+    b[i] = 0.
 for i in range(b.shape[0]):
     for j in range(w.shape[0]):
         f.write(str(w[j][i]) + os.linesep)
