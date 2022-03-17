@@ -76,20 +76,20 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 	 
 	// Define the continuous dynamics.
-	Expression<Real> deriv_x0("", vars); //  deriv_x0 = (2 * x1 * deriv(x1) + 2 * x2 * deriv(x2))/2sqrt(x1*x1 + x2 * x2)
-	Expression<Real> deriv_x1("", vars); //  deriv_x1 = x10 - x7
-	Expression<Real> deriv_x2("", vars); // deriv_x2 = x11 - x8
-	Expression<Real> deriv_x3("", vars); // deriv_x3 = (2 * x4 * deriv(x4) + 2 * x5 * deriv(x5))/sqrt(x4*x4 + x5 * x5)
-	Expression<Real> deriv_x4("", vars); // deriv_x4 = x7
-	Expression<Real> deriv_x5("", vars); // deriv_x5 = x8
-	Expression<Real> deriv_x6("", vars); // deriv_x6 = (2 * x7 * deriv(x7) + 2 * x8 * deriv(x8))/sqrt(x7*x7 + x8 * x8)
-	Expression<Real> deriv_x7("", vars); // deriv_x7 = u3 * x7/x6 - u2 * x8
-	Expression<Real> deriv_x8("", vars); // deriv_x8 = u3 * x8/x6 + u2 * x7
-	Expression<Real> deriv_x9("", vars); // deriv_x9 = (2 * x10 * deriv(x10) + 2 * x11 * deriv(x11))/sqrt(x10*x10 + x11 * x11)
-	Expression<Real> deriv_x10("", vars); // deriv_x10 = u1 * x11/x10 - u1 * x12
-	Expression<Real> deriv_x11("", vars); // deriv_x11 = u1 * x12/x10 - u1 * x11
-	Expression<Real> deriv_x12("", vars); // deriv_x12 = u0
-	Expression<Real> deriv_x13("", vars); // deriv_x13 = u2
+	Expression<Real> deriv_x0("(x1 * (x10 - x7) + x2 * (x11 - x8)) / x0", vars); //  deriv_x0 = (2 * x1 * deriv(x1) + 2 * x2 * deriv(x2))/2sqrt(x1*x1 + x2 * x2)
+	Expression<Real> deriv_x1("x10 - x7", vars); //  deriv_x1 = x10 - x7
+	Expression<Real> deriv_x2("x11 - x8", vars); // deriv_x2 = x11 - x8
+	Expression<Real> deriv_x3("((x4 * (x10 - x8 - 500 * sin(60 * pi/ 180 + 2 * pi + x12)) * u0 * 180 / pi + x5 * (x11 - x8 + 500 * cos(60 * pi/ 180 + 2 * pi + x12)) * u0 * 180 / pi)) / x3", vars); // deriv_x3 = (2 * x4 * deriv(x4) + 2 * x5 * deriv(x5))/sqrt(x4*x4 + x5 * x5)
+	Expression<Real> deriv_x4("x10 - x7 - 500 * sin(60 * pi / 180 + pi + x12) * u0 * 180 / pi", vars); // deriv_x4 = x7
+	Expression<Real> deriv_x5("x11 - x8 + 500 * cos(60 * pi / 180 + pi + x12) * u0 * 180 / pi", vars); // deriv_x5 = x8
+	Expression<Real> deriv_x6("u3", vars); // deriv_x6 = (2 * x7 * deriv(x7) + 2 * x8 * deriv(x8))/sqrt(x7*x7 + x8 * x8)
+	Expression<Real> deriv_x7("u3 * cos(x12 * pi / 180) - u2 * 180 / pi * x6 * sin(x12 * pi / 180)", vars); // deriv_x7 = u3 * x7/x6 - u2 * x8
+	Expression<Real> deriv_x8("u3 * sin(x12 * pi / 180) + u2 * 180 / pi * x6 * cos(x12 * pi / 180)", vars); // deriv_x8 = u3 * x8/x6 + u2 * x7
+	Expression<Real> deriv_x9("u1", vars); // deriv_x9 = (2 * x10 * deriv(x10) + 2 * x11 * deriv(x11))/sqrt(x10*x10 + x11 * x11)
+	Expression<Real> deriv_x10("u1 * cos(x13 * pi / 180) - u0 * 180 / pi * x9 * sin(x13 * pi / 180)", vars); // deriv_x10 = u1 * x11/x10 - u1 * x12
+	Expression<Real> deriv_x11("u1 * sin(x13 * pi / 180) + u0 * 180 / pi * x9 * cos(x13 * pi / 180)", vars); // deriv_x11 = u1 * x12/x10 - u1 * x11
+	Expression<Real> deriv_x12("u0 * 180 / pi", vars); // deriv_x12 = u0
+	Expression<Real> deriv_x13("u2 * 180 / pi", vars); // deriv_x13 = u2
 
 	 
 	// Define the continuous dynamics according to 
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 		init_x8(0),
 		init_x6(0),
 		init_x9(250, 300),
-		init_x10(),
+		init_x10(0),
 		init_x11(0),
 		init_x12(0),
 		init_x13(0);

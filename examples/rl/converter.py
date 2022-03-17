@@ -29,8 +29,8 @@ f.write(str(wbs['default_policy/fc_2/bias'].shape[0]) + os.linesep)
 
 activs = ['tanh', 'tanh', 'Affine']
 activs = ['ReLU', 'Affine', 'ReLU', 'Affine', 'Affine'] + activs
-for activ in activs:
-    f.write(str(activ) + os.linesep)
+#for activ in activs:
+#    f.write(str(activ) + os.linesep)
 
 # max(x, - 1)
 w = np.zeros([num_inputs, 4 * num_inputs])
@@ -66,9 +66,9 @@ b = np.zeros([4 * num_inputs])
 for i in range(num_inputs):
     for j in range(4):
         if j % 4 == 0 or (j % 4 == 3):
-            w[i][j] = -1.
+            w[i][j + 4 * i] = -1.
         else:
-            w[i][j] = 1
+            w[i][j + 4 * i] = 1
         b[j + 4 * i] = 2. * (j % 2) - 1. 
 for i in range(b.shape[0]):
     for j in range(w.shape[0]):

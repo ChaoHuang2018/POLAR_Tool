@@ -1,7 +1,7 @@
 %nn_rl;
 Ts = 1;  % Sample Time
 N = 3;    % Prediction horizon
-Duration = 500; % Simulation horizon
+Duration = 50; % Simulation horizon
 
 pos_radius = 100;
 ang_radius = 360;
@@ -67,8 +67,13 @@ for ct = 1:(Duration/Ts)
     x_input([7, 10]) = x_input([7, 10]) / 400.0;
 
     u = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat');
-    
-    x_next = system_eq_dis(x_now, Ts, u);
+    u_tmp = zeros(4,1);
+    u_tmp(1) = u(3);
+    u_tmp(2) = u(4);
+    u_tmp(3) = u(1);
+    u_tmp(4) = u(2);
+    %u = zeros(4, 1);
+    x_next = system_eq_dis(x_now, Ts, u_tmp);
 
     x = x_next;
     x_now = x_next;
