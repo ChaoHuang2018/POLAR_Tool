@@ -36,3 +36,7 @@ flowstar/
 *.exe
 *.out
 *.app
+
+# Python cache files and folders
+__pycache__/
+*.pyc
