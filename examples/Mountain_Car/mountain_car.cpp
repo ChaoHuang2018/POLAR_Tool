@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
-	Expression<Real> deriv_x0("x1", vars); // theta_r = 0
-	Expression<Real> deriv_x1("0.0015 * u - 0.0025 * cos(3 * x0)", vars);
+	Expression<Real> deriv_x0("x1", vars); // Discrete: Next_x0 = x0 + x1
+	Expression<Real> deriv_x1("0.0015 * u - 0.0025 * cos(3 * x0)", vars); // Discrete: Next_x1 = x1 + 0.0015 * u - 0.0025 * cos(3 * x0)
 	Expression<Real> deriv_u("0", vars);
 
 	vector<Expression<Real>> ode_rhs(numVars);
