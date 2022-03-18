@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
+    // x0 is the position of the mountain car, x1 is the speed of the mountain car.
 	Expression<Real> deriv_x0("x1", vars); // Discrete: Next_x0 = x0 + x1
 	Expression<Real> deriv_x1("0.0015 * u - 0.0025 * cos(3 * x0)", vars); // Discrete: Next_x1 = x1 + 0.0015 * u - 0.0025 * cos(3 * x0)
 	Expression<Real> deriv_u("0", vars);
