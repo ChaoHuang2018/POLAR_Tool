@@ -1,8 +1,39 @@
+#include <unordered_map>
 #include "../../POLAR/NeuralNetwork.h"
 //#include "../flowstar-toolbox/Constraint.h"
 
 using namespace std;
 using namespace flowstar;
+
+Deterministic_Continuous_Dynamics build_dynamics(Variables vars, unsigned int numVars, unordered_map<string, int> var_ids, int segment){
+	vector<string> x1_derivs = {"-0.25+x4", "-0.25+x4", "x4", "0.25+x4"};
+	vector<string> x2_derivs = {"0.25+x5", "-0.25+x5", "0.25+x5", "-0.25+x5"};
+
+	// Define the continuous dynamics.
+	Expression<Real> deriv_x1(x1_derivs[segment], vars);	// Segmentation fault when the expression is "x4-0.25"
+	Expression<Real> deriv_x2(x2_derivs[segment], vars);
+	Expression<Real> deriv_x3("x6", vars);
+	Expression<Real> deriv_x4("9.81*sin(u1)/cos(u1)", vars);
+	Expression<Real> deriv_x5("-9.81*sin(u2)/cos(u2)", vars);
+	Expression<Real> deriv_x6("-9.81+u3", vars);	// Segmentation fault when the expression is "u3-9.81"
+	Expression<Real> deriv_u1("0", vars);
+	Expression<Real> deriv_u2("0", vars);
+	Expression<Real> deriv_u3("0", vars);
+
+	vector<Expression<Real> > ode_rhs(numVars);
+	ode_rhs[var_ids["x1"]] = deriv_x1;
+	ode_rhs[var_ids["x2"]] = deriv_x2;
+	ode_rhs[var_ids["x3"]] = deriv_x3;
+	ode_rhs[var_ids["x4"]] = deriv_x4;
+	ode_rhs[var_ids["x5"]] = deriv_x5;
+	ode_rhs[var_ids["x6"]] = deriv_x6;
+	ode_rhs[var_ids["u1"]] = deriv_u1;
+	ode_rhs[var_ids["u2"]] = deriv_u2;
+	ode_rhs[var_ids["u3"]] = deriv_u3;
+
+	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
+	return dynamics;
+}
 
 int main(int argc, char *argv[])
 {
@@ -13,42 +44,23 @@ int main(int argc, char *argv[])
 
 	Variables vars;
 
-	int x1_id = vars.declareVar("x1");
-	int x2_id = vars.declareVar("x2");
-	int x3_id = vars.declareVar("x3");
-	int x4_id = vars.declareVar("x4");
-	int x5_id = vars.declareVar("x5");
-	int x6_id = vars.declareVar("x6");
-	int u1_id = vars.declareVar("u1");
-	int u2_id = vars.declareVar("u2");
-	int u3_id = vars.declareVar("u3");
+	unordered_map<string, int> var_ids;
+	var_ids["x1"] = vars.declareVar("x1");
+	var_ids["x2"] = vars.declareVar("x2");
+	var_ids["x3"] = vars.declareVar("x3");
+	var_ids["x4"] = vars.declareVar("x4");
+	var_ids["x5"] = vars.declareVar("x5");
+	var_ids["x6"] = vars.declareVar("x6");
+	var_ids["u1"] = vars.declareVar("u1");
+	var_ids["u2"] = vars.declareVar("u2");
+	var_ids["u3"] = vars.declareVar("u3");
 
 	int domainDim = numVars + 1;
 
-	// Define the continuous dynamics.
-	// Expression<Real> deriv_x1("x4-0.25", vars);
-	Expression<Real> deriv_x1("-0.25+x4", vars);	// Segmentation fault when the expression is "x4-0.25"
-	Expression<Real> deriv_x2("x5+0.25", vars);
-	Expression<Real> deriv_x3("x6", vars);
-	Expression<Real> deriv_x4("9.81*sin(u1)/cos(u1)", vars);
-	Expression<Real> deriv_x5("-9.81*sin(u2)/cos(u2)", vars);
-	Expression<Real> deriv_x6("-9.81+u3", vars);	// Segmentation fault when the expression is "u3-9.81"
-	Expression<Real> deriv_u1("0", vars);
-	Expression<Real> deriv_u2("0", vars);
-	Expression<Real> deriv_u3("0", vars);
-
-	vector<Expression<Real> > ode_rhs(numVars);
-	ode_rhs[x1_id] = deriv_x1;
-	ode_rhs[x2_id] = deriv_x2;
-	ode_rhs[x3_id] = deriv_x3;
-	ode_rhs[x4_id] = deriv_x4;
-	ode_rhs[x5_id] = deriv_x5;
-	ode_rhs[x6_id] = deriv_x6;
-	ode_rhs[u1_id] = deriv_u1;
-	ode_rhs[u2_id] = deriv_u2;
-	ode_rhs[u3_id] = deriv_u3;
-
-	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
+	vector<Deterministic_Continuous_Dynamics> dynamics;
+	for(int i=0; i<4; i++) dynamics.push_back(build_dynamics(vars, numVars, var_ids, i));
+	int segment = 0;
+	vector<int> segment_ends = {10, 20, 25};
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting;
@@ -56,10 +68,10 @@ int main(int argc, char *argv[])
 	unsigned int order = stoi(argv[4]);
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.001, order);
+	setting.setFixedStepsize(0.01, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.01);
+	setting.setTime(0.2);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-8);
@@ -110,7 +122,8 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// define the neural network controller
-	string nn_name = "tanh20x20_remodel";
+	// string nn_name = "tanh20x20_remodel";
+	string nn_name = "tanh20x20";	// Original model used in Verisig
 	NeuralNetwork nn(nn_name);
 
 	// the order in use
@@ -187,19 +200,13 @@ int main(int argc, char *argv[])
 		tmv_output.Remainder(rm1);
 		cout << "Neural network taylor remainder: " << rm1 << endl;
 
-		initial_set.tmvPre.tms[u1_id] = tmv_output.tms[0];
-		initial_set.tmvPre.tms[u2_id] = tmv_output.tms[1];
-		initial_set.tmvPre.tms[u3_id] = tmv_output.tms[2];
+		initial_set.tmvPre.tms[var_ids["u1"]] = tmv_output.tms[0];
+		initial_set.tmvPre.tms[var_ids["u2"]] = tmv_output.tms[1];
+		initial_set.tmvPre.tms[var_ids["u3"]] = tmv_output.tms[2];
 
-		// if(if_symbo == 0){
-		// 	dynamics.reach(result, setting, initial_set, unsafeSet);
-		// }
-		// else{
-		// 	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
-		// }
-
+		if(segment < 3 && iter >= segment_ends[segment]) segment++;
 		// Always using symbolic remainder
-		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+		dynamics[segment].reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -278,6 +285,9 @@ int main(int argc, char *argv[])
 
 	plot_setting.setOutputDims("x3", "x6");
 	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo), result);
+
+	plot_setting.setOutputDims("x1", "x2");
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo), result);
 
 	return 0;
 }

@@ -3,6 +3,7 @@ import numpy as np
 import yaml
 import math
 import matplotlib.pyplot as plt
+from tensorflow.keras.models import model_from_json
 
 def load_yml_model(network = 'tanh20x20'):
     nn_verisig = network + '.yml'
@@ -159,7 +160,9 @@ def save_polar_model(model, input_size, network_name = 'tanh20x20'):
 def simulate_one_step(x, ctrl_model, ctrl_func, ctrl_step):
     simulate_step = 1e-3
     u = ctrl_func(x, ctrl_model)
-    for _ in range(int(ctrl_step/simulate_step)):
+    steps = int(ctrl_step/simulate_step)
+    xs = np.zeros((10, len(x)))
+    for i in range(steps):
         x_next = np.zeros_like(x)
         x_next[0] = x[0] + (x[3] - 0.25)*simulate_step
         x_next[1] = x[1] + (x[4] + 0.25)*simulate_step
@@ -168,7 +171,10 @@ def simulate_one_step(x, ctrl_model, ctrl_func, ctrl_step):
         x_next[4] = x[4] + (-9.81*math.sin(u[1])/math.cos(u[1]))*simulate_step
         x_next[5] = x[5] + (-9.81+u[2])*simulate_step
         x = x_next
-    return x, u
+        if (i+1) % (steps//10) == 0:
+            xs[(i+1)//(steps//10) - 1] = x
+    xs[-1] = x
+    return xs, u
 
 def ctrl_input(x, ctrl_model):
     x_t = tf.reshape(x, [1,-1])
@@ -196,33 +202,37 @@ def bangbang_ctrl(x, bangbang_model):
     return u
 
 
-def simulation(ctrl_model, bangbang_model):
-    plt.figure()
-    for _ in range(15):
+def simulation(ctrl_model, bangbang_model, n_trajectory = 15):
+    fig, axs = plt.subplots(ncols=2)
+    for _ in range(n_trajectory):
         x0 = np.random.rand(6) * np.array([0.025, 0.025, 0, 0, 0, 0]) + np.array([-0.05, -0.025, 0, 0, 0, 0])
         print("Initial state:", x0[:2])
         X_new = simulate_one_trajectory(x0, ctrl_model, ctrl_input)
         X_bangbang = simulate_one_trajectory(x0, bangbang_model, bangbang_ctrl)
-        plt.plot(X_new[:50, 0], X_new[:50, 1], 'r')
-        plt.plot(X_new[50:300, 0], X_new[50:300, 1], 'y')
-        plt.plot(X_new[300:, 0], X_new[300:, 1], 'g')
-        plt.plot(X_bangbang[:50, 0], X_bangbang[:50, 1], 'c')
-        plt.plot(X_bangbang[50:300, 0], X_bangbang[50:300, 1], 'b')
-        plt.plot(X_bangbang[300:, 0], X_bangbang[300:, 1], 'm')
+        interval = [20, 40]
+        axs[0].plot(X_new[:interval[0]+1, 0], X_new[:interval[0]+1, 1], 'lightsteelblue')
+        axs[0].plot(X_new[interval[0]:interval[1]+1, 0], X_new[interval[0]:interval[1]+1, 1], 'royalblue')
+        axs[0].plot(X_new[interval[1]:, 0], X_new[interval[1]:, 1], 'navy')
+        axs[1].plot(X_bangbang[:interval[0]+1, 0], X_bangbang[:interval[0]+1, 1], 'mistyrose')
+        axs[1].plot(X_bangbang[interval[0]:interval[1]+1, 0], X_bangbang[interval[0]:interval[1]+1, 1], 'red')
+        axs[1].plot(X_bangbang[interval[1]:, 0], X_bangbang[interval[1]:, 1], 'darkred')
+    axs[0].set_title("Remodelled model")
+    axs[1].set_title("Verisig model")
     plt.show()
 
-def simulate_one_trajectory(x0, model, ctrl_func):
+def simulate_one_trajectory(x0, model, ctrl_func, n_steps = 6, ctrl_step = 2e-1):
     x = x0
     x_min = x_max = x
     u_min = u_max = ctrl_func(x, model)
-    X = np.zeros((600, 2))
-    for i in range(600):
-        x, u = simulate_one_step(x, model, ctrl_func, 1e-2)
+    X = np.zeros((n_steps*10, 2))
+    for i in range(n_steps):
+        xs, u = simulate_one_step(x, model, ctrl_func, ctrl_step)
+        x = xs[-1]
         x_min = np.minimum(x_min, x)
         x_max = np.maximum(x_max, x)
         u_min = np.minimum(u_min, u)
         u_max = np.maximum(u_max, u)
-        X[i] = x[:2]
+        X[i*10:(i+1)*10] = xs[:, :2]
     print("x_min =", x_min, "\nx_max =", x_max)
     print("u_min =", u_min, "\nu_max =", u_max)
     return X
@@ -236,14 +246,25 @@ def save_json_model(dnn_model,  network_name = 'tanh20x20'):
     dnn_model.save_weights("./model/"+network_name+".h5")
     print("Saved model to disk")
 
+def load_json_model(network_name = 'tanh20x20'):
+    json_filename = './model/' + network_name + '.json'
+    json_file = open(json_filename, 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    dnn_model = model_from_json(loaded_model_json)
+    dnn_model.compile(loss='mean_absolute_error',
+                    optimizer=tf.keras.optimizers.Adam(0.001))
+    # load weights into new model
+    dnn_model.load_weights('./model/' + network_name + '.h5')
+    return dnn_model
+
 if __name__ == '__main__':
     np.set_printoptions(precision=4)
     tf_model, input_size = load_yml_model()
-    # new_model = convert_model(tf_model)
-    # new_model = distill_model(tf_model, new_model, input_size)
-    new_model = convert_classify_model(tf_model)
-    new_model = distill_classify_model(tf_model, new_model, input_size)
-    new_model = append_output_layer(new_model)
-    simulation(new_model, tf_model)
-    save_polar_model(new_model, input_size)
-    save_json_model(new_model)
+    # new_model = convert_classify_model(tf_model)
+    # new_model = distill_classify_model(tf_model, new_model, input_size)
+    # new_model = append_output_layer(new_model)
+    new_model = load_json_model()
+    simulation(new_model, tf_model, n_trajectory=30)
+    # save_polar_model(new_model, input_size)
+    # save_json_model(new_model)
