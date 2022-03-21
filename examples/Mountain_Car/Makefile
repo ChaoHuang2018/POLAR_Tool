@@ -7,12 +7,13 @@ CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: mountain_car
+all: mountain_car mountain_car_continuous
 
 mountain_car: mountain_car.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
-
+mountain_car_continuous: mountain_car_continuous.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 %.o: %.cc
 	$(CXX) -O3 -c $(CFLAGS) -o $@ $<

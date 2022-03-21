@@ -1,5 +1,4 @@
 #include "../../POLAR/NeuralNetwork.h"
-#include "../../flowstar/Discrete.h"
 //#include "../flowstar-toolbox/Constraint.h"
 
 using namespace std;
@@ -8,7 +7,7 @@ using namespace flowstar;
 int main(int argc, char *argv[])
 {
 	string net_name = argv[6];
-	string benchmark_name = "mountain_car_" + net_name;
+	string benchmark_name = "mountain_car_continous_" + net_name;
 	// Declaration of the state variables.
 	unsigned int numVars = 3;
 
@@ -22,19 +21,19 @@ int main(int argc, char *argv[])
 
 	int domainDim = numVars + 1;
 
-	// Define the discrete dynamics.
+	// Define the continuous dynamics.
     // x0 is the position of the mountain car, x1 is the speed of the mountain car.
-	Expression<Interval> deriv_x0("x0 + x1", vars); // Discrete: Next_x0 = x0 + x1
-	Expression<Interval> deriv_x1("x1 + 0.0015 * u - 0.0025 * cos(3 * x0)", vars); // Discrete: Next_x1 = x1 + 0.0015 * u - 0.0025 * cos(3 * x0)
-	Expression<Interval> deriv_u("u", vars);
+	Expression<Real> deriv_x0("x1", vars); // Discrete: Next_x0 = x0 + x1
+	Expression<Real> deriv_x1("0.0015 * u - 0.0025 * cos(3 * x0)", vars); // Discrete: Next_x1 = x1 + 0.0015 * u - 0.0025 * cos(3 * x0)
+	Expression<Real> deriv_u("0", vars);
 
-	vector<Expression<Interval> > dde_rhs(numVars);
-	dde_rhs[x0_id] = deriv_x0;
-	dde_rhs[x1_id] = deriv_x1;
-	dde_rhs[u_id] = deriv_u;
+	vector<Expression<Real>> ode_rhs(numVars);
+	ode_rhs[x0_id] = deriv_x0;
+	ode_rhs[x1_id] = deriv_x1;
+	ode_rhs[u_id] = deriv_u;
 
 
-	Nonlinear_Discrete_Dynamics dynamics(dde_rhs);
+	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting;
@@ -42,7 +41,10 @@ int main(int argc, char *argv[])
 	unsigned int order = stoi(argv[4]);
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.01, order); // the stepsize will be ignored
+	setting.setFixedStepsize(stod(argv[7]), order);
+
+	// time horizon for a single control step
+	setting.setTime(1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10);
@@ -50,11 +52,11 @@ int main(int argc, char *argv[])
 	// print out the steps
 	setting.printOff();
 
-/*	// DDE does not require a remainder estimation
+	// remainder estimation
 	Interval I(-0.01, 0.01);
 	vector<Interval> remainder_estimation(numVars, I);
 	setting.setRemainderEstimation(remainder_estimation);
-*/
+
 	//setting.printOn();
 
 	setting.prepare();
@@ -124,6 +126,11 @@ int main(int argc, char *argv[])
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
 
+		// TaylorModelVec<Real> tmv_temp;
+		// initial_set.compose(tmv_temp, order, cutoff_threshold);
+		// tmv_input.tms.push_back(tmv_temp.tms[0]);
+		// tmv_input.tms.push_back(tmv_temp.tms[1]);
+
 
 		// taylor propagation
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
@@ -155,10 +162,7 @@ int main(int argc, char *argv[])
 		// }
 
 		// Always using symbolic remainder
-		dynamics.reach_sr(result, setting, initial_set, 1, symbolic_remainder, unsafeSet);
-
-		// not using a symbolic remainder
-		// dynamics.reach(result, setting, initial_set, 1, unsafeSet);
+		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -180,10 +184,8 @@ int main(int argc, char *argv[])
 	targetSet.push_back(c1);
 	targetSet.push_back(c2);
 
-	string reach_result;
-
 	bool b = result.fp_end_of_time.isInTarget(targetSet, setting);
-
+	string reach_result;
 
 	if(b)
 	{
