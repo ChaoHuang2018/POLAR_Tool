@@ -24,7 +24,7 @@ fileID = fopen('nn_rl_simulation.txt','w');
 for m=1:1
 
 
-    
+% Initial values for 21 state variables
 x12 = ang_radius * rand(1);
 x13 = ang_radius * rand(1);
 x1 = 7500 + pos_radius*rand(1);
@@ -71,19 +71,27 @@ simulation_result = x_now;
 
 for ct = 1:(Duration/Ts)
     x_input = x_now(1:12, 1);
+
+    % normalize input 1 and 4
     x_input([1, 4]) = x_input([1, 4]) / 1000.0;
+
+    % wingman's velocity in wingman's reference????
     x_input([7, 8, 9]) = (x_input([7, 8, 9]) - x_input([7, 8, 9]));
+
+    % lead's velocity in wingman's reference
     x_input([10, 11, 12]) = x_now([19, 20, 21]);
+
+    % normalize velocities
     x_input([7, 10]) = x_input([7, 10]) / 400.0;
     
-    u = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat');
+    y = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat');
     u_tmp = zeros(4,1);
     u_tmp(1) = 0.;
     u_tmp(2) = 0.;
-    u_tmp(3) = u(1);
-    u_tmp(4) = u(3);
-    %u = zeros(4, 1);
-    disp(u_tmp);
+    % ignore std's 
+    u_tmp(3) = y(1);
+    u_tmp(4) = y(3);
+ 
     x_next = system_eq_dis(x_now, Ts, u_tmp);
 
     x = x_next;
