@@ -1,7 +1,7 @@
 %nn_rl;
 Ts = 1;  % Sample Time
 N = 3;    % Prediction horizon
-Duration = 100; % Simulation horizon
+Duration = 300; % Simulation horizon
 
 pos_radius = 100;
 ang_radius = 360;
@@ -45,12 +45,10 @@ x15 = 0.;
 x16 = x14 + x1;
 x17 = x15 + x2;
 
-x19 = x10 - x7;
-x20 = x11 - x8;
-x18 = sqrt(x19 * x19 + x20 * x20);
+x19 = x
  
 
-x = [x0;x1;x2;x3;x4;x5;x6;x7;x8;x9;x10;x11;x12;x13;x14;x15;x16;x17;x18;x19;x20];
+x = [x0;x1;x2;x3;x4;x5;x6;x7;x8;x9;x10;x11;x12;x13;x14;x15;x16;x17;];
 
 options = optimoptions('fmincon','Algorithm','sqp','Display','none');
 uopt = zeros(N,4);
@@ -61,9 +59,9 @@ u_max = 0;
 LB = -3*ones(N,4);
 UB = 3*ones(N,4);
 
-x_now = zeros(21,1);
-x_next = zeros(21,1);
-z = zeros(21,1);
+x_now = zeros(14,1);
+x_next = zeros(14,1);
+z = zeros(18,1);
 
 x_now = x;
 
@@ -72,10 +70,9 @@ simulation_result = x_now;
 for ct = 1:(Duration/Ts)
     x_input = x_now(1:12, 1);
     x_input([1, 4]) = x_input([1, 4]) / 1000.0;
-    x_input([7, 8, 9]) = (x_input([7, 8, 9]) - x_input([7, 8, 9]));
-    x_input([10, 11, 12]) = x_now([19, 20, 21]);
-    x_input([7, 10]) = x_input([7, 10]) / 400.0;
-    
+    x_input([10]) = (x_input([10]) - x_input([7])) / 400.0;
+    x_input([7]) = (x_input([7]) - x_input([7])) / 400.0
+
     u = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat');
     u_tmp = zeros(4,1);
     u_tmp(1) = 0.;
@@ -90,7 +87,7 @@ for ct = 1:(Duration/Ts)
     x_now = x_next;
 end
 
-plot(simulation_result(15,:),simulation_result(16,:), 'blue', simulation_result(17,:),simulation_result(18,:), 'red', simulation_result(15,:) + simulation_result(6,:), simulation_result(16,:) + simulation_result(7,:), 'green');
+plot(simulation_result(15,:),simulation_result(16,:), 'blue', simulation_result(17,:),simulation_result(18,:), 'red');
 %plot(simulation_result(2,:),simulation_result(3,:), 'green');
 
 % title('RL Rejoin Default', 'FontSize', 14)

@@ -68,6 +68,12 @@ int main(int argc, char *argv[])
 	int x12_id = vars.declareVar("x12");	// hd_l
 	int x13_id = vars.declareVar("x13");	// hd_w
 
+	// normalization
+	int x14_id = vars.declareVar("x14");	// hd_l
+	int x15_id = vars.declareVar("x15");	// hd_w
+	int x16_id = vars.declareVar("x16");	// hd_l
+	int x17_id = vars.declareVar("x17");	// hd_w
+
 	int u0_id = vars.declareVar("u0");	// u1_lacc
 	int u1_id = vars.declareVar("u1");	// u2_lacc	
 	int u2_id = vars.declareVar("u2");	// u1_wacc
@@ -91,7 +97,12 @@ int main(int argc, char *argv[])
 	Expression<Real> deriv_x12("u0 * 180 / pi", vars); // deriv_x12 = u0
 	Expression<Real> deriv_x13("u2 * 180 / pi", vars); // deriv_x13 = u2
 
-	 
+	Expression<Real> deriv_x14("(x1 * (x10 - x7) + x2 * (x11 - x8)) / (1000.0 * x0)", vars); //  deriv_x0 = (2 * x1 * deriv(x1) + 2 * x2 * deriv(x2))/2sqrt(x1*x1 + x2 * x2)
+	Expression<Real> deriv_x15("((x4 * (x10 - x8 - 500 * sin(60 * pi/ 180 + 2 * pi + x12)) * u0 * 180 / pi + x5 * (x11 - x8 + 500 * cos(60 * pi/ 180 + 2 * pi + x12)) * u0 * 180 / pi)) / (1000.0 * x3)", vars); // deriv_x3 = (2 * x4 * deriv(x4) + 2 * x5 * deriv(x5))/sqrt(x4*x4 + x5 * x5)
+	Expression<Real> deriv_x16("u3 / 400.0", vars); // deriv_x6 = (2 * x7 * deriv(x7) + 2 * x8 * deriv(x8))/sqrt(x7*x7 + x8 * x8)
+	Expression<Real> deriv_x17("u1 / 400.0", vars); // deriv_x9 = (2 * x10 * deriv(x10) + 2 * x11 * deriv(x11))/sqrt(x10*x10 + x11 * x11)
+	
+
 	// Define the continuous dynamics according to 
 	
 
@@ -109,6 +120,12 @@ int main(int argc, char *argv[])
 	ode_rhs[x11_id] = deriv_x11;
 	ode_rhs[x12_id] = deriv_x12;
 	ode_rhs[x13_id] = deriv_x13;
+	
+	ode_rhs[x14_id] = deriv_x14;
+	ode_rhs[x15_id] = deriv_x15;
+	ode_rhs[x16_id] = deriv_x16;
+	ode_rhs[x17_id] = deriv_x17;
+
 	ode_rhs[u0_id] = deriv_u0;
 	ode_rhs[u1_id] = deriv_u1;
 	ode_rhs[u2_id] = deriv_u2;
@@ -172,6 +189,11 @@ int main(int argc, char *argv[])
 		init_x12(0),
 		init_x13(0);
 
+		init_x14(30/1000);
+		init_x15(10/1000.0, 11/1000.0);
+		init_x16(0);
+		init_x17(0);
+
 	Interval init_u0(0); 
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
@@ -186,6 +208,12 @@ int main(int argc, char *argv[])
 	X0.push_back(init_x9);
 	X0.push_back(init_x10);
 	X0.push_back(init_x11);
+	X0.push_back(init_x12);
+	X0.push_back(init_x13);
+	X0.push_back(init_x14);
+	X0.push_back(init_x15);
+	X0.push_back(init_x16);
+	X0.push_back(init_x17);
 	X0.push_back(init_u0);
 	X0.push_back(init_u1);
 	X0.push_back(init_u2);
@@ -239,6 +267,12 @@ int main(int argc, char *argv[])
 	state_vars.push_back("x9");
 	state_vars.push_back("x10");
 	state_vars.push_back("x11");
+	state_vars.push_back("x12");
+	state_vars.push_back("x13");
+	state_vars.push_back("x14");
+	state_vars.push_back("x15");
+	state_vars.push_back("x16");
+	state_vars.push_back("x17");
 	
 	if (if_symbo == 0)
 	{
@@ -264,9 +298,9 @@ int main(int argc, char *argv[])
 		/*
 		
 		*/
-		for (int i = 0; i < 12; i++)
+		for (int i = 0; i < new int[]{14, 1, 2, 15, 4, 5, 16, 7, 8, 17, 10, 11}; i++)
 		{
-			tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
+			tmv_input.tms.push_back(initial_set.tmvPre.tms[i]);
 			//tmv_input.tms.push_back(tmv_temp.tms[i]);
 	 
 		}
@@ -371,7 +405,7 @@ int main(int argc, char *argv[])
 
 	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/acc_tanh20x20x20_x4x5_steps_" + to_string(steps) + "_" + to_string(if_symbo) + ".txt");
+	ofstream result_output("./outputs/rl_tanh256x256_" + to_string(steps) + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
 	{
 		result_output << reach_result << endl;
@@ -379,7 +413,7 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "acc_tanh20x20x20_x4x5_steps_"  + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "rl_tanh256x256_"  + to_string(steps) + "_"  + to_string(if_symbo), result);
 
  
 
