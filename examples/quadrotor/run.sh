@@ -1,1 +1,6 @@
-./polar_quadrotor_verisig 0.05 3 4 6 1 
+# Argument 1: flowstar stepsize
+# Argument 2: control steps
+# Argument 3: bernstein order
+# Argument 4: order
+# Argument 5: whether to use symbolic reminder
+./polar_quadrotor_verisig 0.05 30 4 6 1 

@@ -1,11 +1,12 @@
 #include <unordered_map>
+#include <queue>
 #include "../../POLAR/NeuralNetwork.h"
 //#include "../flowstar-toolbox/Constraint.h"
 
 using namespace std;
 using namespace flowstar;
 
-Deterministic_Continuous_Dynamics build_dynamics(Variables vars, unsigned int numVars, unordered_map<string, int> var_ids, int segment){
+Deterministic_Continuous_Dynamics build_dynamics(Variables &vars, unsigned int numVars, unordered_map<string, int> &var_ids, int segment){
 	vector<string> x1_derivs = {"-0.25+x4", "-0.25+x4", "x4", "0.25+x4"};
 	vector<string> x2_derivs = {"0.25+x5", "-0.25+x5", "0.25+x5", "-0.25+x5"};
 
@@ -33,6 +34,55 @@ Deterministic_Continuous_Dynamics build_dynamics(Variables vars, unsigned int nu
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
 	return dynamics;
+}
+
+vector<TaylorModelVec<Real>> build_ctrl_lookup_table(int numVars){
+	vector<TaylorModelVec<Real>> lookup_table;
+	vector<vector<Real>> table = {{-0.1, -0.1, 7.81},
+								  {-0.1, -0.1, 11.81},
+								  {-0.1, 0.1, 7.81},
+								  {-0.1, 0.1, 11.81},
+								  {0.1, -0.1, 7.81},
+								  {0.1, -0.1, 11.81},
+								  {0.1, 0.1, 7.81},
+								  {0.1, 0.1, 11.81}};
+	for(vector<Real> row: table){
+		lookup_table.push_back(TaylorModelVec<Real>(row, numVars));
+	}
+	return lookup_table;
+}
+
+bool maybe_the_largest(const TaylorModelVec<Real> &nn_outputs, int i, const vector<Interval> &domain){
+	// determine if it is possible that the i-th output of the nn is the largest
+	for(int j=0; j<nn_outputs.tms.size(); j++){
+		if(j == i) continue;
+		TaylorModel<Real> tm = nn_outputs.tms[j] - nn_outputs.tms[i];
+		Interval box;
+		tm.intEval(box, domain);
+		if(box.inf() > 0) return false; 
+	}
+	return true;
+}
+
+vector<Interval> copy_domain(const vector<Interval> &domain){
+	vector<Interval> new_domain;
+	for(Interval itvl: domain){
+		Interval new_itvl(itvl);
+		new_domain.push_back(new_itvl);
+	}
+	return new_domain;
+}
+
+vector<Constraint> build_guard(Variables & nn_out_vars, int i){
+	// build guard constraint for the i-th nn output
+	vector<string> vars = {"y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8"};
+	vector<Constraint> guard;
+	for(int j=0; j<nn_out_vars.size(); j++){
+		if(j == i) continue;
+		Constraint c(vars[j] + " - " + vars[i], nn_out_vars);	// yj - yi <= 0 => yi >= yj
+		guard.push_back(c);
+	}
+	return guard;
 }
 
 int main(int argc, char *argv[])
@@ -67,8 +117,10 @@ int main(int argc, char *argv[])
 
 	unsigned int order = stoi(argv[4]);
 
+	double stepsize = stod(argv[1]);
+
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.01, order);
+	setting.setFixedStepsize(stepsize, order);
 
 	// time horizon for a single control step
 	setting.setTime(0.2);
@@ -92,7 +144,7 @@ int main(int argc, char *argv[])
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	double w = stod(argv[1]);
+	// double w = stod(argv[1]);
 	int steps = stoi(argv[2]);
 	Interval init_x1(-0.05, -0.025), init_x2(-0.025, 0);
 	Interval init_x3(0), init_x4(0);
@@ -112,8 +164,12 @@ int main(int argc, char *argv[])
 
 	// translate the initial set to a flowpipe
 	Flowpipe initial_set(X0);
+	queue<Flowpipe> initial_sets;
+	initial_sets.push(initial_set);
 
 	Symbolic_Remainder symbolic_remainder(initial_set, 500);
+	queue<Symbolic_Remainder> symbolic_remainders;
+	symbolic_remainders.push(symbolic_remainder);
 
 	// no unsafe set
 	vector<Constraint> unsafeSet;
@@ -148,6 +204,23 @@ int main(int argc, char *argv[])
 	state_vars.push_back("x5");
 	state_vars.push_back("x6");
 
+	Variables nn_out_vars;
+
+	var_ids["y1"] = nn_out_vars.declareVar("y1");
+	var_ids["y2"] = nn_out_vars.declareVar("y2");
+	var_ids["y3"] = nn_out_vars.declareVar("y3");
+	var_ids["y4"] = nn_out_vars.declareVar("y4");
+	var_ids["y5"] = nn_out_vars.declareVar("y5");
+	var_ids["y6"] = nn_out_vars.declareVar("y6");
+	var_ids["y7"] = nn_out_vars.declareVar("y7");
+	var_ids["y8"] = nn_out_vars.declareVar("y8");
+
+	vector<TaylorModelVec<Real>> ctrl_lookup = build_ctrl_lookup_table(numVars);
+	vector<vector<Constraint>> nn_out_guards;
+	for(int i=0; i<8; i++){
+		nn_out_guards.push_back(build_guard(nn_out_vars, i));
+	}
+
 	if (if_symbo == 0)
 	{
 		cout << "High order abstraction starts." << endl;
@@ -158,66 +231,115 @@ int main(int argc, char *argv[])
 	}
 	// return 0;
 
+	queue<Flowpipe> mid_initial_sets;
+	queue<Symbolic_Remainder> mid_symbolic_remainders;
+
 	// perform 35 control steps
 	for (int iter = 0; iter < steps; ++iter)
 	{
 		cout << "Step " << iter << " starts.      " << endl;
-		//vector<Interval> box;
-		//initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
-		TaylorModelVec<Real> tmv_input;
+		while(!initial_sets.empty()){
+			initial_set = initial_sets.front();
+			initial_sets.pop();
+			symbolic_remainder = symbolic_remainders.front();
+			symbolic_remainders.pop();
+			TaylorModelVec<Real> tmv_input;
 
-		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
-		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
-		tmv_input.tms.push_back(initial_set.tmvPre.tms[2]);
-		tmv_input.tms.push_back(initial_set.tmvPre.tms[3]);
-		tmv_input.tms.push_back(initial_set.tmvPre.tms[4]);
-		tmv_input.tms.push_back(initial_set.tmvPre.tms[5]);
+			// tmv_input.tms.push_back(initial_set.tmvPre.tms[0]*0.2);
+			// tmv_input.tms.push_back(initial_set.tmvPre.tms[1]*0.2);
+			// tmv_input.tms.push_back(initial_set.tmvPre.tms[2]*0.2);
+			// tmv_input.tms.push_back(initial_set.tmvPre.tms[3]*0.1);
+			// tmv_input.tms.push_back(initial_set.tmvPre.tms[4]*0.1);
+			// tmv_input.tms.push_back(initial_set.tmvPre.tms[5]*0.1);
 
-		// TaylorModelVec<Real> tmv_temp;
-		// initial_set.compose(tmv_temp, order, cutoff_threshold);
-		// tmv_input.tms.push_back(tmv_temp.tms[0]);
-		// tmv_input.tms.push_back(tmv_temp.tms[1]);
-		// tmv_input.tms.push_back(tmv_temp.tms[2]);
-		// tmv_input.tms.push_back(tmv_temp.tms[3]);
-		// tmv_input.tms.push_back(tmv_temp.tms[4]);
-		// tmv_input.tms.push_back(tmv_temp.tms[5]);
+			TaylorModelVec<Real> tmv_temp;
+			initial_set.compose(tmv_temp, order, cutoff_threshold);
+			tmv_input.tms.push_back(tmv_temp.tms[0]*0.2);
+			tmv_input.tms.push_back(tmv_temp.tms[1]*0.2);
+			tmv_input.tms.push_back(tmv_temp.tms[2]*0.2);
+			tmv_input.tms.push_back(tmv_temp.tms[3]*0.1);
+			tmv_input.tms.push_back(tmv_temp.tms[4]*0.1);
+			tmv_input.tms.push_back(tmv_temp.tms[5]*0.1);
 
-		// taylor propagation
-        PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
-		TaylorModelVec<Real> tmv_output;
+			// taylor propagation
+			PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
+			TaylorModelVec<Real> tmv_output;
 
-		if(if_symbo == 0){
-			// not using symbolic remainder
-			nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+			if(if_symbo == 0){
+				// not using symbolic remainder
+				nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+			}
+			else{
+				// using symbolic remainder
+				nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+			}
+
+			Matrix<Interval> rm1(1, 8);
+			tmv_output.Remainder(rm1);
+			cout << "Neural network taylor remainder: " << rm1 << endl;
+
+			vector<int> possible_argmax;
+			for(int i=0; i<tmv_output.tms.size(); i++){
+				if(maybe_the_largest(tmv_output, i, initial_set.domain)){
+					possible_argmax.push_back(i);
+				}
+			}
+			if(possible_argmax.size() < 1){
+				cout<<"ERROR: non of the output are determined as the possible maximal output." << endl;
+				return 1;
+			}
+			else if(possible_argmax.size() > 1){
+				cout<<"Flowpipe will split into " << possible_argmax.size() << " new flowpipes." << endl;
+				for(int i=0; i<possible_argmax.size(); i++){
+					vector<Interval> domain = copy_domain(initial_set.domain);
+					if(domain_contraction_int(tmv_output, domain, nn_out_guards[possible_argmax[i]], order, cutoff_threshold, setting.g_setting) == UNSAT) continue;
+					cout<<"New split with the " << possible_argmax[i] << "-th control input." << endl;
+					Flowpipe new_initial_set(tmv_temp, domain);
+					Symbolic_Remainder new_symbolic_remainder(symbolic_remainder);
+					TaylorModelVec<Real> tmv_u = ctrl_lookup[possible_argmax[i]];
+					new_initial_set.tmvPre.tms[var_ids["u1"]] = tmv_u.tms[0];
+					new_initial_set.tmvPre.tms[var_ids["u2"]] = tmv_u.tms[1];
+					new_initial_set.tmvPre.tms[var_ids["u3"]] = tmv_u.tms[2];
+					mid_initial_sets.push(new_initial_set);
+					mid_symbolic_remainders.push(new_symbolic_remainder);
+				}
+			}
+			else{
+				cout<<"Pick the " << possible_argmax[0] << "-th control input." << endl;
+				TaylorModelVec<Real> tmv_u = ctrl_lookup[possible_argmax[0]];
+				initial_set.tmvPre.tms[var_ids["u1"]] = tmv_u.tms[0];
+				initial_set.tmvPre.tms[var_ids["u2"]] = tmv_u.tms[1];
+				initial_set.tmvPre.tms[var_ids["u3"]] = tmv_u.tms[2];
+				mid_initial_sets.push(initial_set);
+				mid_symbolic_remainders.push(symbolic_remainder);
+			}
 		}
-		else{
-			// using symbolic remainder
-			nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
-		}
-
-		
-		Matrix<Interval> rm1(1, 3);
-		tmv_output.Remainder(rm1);
-		cout << "Neural network taylor remainder: " << rm1 << endl;
-
-		initial_set.tmvPre.tms[var_ids["u1"]] = tmv_output.tms[0];
-		initial_set.tmvPre.tms[var_ids["u2"]] = tmv_output.tms[1];
-		initial_set.tmvPre.tms[var_ids["u3"]] = tmv_output.tms[2];
 
 		if(segment < 3 && iter >= segment_ends[segment]) segment++;
-		// Always using symbolic remainder
-		dynamics[segment].reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
-		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
-		{
-			initial_set = result.fp_end_of_time;
-			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
+		while(!mid_initial_sets.empty()){
+			initial_set = mid_initial_sets.front();
+			mid_initial_sets.pop();
+			symbolic_remainder = mid_symbolic_remainders.front();
+			mid_symbolic_remainders.pop();
+			// Always using symbolic remainder
+			dynamics[segment].reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+
+			if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
+			{
+				initial_set = result.fp_end_of_time;
+				initial_sets.push(initial_set);
+				symbolic_remainders.push(symbolic_remainder);
+				cout << initial_sets.size() << "Flowpipe(s) derived." << endl;
+				// cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
+			}
+			else
+			{
+				printf("Terminated due to too large overestimation.\n");
+				return 1;
+			}
 		}
-		else
-		{
-			printf("Terminated due to too large overestimation.\n");
-			return 1;
-		}
+		cout<<"Total number of flowpipes after " << iter+1 << " steps: " << initial_sets.size() << endl;
 	}
 
 
@@ -266,7 +388,7 @@ int main(int argc, char *argv[])
 
 	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo) + ".txt");
+	ofstream result_output("./outputs/polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4) + ".txt");
 	if (result_output.is_open())
 	{
 		result_output << reach_result << endl;
@@ -278,16 +400,16 @@ int main(int argc, char *argv[])
 	// plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo), result);
 
     plot_setting.setOutputDims("x1", "x4");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo), result);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
 
 	plot_setting.setOutputDims("x2", "x5");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
 
 	plot_setting.setOutputDims("x3", "x6");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
 
 	plot_setting.setOutputDims("x1", "x2");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo), result);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
 
 	return 0;
 }

@@ -1,2 +1,0 @@
-Verification result: Yes(10)
-Running Time: 61.000000 seconds
