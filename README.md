@@ -104,7 +104,7 @@ tanh // Activation function of the output layer
 ```
 Then we can verify the NNCS with the following command:
 ```bash
-./reachnn_benchmark_1 0.05 35 4 6 1 relu_tanh
+make && ./reachnn_benchmark_1 0.05 35 4 6 1 relu_tanh
 ```
 where 0.05 is the width of the initial set, 35 is the total steps that need to be verified, 4 is the order of Bernstein Polynomial, 6 is the order of Taylor Model, 1 specifies option to use symbolic remainder and relu_tanh specifies the NN controller. 
 
