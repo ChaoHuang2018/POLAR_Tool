@@ -40,7 +40,7 @@ make
 
 where ![formula](https://render.githubusercontent.com/render/math?math=u) is computed from a NN controller ![formula](https://render.githubusercontent.com/render/math?math=\kappa) that has two hidden layers, twenty neurons in each layer, and ReLU and tanh as activation functions. Given a control stepsize ![formula](https://render.githubusercontent.com/render/math?math=\delta_c=0.2), we hope to verify whether the system will reach ![formula](https://render.githubusercontent.com/render/math?math=[0,0.2]\times[0.05,0.3]) from the initial set ![formula](https://render.githubusercontent.com/render/math?math=[0.8,0.9]\times[0.5,0.6]) over the time interval ![formula](https://render.githubusercontent.com/render/math?math=[0,7]).
 
-Partial code of the benchmark 1 dynamics (*.cpp* file) are shown as follows:
+Partial code of the benchmark 1 dynamics ([*.cpp* file](/examples/benchmark1/reachnn_benchmark_1.cpp)) are shown as follows:
 
 ```C++
 // Declaration of the state and input variables.
@@ -80,7 +80,7 @@ Constraint c4("-x1 + 0.05", vars);		// x1 >= 0.05
 ...
 ```
 
-The NN controller is specified in *.txt* file as follows
+The NN controller is specified in [*.txt* file](/examples/benchmark1/nn_1_relu_tanh) as follows
 ```C++
 2 // number of inputs
 1 // number of outputs
