@@ -34,7 +34,7 @@ make
 ```
 
 ## Example Usage
-*Example 1.* Consider the following nolinear control system (benchmark 1):
+*Example 1.* Consider the following nolinear control system ([benchmark 1](/examples/benchmark1)):
 
 ![formula](https://render.githubusercontent.com/render/math?math=\dot{x}_0=x_1,\quad\dot{x}_1=ux_1^2-x_0)
 
@@ -106,6 +106,8 @@ Then we can verify the NNCS with the following command:
 ```bash
 ./reachnn_benchmark_1 0.05 35 4 6 1 relu_tanh
 ```
+A bash script `run.sh` is also available for each benchmark to run POLAR.
+
 The computed flowpipes are shown in [the figure](/examples/benchmark1/outputs/reachnn_benchmark_1_relu_tanh_1.eps).
 
 The output file of POLAR shows the verification results:
@@ -116,7 +118,7 @@ Running Time: 11.000000 seconds // Total computation time in seconds
 ```
 
 Here, "Yes" means that the target set contains the overapproximation of the reachable set. In other words, every trajectory of the system is guaranteed to reach the target set at time T. If the result returns "No", it means that the target set and the overapproximation of the reachable set are mutually exclusive. Every trajectory of the system will fall outside of the target set. "Unknown" means that the target set intersects with the overapproximation of the reachable set. It is unknown whether every system trajectory will fall inside the target set.
-
+<!-- 
 ## Examples - POLAR results
 
 ### Example #1 
@@ -140,7 +142,7 @@ vim SYSTEM_0.txt # verification result
 
 SYSTEM_0.m # plotted reachable sets. Run the command in MATLAB.
 
-```
+``` -->
 
 ## Contributors
 [Chao Huang](https://chaohuang2018.github.io/main/), [Jiameng Fan](https://www.jiamengf.com), [Xin Chen](https://udayton.edu/directory/artssciences/computerscience/chen-xin.php), [Wenchao Li](http://sites.bu.edu/depend/people/), [Qi Zhu](http://users.eecs.northwestern.edu/~qzhu/)
