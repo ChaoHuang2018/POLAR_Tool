@@ -7,7 +7,7 @@ function dxdt = tora(t,x)
  
     rejoin_radius = 500;
     rejoin_angle = 60; 
-    u = control_input
+    u = control_input;
     dxdt =[ (x(2) * (x(11) - x(8)) + x(3) * (x(12) - x(9))) / x(1);
             x(11) - x(8);
             x(12) - x(9);
@@ -22,14 +22,15 @@ function dxdt = tora(t,x)
             control_input(2) * sind(x(14)) + control_input(1) * x(10) * cosd(x(14));
             control_input(3) * 180 / pi;
             control_input(1) * 180 / pi;
-            x(8);
-            x(9);
-            x(11);
-            x(12);
-            control_input(2) * cosd(x(14)) - control_input(1) * x(10) * sind(x(14)) - (control_input(4) * cosd(x(13)) - control_input(3) * x(7) * sind(x(13)));
-            control_input(2) * sind(x(14)) + control_input(1) * x(10) * cosd(x(14)) - (control_input(4) * sind(x(13)) + control_input(3) * x(7) * cosd(x(13)));
-            (x(19) * (control_input(2) * cosd(x(14)) - control_input(1) * x(10) * sind(x(14)) - (control_input(4) * cosd(x(13)) - control_input(3) * x(7) * sind(x(13)))) + x(20) * (control_input(2) * sind(x(14)) + control_input(1) * x(10) * cosd(x(14)) - (control_input(4) * sind(x(13)) + control_input(3) * x(7) * cosd(x(13)))))/x(21);
-            ]
+            ];
+            %x(8);
+            %x(9);
+            %x(11);
+            %x(12);
+            %control_input(2) * cosd(x(14)) - control_input(1) * x(10) * sind(x(14)) - (control_input(4) * cosd(x(13)) - control_input(3) * x(7) * sind(x(13)));
+            %control_input(2) * sind(x(14)) + control_input(1) * x(10) * cosd(x(14)) - (control_input(4) * sind(x(13)) + control_input(3) * x(7) * cosd(x(13)));
+            %(x(19) * (control_input(2) * cosd(x(14)) - control_input(1) * x(10) * sind(x(14)) - (control_input(4) * cosd(x(13)) - control_input(3) * x(7) * sind(x(13)))) + x(20) * (control_input(2) * sind(x(14)) + control_input(1) * x(10) * cosd(x(14)) - (control_input(4) * sind(x(13)) + control_input(3) * x(7) * cosd(x(13)))))/x(21);
+            %];
 
 end
 

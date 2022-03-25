@@ -1,7 +1,7 @@
 %nn_rl;
 Ts = 1;  % Sample Time
 N = 3;    % Prediction horizon
-Duration = 100; % Simulation horizon
+Duration = 300; % Simulation horizon
 
 pos_radius = 100;
 ang_radius = 360;
@@ -40,17 +40,17 @@ x9 = (280 + pos_radius*rand(1));
 x10 = x9 * cosd(x13);
 x11 = x9 * sind(x13);
 
-x14 = 0.;
-x15 = 0.;
-x16 = x14 + x1;
-x17 = x15 + x2;
+%x14 = 0.;
+%x15 = 0.;
+%x16 = x14 + x1;
+%x17 = x15 + x2;
 
-x19 = x10 - x7;
-x20 = x11 - x8;
-x18 = sqrt(x19 * x19 + x20 * x20);
+%x19 = x10 - x7;
+%x20 = x11 - x8;
+%x18 = sqrt(x19 * x19 + x20 * x20);
  
 
-x = [x0;x1;x2;x3;x4;x5;x6;x7;x8;x9;x10;x11;x12;x13;x14;x15;x16;x17;x18;x19;x20];
+x = [x0;x1;x2;x3;x4;x5;x6;x7;x8;x9;x10;x11;x12;x13;]; %x14;x15;x16;x17;x18;x19;x20];
 
 options = optimoptions('fmincon','Algorithm','sqp','Display','none');
 uopt = zeros(N,4);
@@ -61,9 +61,14 @@ u_max = 0;
 LB = -3*ones(N,4);
 UB = 3*ones(N,4);
 
-x_now = zeros(21,1);
-x_next = zeros(21,1);
-z = zeros(21,1);
+%x_now = zeros(21,1);
+%x_next = zeros(21,1);
+%z = zeros(21,1);
+
+x_now = zeros(14,1);
+x_next = zeros(14,1);
+z = zeros(14,1);
+
 
 x_now = x;
 
@@ -71,35 +76,58 @@ simulation_result = x_now;
 
 for ct = 1:(Duration/Ts)
     x_input = x_now(1:12, 1);
-
-    % normalize input 1 and 4
+   
+    wingman_heading = x_now(13);
+   
+    wingman_frame_rot_mat = [ ...
+        cosd(-wingman_heading) -sind(-wingman_heading);
+        sind(-wingman_heading) cosd(-wingman_heading);
+    ];
+   
+    % rotate input vector
+    x_input(2:3) = wingman_frame_rot_mat * x_input(2:3);
+    x_input(5:6) = wingman_frame_rot_mat * x_input(5:6);
+    x_input(8:9) = wingman_frame_rot_mat * x_input(8:9);
+    x_input(11:12) = wingman_frame_rot_mat * x_input(11:12);
+   
+    % normalize position vectors
+    x_input(2:3) = x_input(2:3) / x_input(1);
+    x_input(5:6) = x_input(5:6) / x_input(4);
+   
+    % normalize distance magnitudes
     x_input([1, 4]) = x_input([1, 4]) / 1000.0;
-
+ 
     % wingman's velocity in wingman's reference????
-    x_input([7, 8, 9]) = (x_input([7, 8, 9]) - x_input([7, 8, 9]));
-
-    % lead's velocity in wingman's reference
-    x_input([10, 11, 12]) = x_now([19, 20, 21]);
-
-    % normalize velocities
+    %   umberto: note that by "reference frame" we mean the the wingman's
+    %       local coordinates, not the inertial reference from. Velocities are
+    %       not relative, only their direction is modified by the reference
+    %       frame transformation
+   
+    % normalize the x,y components of the velocity by the vector magnitude
+    % for the magnorm transformation
+    x_input(8:9) = x_input(8:9)/x_input(7);
+    x_input(11:12) = x_input(11:12) / x_input(10);
+ 
+    % normalize velocities magnitudes
     x_input([7, 10]) = x_input([7, 10]) / 400.0;
-    
+   
     y = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat');
     u_tmp = zeros(4,1);
     u_tmp(1) = 0.;
     u_tmp(2) = 0.;
-    % ignore std's 
+    % ignore std's
     u_tmp(3) = y(1);
     u_tmp(4) = y(3);
  
     x_next = system_eq_dis(x_now, Ts, u_tmp);
-
+ 
     x = x_next;
     x_now = x_next;
 end
+ 
 
-plot(simulation_result(15,:),simulation_result(16,:), 'blue', simulation_result(17,:),simulation_result(18,:), 'red', simulation_result(15,:) + simulation_result(6,:), simulation_result(16,:) + simulation_result(7,:), 'green');
-%plot(simulation_result(2,:),simulation_result(3,:), 'green');
+%plot(simulation_result(15,:),simulation_result(16,:), 'blue', simulation_result(17,:),simulation_result(18,:), 'red', simulation_result(15,:) + simulation_result(6,:), simulation_result(16,:) + simulation_result(7,:), 'green');
+plot(simulation_result(2,:),simulation_result(3,:), 'green');
 
 % title('RL Rejoin Default', 'FontSize', 14)
 % xlabel('x1', 'FontSize', 14);
