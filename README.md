@@ -9,7 +9,7 @@ Experiment results across a suite of benchmarks show that POLAR significantly ou
 Ubuntu 18.04, MATLAB 2016a or later
 
 
-#### Installation of Flow*
+#### Dependencies
 POLAR relies on the Taylor model arithmetic library provided by Flow*. Please install Flow* with the same directory of POLAR. You can either use the following command or follow the manual of Flow* for installation.
 
 - Install dependencies through apt-get install
@@ -32,6 +32,90 @@ make
 cd POLAR
 make
 ```
+
+## Example Usage
+*Example 1.* Consider the following nolinear control system (benchmark 1):
+
+![formula](https://render.githubusercontent.com/render/math?math=\dot{x}_0=x_1,\quad\dot{x}_1=ux_1^2-x_0)
+
+where ![formula](https://render.githubusercontent.com/render/math?math=u) is computed from a NN controller ![formula](https://render.githubusercontent.com/render/math?math=\kappa) that has two hidden layers, twenty neurons in each layer, and ReLU and tanh as activation functions. Given a control stepsize ![formula](https://render.githubusercontent.com/render/math?math=\delta_c=0.2), we hope to verify whether the system will reach ![formula](https://render.githubusercontent.com/render/math?math=[0,0.2]\times[0.05,0.3]) from the initial set ![formula](https://render.githubusercontent.com/render/math?math=[0.8,0.9]\times[0.5,0.6]) over the time interval ![formula](https://render.githubusercontent.com/render/math?math=[0,7]).
+
+Partial code of the benchmark 1 dynamics (*.cpp* file) are shown as follows:
+
+```C++
+// Declaration of the state and input variables.
+unsigned int numVars = 3;
+Variables vars;
+
+int x0_id = vars.declareVar("x0");
+int x1_id = vars.declareVar("x1");
+int u_id = vars.declareVar("u");
+
+// Define the continuous dynamics.
+Expression<Real> deriv_x0("x1", vars); 
+Expression<Real> deriv_x1("u*x1^2-x0", vars);
+Expression<Real> deriv_u("0", vars);
+...
+// Define initial state set.
+double w = stod(argv[1]);
+Interval init_x0(0.85 - w, 0.85 + w), init_x1(0.55 - w, 0.55 + w), init_u(0); // w=0.05
+...
+// Define the neural network controller
+string nn_name = "nn_1_"+net_name;
+NeuralNetwork nn(nn_name);
+...
+// Order of Bernstein Polynomial
+unsigned int bernstein_order = stoi(argv[3]); // 4
+// Order of Taylor Model
+unsigned int order = stoi(argv[4]); // 6
+// Define the time interval
+int steps = stoi(argv[2]);  // 35
+...
+// Define target set
+vector<Constraint> targetSet;
+Constraint c1("x0 - 0.2", vars);		// x0 <= 0.2
+Constraint c2("-x0", vars);			// x0 >= 0
+Constraint c3("x1 - 0.3", vars);		// x1 <= 0.3
+Constraint c4("-x1 + 0.05", vars);		// x1 >= 0.05
+...
+```
+
+The NN controller is specified in *.txt* file as follows
+```C++
+2 // number of inputs
+1 // number of outputs
+2 // number of hidden layers
+20 // number of nodes in the first hidden layer
+20 // number of nodes in the second hidden layer
+ReLU // Activation function of the first layer
+ReLU // Activation function of the second layer
+tanh // Activation function of the output layer
+// Weights of the first hidden layer
+-0.0073867239989340305
+...
+0.014101211912930012
+// Bias of the first hidden layer
+-0.07480818033218384
+...
+0.29650038480758667
+...
+0 // Offset of the neural network
+4 // Scala of the neural network
+```
+Then we can verify the NNCS with the following command:
+```bash
+./reachnn_benchmark_1 0.05 35 4 6 1 relu_tanh
+```
+The computed flowpipes are shown in [the figure](/examples/benchmark1/outputs/reachnn_benchmark_1_relu_tanh_1.eps).
+
+The output file of POLAR shows the verification results:
+
+```C++
+Verification result: Yes(35)  // Verification result at the 35th step
+Running Time: 11.000000 seconds // Total computation time in seconds
+```
+
+Here, "Yes" means that the target set contains the overapproximation of the reachable set. In other words, every trajectory of the system is guaranteed to reach the target set at time T. If the result returns "No", it means that the target set and the overapproximation of the reachable set are mutually exclusive. Every trajectory of the system will fall outside of the target set. "Unknown" means that the target set intersects with the overapproximation of the reachable set. It is unknown whether every system trajectory will fall inside the target set.
 
 ## Examples - POLAR results
 
