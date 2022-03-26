@@ -74,16 +74,8 @@ def simulation(ctrl_model, n_trajectory = 15, n_steps = 6, ctrl_step = 2e-1, int
                 ax.plot(X[interval[i]:interval[i+1]+1, 0], X[interval[i]:interval[i+1]+1, 2], colors[i%7])
             else:
                 ax.plot(X[interval[i]:, 0], X[interval[i]:, 2], colors[i%7])
-        # axs[0].plot(X[:interval[0]+1, 0], X[:interval[0]+1, 2], 'lightsteelblue')
-        # axs[0].plot(X[interval[0]:interval[1]+1, 0], X[interval[0]:interval[1]+1, 2], 'royalblue')
-        # axs[0].plot(X[interval[1]:, 0], X[interval[1]:, 2], 'navy')
-        # axs[1].plot(X[:interval[0]+1, 1], X[:interval[0]+1, 3], 'mistyrose')
-        # axs[1].plot(X[interval[0]:interval[1]+1, 1], X[interval[0]:interval[1]+1, 3], 'red')
-        # axs[1].plot(X[interval[1]:, 1], X[interval[1]:, 3], 'darkred')
-    # axs[0].set_xlim([22,33])
-    # axs[0].set_ylim([29.86,30.06])
-    # axs[0].set_title("x2-x5")
-    # axs[1].set_title("x3-x6")
+    # ax.set_xlim([22,33])
+    # ax.set_ylim([29.86,30.06])
     plt.show()
 
 def simulate_one_trajectory(x0, model, ctrl_func, n_steps = 6, ctrl_step = 2e-1):
@@ -106,4 +98,4 @@ def simulate_one_trajectory(x0, model, ctrl_func, n_steps = 6, ctrl_step = 2e-1)
 
 if __name__ == '__main__':
     tf_model, input_size = load_yml_model(network='tanh20x20x20')
-    simulation(tf_model, n_trajectory=10, n_steps=70, ctrl_step=1e-1, interval=[0, 100, 200, 300, 400, 500, 600])
+    simulation(tf_model, n_trajectory=10, n_steps=50, ctrl_step=1e-1, interval=[0, 100, 200, 300, 400])
