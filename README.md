@@ -112,6 +112,8 @@ A bash script `run.sh` is also available for each benchmark to run POLAR.
 
 The computed flowpipes are shown in [the figure](/examples/benchmark1/outputs/reachnn_benchmark_1_relu_tanh_1.eps).
 
+![alt text](/examples/benchmark1/outputs/reachnn_benchmark_1_relu_tanh_1.png)
+
 The output file of POLAR shows the verification results:
 
 ```C++
