@@ -8,7 +8,7 @@ ang_radius = 360;
 rejoin_radius = 500;
 rejoin_angle = 60; 
 %degree
-
+%%%
 global simulation_result;
 global disturb_range;
 
@@ -21,7 +21,7 @@ fileID = fopen('nn_rl_simulation.txt','w');
 
 
 
-for m=1:5
+for m=1:3
 
 
 % Initial values for 21 state variables

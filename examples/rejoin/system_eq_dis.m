@@ -4,16 +4,20 @@ global simulation_result;
 global disturb_range;
 
 function dxdt = tora(t,x)
- 
+    %%%
     rejoin_radius = 500;
     rejoin_angle = 60; 
     u = control_input;
     dxdt =[ (x(2) * (x(10) * x(11) - x(7) * x(8)) + x(3) * (x(10) * x(12) - x(7) * x(9))) / x(1);
-            (x(10) * x(11) - x(7) * x(8));
-            (x(10) * x(12) - x(7) * x(9));
+            %(x(10) * x(11) - x(7) * x(8));
+            x(11) - x(8);
+            %(x(10) * x(12) - x(7) * x(9));
+            x(12) - x(9);
             (x(5) * (x(10) * x(11) - x(7) * x(8) - rejoin_radius * sind(rejoin_angle + 180 + x(14)) * control_input(1)) + x(6) * (x(10) * x(12) - x(7) * x(9) + rejoin_radius * cosd(rejoin_angle + 180 + x(14)) * control_input(1)))/x(4);
-            x(10) * x(11) - x(7) * x(8) - rejoin_radius * sind(rejoin_angle + 180 + x(14)) * control_input(1);
-            x(10) * x(12) - x(7) * x(9) + rejoin_radius * cosd(rejoin_angle + 180 + x(14)) * control_input(1);
+            %x(10) * x(11) - x(7) * x(8) - rejoin_radius * sind(rejoin_angle + 180 + x(14)) * control_input(1);
+            x(11) - x(8) - rejoin_radius * sind(rejoin_angle + 180 + x(14)) * control_input(1);
+            %x(10) * x(12) - x(7) * x(9) + rejoin_radius * cosd(rejoin_angle + 180 + x(14)) * control_input(1);
+           x(12) - x(9) + rejoin_radius * cosd(rejoin_angle + 180 + x(14)) * control_input(1);
             (x(8) * (control_input(4) * cosd(x(13)) - x(7) * control_input(3) * sind(x(13))) + x(9) * (control_input(4) * sind(x(13)) - x(7) * control_input(3) * cosd(x(13)))) / x(7);
             control_input(4) * cosd(x(13)) - x(7) * control_input(3) * sind(x(13));
             control_input(4) * sind(x(13)) - x(7) * control_input(3) * cosd(x(13));
