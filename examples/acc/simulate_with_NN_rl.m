@@ -1,7 +1,7 @@
 %nn_rl;
 Ts = 0.1;  % Sample Time
 N = 3;    % Prediction horizon
-Duration =  5; % Simulation horizon
+Duration = 5; % Simulation horizon
 
 pos_radius = 10;
 vel_radius = 1;
@@ -21,13 +21,13 @@ fileID = fopen('nn_rl_simulation.txt','w');
 
 
 
-for m=1:1
+for m=1:10
 x0 = 30;
 x1 = 1.4;
-x2 = 90 + 10 * rand(1);
+x2 = 90 + 1 * rand(1);
 x3 = 10 + 1 * rand(1);
-x4 = 32 + 0.2 * rand(1);
-x5 = 30 + 0.2 * rand(1);
+x4 = 32 + 0.05 * rand(1);
+x5 = 30 + 0.05 * rand(1);
 x6 = 0;
 x7 = 0;
 

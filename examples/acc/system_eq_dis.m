@@ -13,8 +13,8 @@ function dxdt = tora(t,x)
             x(6);
             x(7);
             x(8);
-            -2 * 2 - 2 * x(7) - 0.0001 * x(3) * x(3);
-            2 * u - 2 * x(8) - 0.0001 * x(4) * x(4);
+            -2 * 2 - 2 * x(7) - 0.0001 * x(5) * x(5);
+            2 * u - 2 * x(8) - 0.0001 * x(6) * x(6);
             ]
 
 end
@@ -34,8 +34,8 @@ for m = 1: (time / simulate_step)
     x_next(4) = x(4) + x(6) * simulate_step;
     x_next(5) = x(5) + x(7) * simulate_step;
     x_next(6) = x(6) + x(8) * simulate_step;
-    x_next(7) = x(7) + (-2 * 2 - 2 * x(7) - 0.0001 * x(3) * x(3)) * simulate_step;
-    x_next(8) = x(8) + (2 * u - 2 * x(8) - 0.0001 * x(4) * x(4)) * simulate_step;
+    x_next(7) = x(7) + (-2 * 2 - 2 * x(7) - 0.0001 * x(5) * x(5)) * simulate_step;
+    x_next(8) = x(8) + (2 * u - 2 * x(8) - 0.0001 * x(6) * x(6)) * simulate_step;
     x = x_next;
 end
 
