@@ -14,12 +14,12 @@ function dxdt = tora(t,x)
             (x(5) * (x(10) * x(11) - x(7) * x(8) - rejoin_radius * sind(rejoin_angle + 180 + x(14)) * control_input(1)) + x(6) * (x(10) * x(12) - x(7) * x(9) + rejoin_radius * cosd(rejoin_angle + 180 + x(14)) * control_input(1)))/x(4);
             x(10) * x(11) - x(7) * x(8) - rejoin_radius * sind(rejoin_angle + 180 + x(14)) * control_input(1);
             x(10) * x(12) - x(7) * x(9) + rejoin_radius * cosd(rejoin_angle + 180 + x(14)) * control_input(1);
-            (x(8) * (control_input(4) * cosd(x(13)) - x(7) * control_input(3) * sind(x(13))) + x(9) * (control_input(4) * sind(x(13)) - x(7) * control_input(3) * cosd(x(13)))) / x(7);
+            control_input(4);
             control_input(4) * cosd(x(13)) - x(7) * control_input(3) * sind(x(13));
             control_input(4) * sind(x(13)) - x(7) * control_input(3) * cosd(x(13));
-            (x(11) * (control_input(2) * cosd(x(14)) - control_input(1) * sind(x(14))) + x(12) * (control_input(2) * sind(x(14)) + control_input(1) * cosd(x(14)))) / x(10);
+            control_input(2);
             control_input(2) * cosd(x(14)) - control_input(1) * sind(x(14));
-            control_input(2) * sind(x(14)) + control_input(1) * cosd(x(14));
+            control_input(2) * sind(x(14control_input(1) * cosd(x(14));
             control_input(3) * 180 / pi;
             control_input(1) * 180 / pi;
             ];
