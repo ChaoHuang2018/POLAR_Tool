@@ -1,7 +1,7 @@
 %nn_rl;
 Ts = 1;  % Sample Time
 N = 3;    % Prediction horizon
-Duration = 200; % Simulation horizon
+Duration = 1000; % Simulation horizon
 
 pos_radius = 100;
 ang_radius = 2 * pi;
@@ -121,7 +121,7 @@ for ct = 1:(Duration/Ts)
     u_tmp(2) = 0.;
     % ignore std's
     u_tmp(3) = 0.17 * (y(1) > 0.17) - 0.17 * (y(1) < -0.17) + y(1) * (y(1) < 0.17 && y(1) > -0.17);
-    u_tmp(4) = 96.5 * (y(3) > 96.5) - 96.5 * (y(1) < -96.5) + y(3) * (y(1) < 96.5 && y(1) > -96.5);
+    u_tmp(4) = 96.5 * (y(3) > 96.5) - 96.5 * (y(1) < -96.5) + y(3) * (y(1) < 96.5 && y(1) > ;
  
     x_next = system_eq_dis(x_now, Ts, u_tmp);
     

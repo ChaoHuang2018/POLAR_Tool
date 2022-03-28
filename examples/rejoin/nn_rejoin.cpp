@@ -106,24 +106,27 @@ int main(int argc, char *argv[])
 	 
 	
 	// Define the continuous dynamics.
+    // x(1:14) are the original state variables in the matlab code 
 
-	// x2 = x(2) / x(1); x3 = x(3) / x(1); 
-    // deriv_x1 = deriv_x(1) = (x(2) * (x(11) - x(8)) + x(3) * (x(12) - x(9))) / x(1) = x2 * (x(11) - x(8) + x_3 * (x(12) - x(9));
+	// x1 = x(1); x2 = x(2) / x(1); x3 = x(3) / x(1); 
+    // deriv_x1 = deriv_x(1) = (x(2) * deriv_x(2) + x(3) * deriv_x(3)) / x(1) = (x(2) * (x(11) - x(8)) + x(3) * (x(12) - x(9))) / x(1) = x2 * (x(11) - x(8) + x_3 * (x(12) - x(9));
 	Expression<Real> deriv_x1("x2 * (x11 * x10 - x8 * x7) + x3 * (x12 * x10 - x9 * x7)", vars); 
-    // deriv_x2 = (deriv_x(2) * x(1) - x(2) * deriv_x1) / (x(1)^2) = deriv_x(2) / x(1) - x_2 * deriv_x1 / x(1)
+    // deriv_x2 = (deriv_x(2) * x(1) - x(2) * deriv_x1) / (x(1)^2) = deriv_x(2) / x(1) - x2 * deriv_x1 / x(1)
 	Expression<Real> deriv_x2("(x11 * x10 - x8 * x7) / x1 - x2 * (x2 * (x11 * x10 - x8 * x7) + x3 * (x12 * x10 - x9 * x7)) / x1", vars); 
-	// deriv_x3 = (deriv_x(3) * x(1) - x(3) * deriv_x1) / (x(1)^2) = deriv_x(3) / x(1) - x_3 * deriv_x1 / x(1)
+	// deriv_x3 = (deriv_x(3) * x(1) - x(3) * deriv_x1) / (x(1)^2) = deriv_x(3) / x(1) - x3 * deriv_x1 / x(1)
     Expression<Real> deriv_x3("(x12 * x10 - x9 * x7) / x1 - x3 * (x2 * (x11 * x10 - x8 * x7) + x3 * (x12 * x10 - x9 * x7)) / x1", vars); 
-	// x5 = x4 * original x5; x6 = x4 * original x5; 
-    // deriv_x4 = deriv_x(4) 
+	// x4 = x(4), x5 =  x(5) / x4; x6 = x(6) / x4; 
+    // deriv_x4 = deriv_x(4) = (x(5) * deriv_x(5) + x(6) * deriv_x(6)) / x(4) = x5 * deriv_x(5) + x6 * deriv_x(6)
     Expression<Real> deriv_x4("x5 * (x11 * x10 - x8 * x7 - 500 * sin(60 * pi/ 180 + pi + x14) * u1) + x6 * (x12 * x10 - x9 * x7 + 500 * cos(60 * pi/ 180 + pi + x14) * u1)", vars);
-	Expression<Real> deriv_x5("(x11 * x10 - x8 * x7 - 500 * sin(60 * pi/ 180 + pi + x14) * u1) / x4 - x5 * (x5 * (x11 * x10 - x8 * x7 - 500 * sin(60 * pi/ 180 + pi + x14) * u1) + x6 * (x12 * x10 - x9 * x7 + 500 * cos(60 * pi/ 180 + pi + x14) * u1)) / x4 ", vars); 
-	Expression<Real> deriv_x6("(x12 * x10 - x9 * x7 + 500 * cos(60 * pi/ 180 + pi + x14) * u1) / x4 - x6 * (x5 * (x11 * x10 - x8 * x7 - 500 * sin(60 * pi/ 180 + pi + x14) * u1) + x6 * (x12 * x10 - x9 * x7 + 500 * cos(60 * pi/ 180 + pi + x14) * u1)) / x4", vars); 
-	// x8 = x7 * original x8; x9 = x7 * original x8; 
+	// deriv_x5 = (deriv_x(5) * x(4) - deriv_x(4) * x(5)) / (x(4) * x(4)) = deriv_x(5) / x4 - deriv_x(4) * x5 / x4 
+    Expression<Real> deriv_x5("(x11 * x10 - x8 * x7 - 500 * sin(60 * pi/ 180 + pi + x14) * u1) / x4 - x5 * (x5 * (x11 * x10 - x8 * x7 - 500 * sin(60 * pi/ 180 + pi + x14) * u1) + x6 * (x12 * x10 - x9 * x7 + 500 * cos(60 * pi/ 180 + pi + x14) * u1)) / x4 ", vars); 
+	// deriv_x6 = (deriv_x(6) * x(4) - deriv_x(6) * x(5)) / (x(4) * x(4)) = deriv_x(6) / x4 - deriv_x(6) * x5 / x4 
+    Expression<Real> deriv_x6("(x12 * x10 - x9 * x7 + 500 * cos(60 * pi/ 180 + pi + x14) * u1) / x4 - x6 * (x5 * (x11 * x10 - x8 * x7 - 500 * sin(60 * pi/ 180 + pi + x14) * u1) + x6 * (x12 * x10 - x9 * x7 + 500 * cos(60 * pi/ 180 + pi + x14) * u1)) / x4", vars); 
+	// x7 = x(7); x8 = x(8) / x7; x9 = x(9) / x7; 
     Expression<Real> deriv_x7("x8 * (u4 * cos(x13) - u3 * x7 * sin(x13)) + x9 * (u4 * sin(x13) + u3 * x7 * cos(x13))", vars); 
 	Expression<Real> deriv_x8("(u4 * cos(x13) - u3 * x7 * sin(x13)) / x7 - x8 * (x8 * (u4 * cos(x13) - u3 * x7 * sin(x13)) + x9 * (u4 * sin(x13) + u3 * x7 * cos(x13))) / x7", vars);
 	Expression<Real> deriv_x9("(u4 * sin(x13) + u3 * x7 * cos(x13)) / x7 - x9 * (x8 * (u4 * cos(x13) - u3 * x7 * sin(x13)) + x9 * (u4 * sin(x13) + u3 * x7 * cos(x13))) / x7", vars); 
-	// x11 = x10 * original x12; x12 = x10 * original x12; 
+	// x10 = x(10); x11 = x(11) / x10; x12 = x(12) / x10; 
     Expression<Real> deriv_x10("x11 * (u2 * cos(x14) - u1 * x9 * sin(x14)) + x12 * (u2 * sin(x14) + u1 * x9 * cos(x14))", vars); 
 	Expression<Real> deriv_x11("(u2 * cos(x14) - u1 * x9 * sin(x14)) / x10 - x11 * (x11 * (u2 * cos(x14) - u1 * x9 * sin(x14)) + x12 * (u2 * sin(x14) + u1 * x9 * cos(x14))) / x10", vars);
 	Expression<Real> deriv_x12("(u2 * sin(x14) + u1 * x9 * cos(x14)) / x10 - x12 * (x11 * (u2 * cos(x14) - u1 * x9 * sin(x14)) + x12 * (u2 * sin(x14) + u1 * x9 * cos(x14))) / x10", vars); 

@@ -13,7 +13,7 @@ for i = 1:no_of_hidden_layers
     pointer = pointer + 1;
 end
 network_structure(no_of_hidden_layers+1) = no_of_outputs;
-
+ 
 active_function = {"ReLU";
 "Affine";
 "ReLU";
@@ -41,7 +41,8 @@ g = zeros(no_of_inputs,1);
 g = x;
 g = weight_matrix * g;
 g = g + bias_matrix(:);
-g = do_thresholding_relu(g);
+%g = do_thresholding_relu(g);
+g = do_thresholding_tanh(g);
 
 
 for i = 1:(no_of_hidden_layers)
@@ -63,10 +64,12 @@ for i = 1:(no_of_hidden_layers)
     g = weight_matrix * g;
     g = g + bias_matrix(:);
     switch i 
-        case 2 
-            g = do_thresholding_relu(g);
-        case {5, 6}
+        case 1
             g = do_thresholding_tanh(g);
+        %case 2 
+        %    g = do_thresholding_relu(g);
+        %case {5, 6}
+        %    g = do_thresholding_tanh(g);
     end
 
 end

@@ -8,30 +8,30 @@ wbs = conf['default_policy']
 
 f.close()
 
-f = open("./rl_tanh256x256_mat", 'w')
+f = open("./rl_tanh256x256_mat_orig", 'w')
 
 num_inputs = wbs['default_policy/fc_1/kernel'].shape[0]
 f.write("{}".format(num_inputs) + os.linesep)
 num_outputs = wbs['default_policy/fc_out/bias'].shape[0]
 f.write(str(num_outputs) + os.linesep)
 
-num_of_hidden_layers = 3
-num_of_hidden_layers += 5
+num_of_hidden_layers = 2
+#num_of_hidden_layers += 5
 f.write(str(num_of_hidden_layers) + os.linesep)
 
-f.write(str(4 * num_inputs) + os.linesep)
-f.write(str(num_inputs) + os.linesep)
-f.write(str(4 * num_inputs) + os.linesep)
-f.write(str(num_inputs) + os.linesep)
-f.write(str(num_inputs) + os.linesep)
+#f.write(str(4 * num_inputs) + os.linesep)
+#f.write(str(num_inputs) + os.linesep)
+#f.write(str(4 * num_inputs) + os.linesep)
+#f.write(str(num_inputs) + os.linesep)
+#f.write(str(num_inputs) + os.linesep)
 f.write(str(wbs['default_policy/fc_1/bias'].shape[0]) + os.linesep) 
 f.write(str(wbs['default_policy/fc_2/bias'].shape[0]) + os.linesep) 
 
 activs = ['tanh', 'tanh', 'Affine']
-activs = ['ReLU', 'Affine', 'ReLU', 'Affine', 'Affine'] + activs
+#activs = ['ReLU', 'Affine', 'ReLU', 'Affine', 'Affine'] + activs
 #for activ in activs:
 #    f.write(str(activ) + os.linesep)
-
+"""
 # max(x, - 1)
 w = np.zeros([num_inputs, 4 * num_inputs])
 b = np.zeros([4 * num_inputs])
@@ -96,7 +96,7 @@ for i in range(b.shape[0]):
     for j in range(w.shape[0]):
         f.write(str(w[j][i]) + os.linesep)
     f.write(str(b[i]) + os.linesep)
- 
+"""
  
 
 w = wbs['default_policy/fc_1/kernel']
