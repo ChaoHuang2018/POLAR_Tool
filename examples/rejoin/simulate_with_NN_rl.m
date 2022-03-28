@@ -34,11 +34,11 @@ x4 = x1 + rejoin_radius* cosd(rejoin_angle + 180 + x13);
 x5 = x2 + rejoin_radius* sind(rejoin_angle + 180 + x13);
 x3 = sqrt(x4*x4 + x5*x5);
 x6 = (300 + pos_radius*rand(1));
-x7 = cosd(x12);
-x8 = sind(x12);
+x7 = x6 * cosd(x12);
+x8 = x6 * sind(x12);
 x9 = (280 + pos_radius*rand(1));
-x10 = cosd(x13);
-x11 = sind(x13);
+x10 = x9 * cosd(x13);
+x11 = x9 * sind(x13);
 
 %x14 = 0.;
 %x15 = 0.;
