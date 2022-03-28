@@ -14,6 +14,14 @@ using namespace flowstar;
 #define rejoin_radius 500
 #endif
 
+vector<Interval> copy_domain(const vector<Interval> &domain){
+	vector<Interval> new_domain;
+	for(Interval itvl: domain){
+		Interval new_itvl(itvl);
+		new_domain.push_back(new_itvl);
+	}
+	return new_domain;
+}
 
 void build_winman_frame_rot_mat(vector<TaylorModelVec<Real> & winman_fram_rot_mat, const TaylorModelVec<Real> &states, const vector<Real> & domain, const unsigned int order, const Interval & cutoff_threshold, const Global_Setting & setting) {
 	// Need to initialize winman_fram_rot_mat from outside
@@ -305,10 +313,11 @@ int main(int argc, char *argv[])
 		for (TaylorModel<Real> tm: initial_set.tmvPre.tms) tmv_input.tms.push_back(tm);
 		
 		TaylorModelVec<Real> winman_fram_rot_mat;
-		build_winman_frame_rot_mat(winman_fram_rot_mat, tmv_input, domain, order, cutoff_threshold, setting);
+		build_winman_frame_rot_mat(winman_fram_rot_mat, tmv_input, initial_set.domain, order, cutoff_threshold, setting);
 		
+        vector<Interval> nn_domain = copy_domain(initial_set.domain);
 		TaylorModelVec<Real> nn_input;
-		preprocess(nn_input, winman_fram_rot_mat, tmv_input, domain, order, cutoff_threshold, setting);
+		preprocess(nn_input, winman_fram_rot_mat, tmv_input, nn_domain, order, cutoff_threshold, setting);
 	
 
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Taylor", "Concrete");
@@ -318,7 +327,7 @@ int main(int argc, char *argv[])
 		// nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
 
         // using symbolic remainder
-		nn.get_output_tmv_symbolic(tmv_output, nn_input, initial_set.domain, polar_setting, setting);
+		nn.get_output_tmv_symbolic(tmv_output, nn_input, nn_domain, polar_setting, setting);
 		
 		 
 		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);

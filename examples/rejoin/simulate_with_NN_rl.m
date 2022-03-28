@@ -112,16 +112,16 @@ for ct = 1:(Duration/Ts)
     % normalize velocities magnitudes
     x_input([7, 10]) = x_input([7, 10]) / 400.0;
     
-    x_input(x_input > 1.0) = 1.0;
-    x_input(x_input < -1.0) = -1.0;
+    %x_input(x_input > 1.0) = 1.0;
+    %x_input(x_input < -1.0) = -1.0;
    
-    y = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat_orig');
+    y = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat_tail');
     u_tmp = zeros(4,1);
     u_tmp(1) = 0.;
     u_tmp(2) = 0.;
     % ignore std's
-    u_tmp(3) = 0.17 * (y(1) > 0.17) - 0.17 * (y(1) < -0.17) + y(1) * (y(1) < 0.17 && y(1) > -0.17);
-    u_tmp(4) = 96.5 * (y(3) > 96.5) - 96.5 * (y(1) < -96.5) + y(3) * (y(1) < 96.5 && y(1) > -96.5);
+    u_tmp(3) = y(1); %0.17 * (y(1) > 0.17) - 0.17 * (y(1) < -0.17) + y(1) * (y(1) < 0.17 && y(1) > -0.17);
+    u_tmp(4) = y(3); %96.5 * (y(3) > 96.5) - 96.5 * (y(1) < -96.5) + y(3) * (y(1) < 96.5 && y(1) > -96.5);
  
     x_next = system_eq_dis(x_now, Ts, u_tmp);
     
