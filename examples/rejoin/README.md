@@ -1,8 +1,8 @@
-run `simulate_with_NN_rl.m`
+## run `simulate_with_NN_rl.m`
 
 * Dynamics:
 
-    *  21 state variables x[1, 2, ..., 8]
+    *  14 state variables x[1, 2, ..., 14]
     
         *  x(1): lead to wingman distance x(1) = sqrt(x(2) * x(2) + x(3) * x(3))
         
@@ -28,24 +28,11 @@ run `simulate_with_NN_rl.m`
         
         *  x(12): lead's y-axis velocity   x(12) = x(10) * cosd(x(14))
         
-        *  x(13): wingman's heading (deg) 
+        *  x(13): wingman's heading  
         
-        *  x(14): lead's heading (deg)
-        
-        *  x(15): wingman's x-position 
-        
-        *  x(16): wingman's y-position
-        
-        *  x(17): lead's x-position x(17) = x(1) + x(15)
-        
-        *  x(18): lead's y-position    x(18) = x(2) + x(16)
-        
-        *  x(19): lead relative x axis velocity in wingman's reference x(19) = sqrt(x(20) * x(20) + x(21) * x(21))
-        
-        *  x(20): lead relative x axis velocity in wingman's reference x(20) = x(11) - x(8)
-        
-        *  x(21): lead relative velocity in wingman's reference x(21) = x(12) - x(9)
-    
+        *  x(14): lead's heading 
+
+
     *  4 control variables u[1, 2]
         
         *  u(1): lead's heading angular velocity === 0 
@@ -58,28 +45,55 @@ run `simulate_with_NN_rl.m`
 
 *  NN controller:
 
-    *  2 inputs:
-       
-        *   x_input(1) = x(1) / 1000.0
-        
-        *  x_input(2) = x(2)
-        
-        *  x_input(3) = x(3)
-        
-        *  x_input(4) = x(4) / 1000.0
-        
-        *  x_input(5) = x(5)
-        
-        *  x_input(6) = x(6)
-        
-        *  x_input(7) = x_input(8) = x_input(9) = 0???  wingman's velocity in wingman's reference???
-        
-        *  x_input(10) = x(19) / 400.0
-        
-        *  x_input(11) = x(20)
-        
-        *  x_input(12) = x(21)
+    *   Need a transformation matrix 
 
+        *   wingman_frame_rot_mat = [
+            cos(-wingman_heading) -sin(-wingman_heading);
+            sin(-wingman_heading) cos(-wingman_heading);
+        ];
+
+    *  12 inputs:
+       
+        *   x_input(2:3) = wingman_frame_rot_mat * x_input(2:3);
+        
+        *   x_input(5:6) = wingman_frame_rot_mat * x_input(5:6);
+    
+        *   x_input(8:9) = wingman_frame_rot_mat * x_input(8:9);
+    
+        *   x_input(11:12) = wingman_frame_rot_mat * x_input(11:12);
+   
+        *   % normalize position vectors
+    
+        *   x_input(2:3) = x_input(2:3) / x_input(1);
+    
+        *   x_input(5:6) = x_input(5:6) / x_input(4);
+   
+        *   % normalize distance magnitudes
+
+        *   x_input([1, 4]) = x_input([1, 4]) / 1000.0;
+ 
+        *   % wingman's velocity in wingman's reference????
+        
+        *   %   umberto: note that by "reference frame" we mean the the wingman's
+        
+        *   %       local coordinates, not the inertial reference from. Velocities are
+        
+        *   %       not relative, only their direction is modified by the reference
+        
+        *   %       frame transformation
+   
+        *   % normalize the x,y components of the velocity by the vector magnitude
+        
+        *   % for the magnorm transformation
+        
+        *   x_input(8:9) = x_input(8:9)/x_input(7);
+        
+        *   x_input(11:12) = x_input(11:12) / x_input(10);
+  
+        *   % normalize velocities magnitudes
+    
+        *   x_input([7, 10]) = x_input([7, 10]) / 400.0;
+    
     *  4 outputs:
         
         *  y(1): wingman's angular velocity y(1) = u(3)
@@ -111,3 +125,20 @@ run `simulate_with_NN_rl.m`
     * The second relu-affine structure is for max(-x, -1) = ReLU(x[-1, 1, 1, -1] + [-1, 1, -1, 1]) * [0.5, -0.5, 0.5, 0.5]
     
     * The additional affine layer is used for negation -1 * x
+
+    * Add a clip(-0.17, 0.17)(x(1)) and a clip(-96.5, 96.5)(x(3)) structure to the end of the original network
+
+
+## run `make clean && ./run_rejoin.sh` to verify the NNCS example with POLAR
+    
+* Dynamics are the same as in the simulation
+
+* In the beginning of each iteration (simulation step), a TaylorModelVec<Real> variable `tmv_temp` is used to store the current state variables in the `initial_set`
+
+* Then a new TaylorModelVec<Real> variable  `wingman_frame_rot_mat`  is created to store the `wingman_frame_rot_mat` matrix based on the x(13), i.e., tmv_temp.tms[12]
+
+* After having `wingman_frame_rot_mat`, the TaylorModel<Real> variables in the `tmv_temp` are transformed and stored into a new TaylorModelVec<Real> variable `tmv_input`
+
+* `tmv_input` will be used as input to the neural network, which outputs a `tmv_output` TaylorModelVec<Real> varaible
+
+* `tmv_output` will be stored in `initial_set` which will be fed to the dynamics model and generate the flowpipe
