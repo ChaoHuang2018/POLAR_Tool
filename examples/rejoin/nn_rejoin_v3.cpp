@@ -479,7 +479,7 @@ int main(int argc, char *argv[])
 		}
 		
 
-        PolarSetting polar_setting(order, bernstein_order, partition_num, "Taylor", "Concrete");
+        PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
 		TaylorModelVec<Real> tmv_output;
 
 		// not using symbolic remainder

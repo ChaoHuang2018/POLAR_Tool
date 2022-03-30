@@ -1,3 +1,37 @@
+## run `make clean && ./run_rejoin_v2.sh` to verify the rejoin network
+    
+* Neural network:
+    
+    * The trained network is a 64x64 tanh fully connected network.
+
+    * Added a clip(-1, 1) structure before the original network structure
+    
+    * Two relu-affine structures and an additional affine layer is used to construct clip(-1, 1) = -1 * max(-max(x, -1), -1)
+    
+    * The first relu-affine structure is for max(x, -1) = ReLU(x*[1, -1, -1, 1] + [-1, 1, -1, 1]) * [0.5, -0.5, 0.5, 0.5]
+    
+    * The second relu-affine structure is for max(-x, -1) = ReLU(x[-1, 1, 1, -1] + [-1, 1, -1, 1]) * [0.5, -0.5, 0.5, 0.5]
+
+    * Add a clip(-0.17, 0.17)(x(1)) and a clip(-96.5, 96.5)(x(3)) structure to the end of the original network. 
+
+    * The network ends up with 10 hidden layers
+
+    * The network file is `rejoin_tanh64x64_v2`.
+
+* Dynamics are explained below. 
+
+* In the beginning of each iteration (simulation step), a TaylorModelVec<Real> variable `tmv_temp` is used to store the current state variables in the `initial_set`
+
+* Then a new TaylorModelVec<Real> variable  `wingman_frame_rot_mat`  is created to store the `wingman_frame_rot_mat` matrix based on the x(13), i.e., tmv_temp.tms[12]
+
+* After having `wingman_frame_rot_mat`, the TaylorModel<Real> variables in the `tmv_temp` are transformed and stored into a new TaylorModelVec<Real> variable `tmv_input`
+
+* `tmv_input` will be used as input to the neural network, which outputs a `tmv_output` TaylorModelVec<Real> varaible
+
+* `tmv_output` will be stored in `initial_set` which will be fed to the dynamics model and generate the flowpipe
+
+
+
 ## run `simulate_with_NN_rl.m`
 
 * Dynamics:
@@ -113,32 +147,3 @@
     *  `system_eq_dis.m` describes the dynamics model
     
     *  `NN_output_rl.m` reads NN outputs
-    
-* Neural network:
-    
-    * Added a clip(-1, 1) structure before the original network structure
-    
-    * Two relu-affine structures and an additional affine layer is used to construct clip(-1, 1) = -1 * max(-max(x, -1), -1)
-    
-    * The first relu-affine structure is for max(x, -1) = ReLU(x*[1, -1, -1, 1] + [-1, 1, -1, 1]) * [0.5, -0.5, 0.5, 0.5]
-    
-    * The second relu-affine structure is for max(-x, -1) = ReLU(x[-1, 1, 1, -1] + [-1, 1, -1, 1]) * [0.5, -0.5, 0.5, 0.5]
-    
-    * The additional affine layer is used for negation -1 * x
-
-    * Add a clip(-0.17, 0.17)(x(1)) and a clip(-96.5, 96.5)(x(3)) structure to the end of the original network
-
-
-## run `make clean && ./run_rejoin.sh` to verify the NNCS example with POLAR
-    
-* Dynamics are the same as in the simulation
-
-* In the beginning of each iteration (simulation step), a TaylorModelVec<Real> variable `tmv_temp` is used to store the current state variables in the `initial_set`
-
-* Then a new TaylorModelVec<Real> variable  `wingman_frame_rot_mat`  is created to store the `wingman_frame_rot_mat` matrix based on the x(13), i.e., tmv_temp.tms[12]
-
-* After having `wingman_frame_rot_mat`, the TaylorModel<Real> variables in the `tmv_temp` are transformed and stored into a new TaylorModelVec<Real> variable `tmv_input`
-
-* `tmv_input` will be used as input to the neural network, which outputs a `tmv_output` TaylorModelVec<Real> varaible
-
-* `tmv_output` will be stored in `initial_set` which will be fed to the dynamics model and generate the flowpipe
