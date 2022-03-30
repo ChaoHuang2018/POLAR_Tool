@@ -115,7 +115,7 @@ for ct = 1:(Duration/Ts)
     %x_input(x_input > 1.0) = 1.0;
     %x_input(x_input < -1.0) = -1.0;
    
-    y = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat_tail');
+    y = NN_output_rl(x_input,0,1,'rejoin_tanh64x64_mat');
     u_tmp = zeros(4,1);
     u_tmp(1) = 0.;
     u_tmp(2) = 0.;

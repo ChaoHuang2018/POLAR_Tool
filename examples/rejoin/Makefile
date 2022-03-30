@@ -13,6 +13,8 @@ nn_rejoin_v1: nn_rejoin_v1.o
 nn_rejoin_v2: nn_rejoin_v2.o $(OBJS)
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+nn_rejoin_v3: nn_rejoin_v3.o $(OBJS)
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
  
 
 

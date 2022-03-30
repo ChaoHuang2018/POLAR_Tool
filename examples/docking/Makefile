@@ -7,9 +7,11 @@ CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-nn_docking: nn_docking.o
+nn_docking_v1: nn_docking_v1.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+nn_docking_v2: nn_docking_v2.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
  
 
 
