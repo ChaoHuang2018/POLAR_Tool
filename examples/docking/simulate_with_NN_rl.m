@@ -54,7 +54,7 @@ for ct = 1:(Duration/Ts)
     x_input([1, 2]) = x_input([1, 2]) / 1000.0;
     x_input([3, 4]) = x_input([3, 4]) / 0.5;
 
-    u = NN_output_rl(x_input,0,1,'rl_tanh256x256_mat');
+    u = NN_output_rl(x_input,0,1,'docking_tanh64x64_mat');
     u_tmp = zeros(2,1);
     u_tmp(1) = u(1);
     u_tmp(2) = u(3);

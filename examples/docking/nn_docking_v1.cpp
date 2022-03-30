@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// define the neural network controller
-	string nn_name = "./rl_tanh256x256";
+	string nn_name = "./docking_tanh64x64";
  
 	NeuralNetwork nn(nn_name);
 

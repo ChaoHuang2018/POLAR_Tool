@@ -16,7 +16,7 @@ f.write("{}".format(num_inputs) + os.linesep)
 num_outputs = wbs['default_policy/fc_out/bias'].shape[0]
 f.write(str(num_outputs) + os.linesep)
 
-num_of_hidden_layers = 3
+num_of_hidden_layers = 2
  
 f.write(str(num_of_hidden_layers) + os.linesep)
 
@@ -25,8 +25,8 @@ f.write(str(wbs['default_policy/fc_2/bias'].shape[0]) + os.linesep)
 
 activs = ['tanh', 'tanh', 'Affine']
  
-#for activ in activs:
-#    f.write(str(activ) + os.linesep)
+for activ in activs:
+    f.write(str(activ) + os.linesep)
 
 
 w = wbs['default_policy/fc_1/kernel']
