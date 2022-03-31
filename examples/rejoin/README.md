@@ -6,7 +6,7 @@
 
     * Added a clip(-1, 1) structure before the original network structure
     
-    * Two relu-affine structures and an additional affine layer is used to construct clip(-1, 1) = -1 * max(-max(x, -1), -1)
+    * Two relu-affine structures are used to construct clip(-1, 1) = -1 * max(-max(x, -1), -1)
     
     * The first relu-affine structure is for max(x, -1) = ReLU(x*[1, -1, -1, 1] + [-1, 1, -1, 1]) * [0.5, -0.5, 0.5, 0.5]
     
@@ -29,6 +29,46 @@
 * `tmv_input` will be used as input to the neural network, which outputs a `tmv_output` TaylorModelVec<Real> varaible
 
 * `tmv_output` will be stored in `initial_set` which will be fed to the dynamics model and generate the flowpipe
+
+* Error log
+
+------Neuron 0 -------
+
+Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
+
+------Neuron 1 -------
+
+Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
+
+------Neuron 2 -------
+
+Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
+
+------Neuron 3 -------
+
+Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
+
+------------- Layer 11 starts. -------------
+
+Output Layer 11
+
+Output Layer 11
+
+neural network output range by TMP: [ -1.704113899050357e-01 , -1.695886100949736e-01 ]
+
+Neural network taylor remainder: [ -4.113899050265230e-04 , 4.113899050265230e-04 ]	
+
+[ -0.000000000000000e+00 , 0.000000000000000e+00 ]	
+
+[ -3.806021521743103e-01 , 3.806021521743103e-01 ]	
+
+[ -0.000000000000000e+00 , 0.000000000000000e+00 ]	
+
+
+
+TM -- Propagation
+
+Terminated due to too large overestimation.
 
 
 
