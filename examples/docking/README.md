@@ -7,7 +7,8 @@
     * The network file is `docking_tanh64x64`.
 
 * Error log:
-    ------Neuron 0 -------
+
+------Neuron 0 -------
 
 Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
 
