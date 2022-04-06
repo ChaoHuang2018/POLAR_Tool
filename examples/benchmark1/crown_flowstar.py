@@ -4,7 +4,7 @@ import sys
 CROWN_DIR = "/home/zhilu/layR/ITNE_CROWN/alpha-beta-CROWN/complete_verifier/"
 if not os.path.isdir(CROWN_DIR):
     raise Exception("Please set your own CROWN directory.")
-sys.path.append()
+sys.path.append(CROWN_DIR)
 
 import subprocess
 import socket
