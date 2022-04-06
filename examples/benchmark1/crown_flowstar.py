@@ -1,7 +1,7 @@
 import os
 import sys
 
-CROWN_DIR = "/home/zhilu/layR/ITNE_CROWN/alpha-beta-CROWN/complete_verifier/"
+CROWN_DIR = "/home/jiameng/packages/CROWN_FLOWSTAR/alpha-beta-CROWN/complete_verifier/"
 if not os.path.isdir(CROWN_DIR):
     raise Exception("Please set your own CROWN directory.")
 sys.path.append(CROWN_DIR)
@@ -33,9 +33,11 @@ def config_args():
             help='Complete verification verifier. "bab": branch and bound with beta-CROWN; "mip": mixed integer programming (MIP) formulation; "bab-refine": branch and bound with intermediate layer bounds computed by MIP.', hierarchy=h + ["complete_verifier"])
     arguments.Config.add_argument('--no_incomplete', action='store_false', dest='incomplete',
             help='Enable/Disable initial alpha-CROWN incomplete verification (this can save GPU memory when disabled).', hierarchy=h + ["enable_incomplete_verification"])
+    arguments.Config.add_argument('--network_name', type=str, default="nn_1_relu",
+            help='Name of the neural network controller.', hierarchy=h + ["network_name"])
     h = ["debug"]
-    arguments.Config.add_argument("--lp_test", type=str, default=None, 
-        choices=["MIP", "LP", "LP_intermediate_refine", "MIP_intermediate_refine", None], 
+    arguments.Config.add_argument("--lp_test", type=str, default=None,
+        choices=["MIP", "LP", "LP_intermediate_refine", "MIP_intermediate_refine", None],
         help='Debugging option, do not use.', hierarchy=h + ['lp_test'])
     arguments.Config.parse_config()
 
@@ -51,7 +53,7 @@ def config_args():
     # arguments.Config["solver"]['alpha-crown']["iteration"] = 1000
 
 def load_model(eval_ctrl_ub = False):
-    nn_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "nn_1_relu")
+    nn_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), arguments.Config["general"]["network_name"])
     sign = -1 if eval_ctrl_ub else 1
     model_ori = AttitudeController(nn_path, sign).to(arguments.Config["general"]["device"])
     return model_ori
@@ -144,13 +146,15 @@ def main(steps = 5):
         print("******CTRL BOUND*********", u_min, u_max)
         command = ['./flowstar_1step', '6']
         command += [str(i) for i in [x0_min, x0_max, x1_min, x1_max, u_min, u_max]]
+        command += [str(step)]
+        command += [arguments.Config["general"]["network_name"]]
         try:
             flowstar_res = subprocess.check_output(" ".join(command), shell=True, text=True)
         except subprocess.CalledProcessError as e:
             print("Flowstar exploded at step", step)
             Xs = Xs[:step+1]
             break
-            
+
         lines = flowstar_res.split('\n')
         print(lines[0])
         print(lines[1])
@@ -170,7 +174,7 @@ def main(steps = 5):
         ax.plot([x0_max]*2, [x1_min, x1_max], 'b')
         ax.plot([x0_min, x0_max], [x1_min]*2, 'b')
         ax.plot([x0_min, x0_max], [x1_max]*2, 'b')
-    
+
     ax.set_xlim([-0.4, 1.2])
     ax.set_ylim([-0.6, 0.8])
     plt.show()
@@ -180,4 +184,4 @@ def main(steps = 5):
 if __name__ == "__main__":
     config_args()
     main(24)        # Flowstar error at step 27 because of too large input range
-    
+

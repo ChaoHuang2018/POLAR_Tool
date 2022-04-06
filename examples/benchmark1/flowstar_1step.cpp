@@ -13,13 +13,15 @@ argv[4]: x1_min
 argv[5]: x1_max
 argv[6]: u_min
 argv[7]: u_max
+argv[8]: step
+argv[9]: net name
 
 
 */
 
 int main(int argc, char *argv[])
 {
-	string net_name = argv[2];
+	string net_name = argv[9];
 	string benchmark_name = "reachnn_benchmark_1_" + net_name;
 	// Declaration of the state variables.
 	unsigned int numVars = 3;
@@ -129,6 +131,27 @@ int main(int argc, char *argv[])
 	cout << scientific << box.inf() << " " << scientific << box.sup() << endl;
 	initial_set.tmvPre.tms[x1_id].intEval(box, initial_set.domain);
 	cout << scientific << box.inf() << " " << scientific << box.sup() << endl;
+
+	// plot the flowpipes in the x-y plane
+	result.transformToTaylorModels(setting);
+
+	Plot_Setting plot_setting(vars);
+
+    const string dir_name = "./outputs/"  + benchmark_name + "_crown_flowstar";
+    char* c = const_cast<char*>(dir_name.c_str());
+
+	int mkres = mkdir(c, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+	if (mkres < 0 && errno != EEXIST)
+	{
+		printf("Can not create the directory for images.\n");
+		exit(1);
+	}
+	// you need to create a subdir named outputs
+	// the file name is example.m and it is put in the subdir outputs
+    plot_setting.setOutputDims("x0", "x1");
+    plot_setting.plot_2D_octagon_MATLAB(c, "/" + to_string(stoi(argv[8])), result);
+
+
 
 	return 0;
 }
