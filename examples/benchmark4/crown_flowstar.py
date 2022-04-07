@@ -143,8 +143,8 @@ def main(steps = 5):
     for step in range(steps):
         us_min = ctrl_input_bound(model_lb, [x0_min, x1_min, x2_min], [x0_max, x1_max, x2_max])
         us_max = -ctrl_input_bound(model_ub, [x0_min, x1_min, x2_min], [x0_max, x1_max, x2_max])
-        u_min = us_min[0] * model_lb.output_scale - model_lb.output_offset
-        u_max = us_max[0] * model_ub.output_scale - model_ub.output_offset
+        u_min = (us_min[0] - model_lb.output_offset) * model_lb.output_scale
+        u_max = (us_max[0] - model_ub.output_offset) * model_ub.output_scale
         print("******CTRL BOUND*********", u_min, u_max)
         command = ['./flowstar_1step', '6']
         command += [str(i) for i in [x0_min, x0_max, x1_min, x1_max, x2_min, x2_max, u_min, u_max]]

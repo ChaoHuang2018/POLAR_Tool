@@ -1,4 +1,4 @@
-CXX = g++
+CXX = g++-8
 HOME= /usr/local/include
 POLAR_HOME = ../../POLAR
 FLOWSTAR_HOME = ../../flowstar

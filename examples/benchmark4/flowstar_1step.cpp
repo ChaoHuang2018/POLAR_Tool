@@ -24,7 +24,7 @@ argv[11]: net name
 int main(int argc, char *argv[])
 {
 	string net_name = argv[11];
-	string benchmark_name = "reachnn_benchmark_3_" + net_name;
+	string benchmark_name = "reachnn_benchmark_4_" + net_name;
 	// Declaration of the state variables.
 	unsigned int numVars = 4;
 	
