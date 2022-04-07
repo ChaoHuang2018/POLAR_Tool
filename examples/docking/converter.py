@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 import os
 
-pathname = "docking_tanh64x64"
+pathname = "docking_tanh64x64_v1"
 f = open(os.path.join("./", pathname + ".pickle"), 'rb')
 conf = pickle.load(f)
 wbs = conf['default_policy']

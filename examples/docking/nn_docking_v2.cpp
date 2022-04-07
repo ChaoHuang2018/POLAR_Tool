@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	int x2_id = vars.declareVar("x2");	// y_pos
 	int x3_id = vars.declareVar("x3");	// x_vel
 	int x4_id = vars.declareVar("x4");	// y_vel
-	//int x5_id = vars.declareVar("x5"); // ||v||
+	int x5_id = vars.declareVar("x5"); // ||v||
 	//int x6_id = vars.declareVar("x6");	// max_vel
  
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	Expression<Real> deriv_x2("x4", vars); //   
 	Expression<Real> deriv_x3("2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.", vars); //  
 	Expression<Real> deriv_x4("-2.0 * 0.001027 * x3 + u3 / 12.", vars); //  
-	//Expression<Real> deriv_x5("((2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.) * x3 + (-2.0 * 0.001027 * x3 + u2 / 12.) * x4) / x5", vars);  
+	Expression<Real> deriv_x5("((2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.) * x3 + (-2.0 * 0.001027 * x3 + u2 / 12.) * x4) / x5", vars);  
 	//Expression<Real> deriv_x6("2.0 * 0.001027 * (x1 * x3 + x2 * x4) / sqrt(x1 * x1 + x2 * x2)", vars);  
 	//Expression<Real> deriv_x7("x2 / 1000.0", vars);  
 	//Expression<Real> deriv_x8("x3 / 1000.0", vars); // deriv_x7 = u3 * x7/x6 - u2 * x8
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	ode_rhs[x2_id] = deriv_x2;
 	ode_rhs[x3_id] = deriv_x3;
 	ode_rhs[x4_id] = deriv_x4;
-	//ode_rhs[x5_id] = deriv_x5;
+	ode_rhs[x5_id] = deriv_x5;
 	//ode_rhs[x6_id] = deriv_x6;
 	//ode_rhs[x8_id] = deriv_x8;
 	//ode_rhs[x9_id] = deriv_x9;
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 	//setting.setFixedStepsize(0.005, order); // order = 4/5
 
 	// time horizon for a single control step
-	setting.setTime(0.1);
+	setting.setTime(1);
 
 	// cutoff threshold
 	//setting.setCutoffThreshold(1e-10); //core dumped
@@ -153,8 +153,8 @@ int main(int argc, char *argv[])
 		//init_x2(125 - 25, 125 + 25); 
 		//init_x1(125 - 5, 125 + 5), 
 		//init_x2(125 - 5, 125 + 5); 
-		init_x1(125, 125), 
-		init_x2(125, 125); 
+		init_x1(24, 26), 
+		init_x2(24, 26); 
 	
 	Interval 
 		init_x6(init_x1.pow(2) + init_x2.pow(2));
@@ -162,16 +162,15 @@ int main(int argc, char *argv[])
 		init_x6.mul_assign(2.0 * 0.001027);
 		init_x6.add_assign(0.2);
 	cout << "1111" << endl;
-	Interval 
-		//init_x5(init_x6 * Interval(0, 1));
-		init_x5(init_x6 * Interval(0.5, 0.5));
 	Interval
 		//init_x3(init_x5 * Interval(-1, 1));
-		init_x3(init_x5 * Interval(0., 0.));
+		init_x3(-init_x6.inf() * 0.5, -init_x6.inf() * 0.5);
 	Interval
-		init_x4(init_x5.pow(2) - init_x3.pow(2));
-		init_x4.abs_assign();
-		init_x4.sqrt_assign();
+		init_x4(-init_x6.inf() * 0.5, -init_x6.inf() * 0.5);
+	Interval
+		init_x5(init_x3.pow(2) + init_x4.pow(2));
+		init_x5.abs_assign();
+		init_x5.sqrt_assign();
 	  
 	Interval 
 		init_u1(0),
@@ -185,7 +184,7 @@ int main(int argc, char *argv[])
 	X0.push_back(init_x2);
 	X0.push_back(init_x3);
 	X0.push_back(init_x4);
-	//X0.push_back(init_x5);
+	X0.push_back(init_x5);
 	//X0.push_back(init_x6);
  
 	X0.push_back(init_u1);
@@ -263,7 +262,9 @@ int main(int argc, char *argv[])
 			double norm = 1.;
 			if(i <= 1) norm = 1000.0;
 			else if(i <= 3) norm = 0.5;
-			else if(i == 4) {
+			else if(i == 4) norm = 1.0;
+			/*
+			{
 				TaylorModel<Real> tm2sq;
 				tmv_temp.tms[2].mul_ctrunc(tm2sq, tmv_temp.tms[2], initial_set.domain, order, cutoff_threshold);
 				TaylorModel<Real> tm3sq;
@@ -273,6 +274,7 @@ int main(int argc, char *argv[])
 				tmv_input.tms.push_back(tm4);
 				continue;
 			} 
+			*/
 			else if(i == 5) {
 				TaylorModel<Real> tm0sq;
 				tmv_temp.tms[0].mul_ctrunc(tm0sq, tmv_temp.tms[0], initial_set.domain, order, cutoff_threshold);
@@ -328,9 +330,9 @@ int main(int argc, char *argv[])
 
 
 		initial_set.tmvPre.tms[u1_id] = tmv_output.tms[0];
-		initial_set.tmvPre.tms[u2_id] = tmv_output.tms[1] * 0.0;
+		initial_set.tmvPre.tms[u2_id] = tmv_output.tms[1];
 		initial_set.tmvPre.tms[u3_id] = tmv_output.tms[2];
-		initial_set.tmvPre.tms[u4_id] = tmv_output.tms[3] * 0.0;
+		initial_set.tmvPre.tms[u4_id] = tmv_output.tms[3];
 
 		// taylor
 		// NNTaylor nn_taylor1(nn);
@@ -360,6 +362,13 @@ int main(int argc, char *argv[])
 		initial_set.tmvPre.tms[u1_id] = tmv_output.tms[0];
 			
 		cout << "TM -- Propagation" << endl;
+
+
+		for (TaylorModel<Real> tm: initial_set.tmvPre.tms) {
+			Interval box;
+			tm.intEval(box, initial_set.domain);
+			cout << "Dynamics variables interval: [" << box.inf() << ", " << box.sup() << "]" << endl; 
+		}
 
 		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
