@@ -12,7 +12,7 @@ for i = 1:no_of_hidden_layers
     network_structure(i) = file_data(pointer);
     pointer = pointer + 1;
 end
-network_structure(no_of_hidden_layers+1) = no_of_outputs
+network_structure(no_of_hidden_layers+1) = no_of_outputs;
 
 active_function = {"ReLU";
 "Affine";

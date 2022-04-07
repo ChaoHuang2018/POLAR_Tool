@@ -1,9 +1,9 @@
 %nn_rl;
-Ts = 1;  % Sample Time
+Ts = 0.1;  % Sample Time
 N = 3;    % Prediction horizon
-Duration = 1000; % Simulation horizon
+Duration = 120; % Simulation horizon
 
-pos_radius = 25;
+pos_radius = 1;
 ang_radius = 360;
 rejoin_radius = 500;
 rejoin_angle = 60; 
@@ -22,12 +22,16 @@ fileID = fopen('nn_rl_simulation.txt','w');
 
 
 for m=1:1
-x0 = 125 + pos_radius*rand(1);
-x1 = 125 + pos_radius*rand(1);
-x2 = (0.2 + 2.0 * 0.001027 * sqrt(x0 * x0 + x1 * x1)) * rand(1) * cosd(ang_radius * rand(1));
-x3 = (0.2 + 2.0 * 0.001027 * sqrt(x0 * x0 + x1 * x1)) * rand(1) * sind(ang_radius * rand(1));
+x0 = 25 + 2 * rand(1) - 1; %125; % + pos_radius*rand(1);
+x1 = 25 + 2 * rand(1) - 1; %125; % + pos_radius*rand(1);
+%x2 = (0.2 + 2.0 * 0.001027 * sqrt(x0 * x0 + x1 * x1)) * (-0.5); % * rand(1) * cosd(ang_radius * rand(1));
+%x3 = (0.2 + 2.0 * 0.001027 * sqrt(x0 * x0 + x1 * x1)) * (-0.5); % * rand(1) * sind(ang_radius * rand(1));
+x2 = 0.2 + (2.0 * 0.001027 * sqrt(26 * 26 + 26 * 26)) * (0.5); % * rand(1) * cosd(ang_radius * rand(1));
+x3 = 0.2 + (2.0 * 0.001027 * sqrt(26 * 26 + 26 * 26)) * (0.5); % * rand(1) * sind(ang_radius * rand(1));
 x4 = sqrt(x2 * x2 + x3 * x3);
 x5 = (0.2 + 2.0 * 0.001027 * sqrt(x0 * x0 + x1 * x1));
+%x5 = (0.2 + 2.0 * 0.001027 * sqrt(26 * 26 + 26 * 26));
+
 
 x = [x0;x1;x2;x3;x4;x5];
 
@@ -54,7 +58,9 @@ for ct = 1:(Duration/Ts)
     x_input([1, 2]) = x_input([1, 2]) / 1000.0;
     x_input([3, 4]) = x_input([3, 4]) / 0.5;
 
-    u = NN_output_rl(x_input,0,1,'docking_tanh256x256_mat');
+    u = NN_output_rl(x_input,0,1,'docking_tanh64x64_v1_mat');
+    u(u >= 1.0) = 1.0;
+    u(u <= -1.0) = -1.0;
     u_tmp = zeros(2,1);
     u_tmp(1) = u(1);
     u_tmp(2) = u(3);
@@ -68,8 +74,8 @@ for ct = 1:(Duration/Ts)
 end
 
 %plot(simulation_result(15,:),simulation_result(16,:), 'blue', simulation_result(17,:),simulation_result(18,:), 'red');
-plot(simulation_result(1,:),simulation_result(2,:), 'green');
-
+%plot(simulation_result(1,:),simulation_result(2,:), 'green');
+plot(simulation_result(5,:), simulation_result(6,:), 'red');
 % title('RL 2D Docking', 'FontSize', 14)
 % xlabel('x1', 'FontSize', 14);
 % ylabel('x2', 'FontSize', 14);

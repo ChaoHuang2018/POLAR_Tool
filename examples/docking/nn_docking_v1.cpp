@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	//setting.setFixedStepsize(0.005, order); // order = 4/5
 
 	// time horizon for a single control step
-	setting.setTime(0.1);
+	setting.setTime(1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10); //core dumped
@@ -148,15 +148,17 @@ int main(int argc, char *argv[])
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	double w = stod(argv[1]); // 0.5
+	int w = stod(argv[1]); // 0.5
  
 	int steps = stoi(argv[2]);
 
 	Interval 
 		//init_x1(125 - 25, 125 + 25), 
 		//init_x2(125 - 25, 125 + 25); 
-		init_x1(125 - 5, 125 + 5), 
-		init_x2(125 - 5, 125 + 5); 
+		init_x1(50 - 1, 50 + 1), 
+		init_x2(50 - 1, 50 + 1); 
+		//init_x1(50 - 1, 50 + 1), 
+		//init_x2(50 - 1, 50 + 1); 
 	
 	Interval 
 		init_x6(init_x1.pow(2) + init_x2.pow(2));
@@ -164,17 +166,23 @@ int main(int argc, char *argv[])
 		init_x6.mul_assign(2.0 * 0.001027);
 		init_x6.add_assign(0.2);
 	cout << "1111" << endl;
-	Interval 
-		//init_x5(init_x6 * Interval(0, 1));
-		init_x5(init_x6 * Interval(0.5, 0.6));
+	
+	 
+	 
 	Interval
 		//init_x3(init_x5 * Interval(-1, 1));
-		init_x3(init_x5 * Interval(-0.1, 0.1));
+		//init_x3(init_x6 * (-0.7));
+		init_x3(-init_x6.sup() * 0.5, -init_x6.sup() * 0.5);
+	Interval 
+		//init_x5(init_x6 * Interval(0, 1));
+		//init_x4(init_x6 * (-0.7));
+		init_x4(-init_x6.sup() * 0.5, -init_x6.sup() * 0.5);
+
 	Interval
-		init_x4(init_x5.pow(2) - init_x3.pow(2));
-		init_x4.abs_assign();
-		init_x4.sqrt_assign();
-	  
+		init_x5(init_x3.pow(2) + init_x4.pow(2));
+		init_x5.abs_assign();
+		init_x5.sqrt_assign();	
+	
 	Interval 
 		init_u1(0),
 		init_u2(0),
@@ -205,7 +213,8 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// define the neural network controller
-	string nn_name = "./docking_tanh64x64";
+	string nn_name = "./docking_tanh" + to_string(w) + "x" + to_string(w);
+	cout << nn_name << endl;
  
 	NeuralNetwork nn(nn_name);
 
@@ -218,7 +227,7 @@ int main(int argc, char *argv[])
 	// the order in use
 	// unsigned int order = 5;
 	//Interval cutoff_threshold(-1e-7, 1e-7);
-	Interval cutoff_threshold(-1e-10, 1e-10);
+	Interval cutoff_threshold(-1e-7, 1e-7);
 	unsigned int bernstein_order = stoi(argv[3]);
 	unsigned int partition_num = 4000;
 
@@ -372,8 +381,7 @@ int main(int argc, char *argv[])
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting(vars);
-	plot_setting.setOutputDims("x1", "x2");
-
+	
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if (mkres < 0 && errno != EEXIST)
 	{
@@ -383,7 +391,7 @@ int main(int argc, char *argv[])
 
 	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/rl_tanh256x256_" + to_string(steps) + "_" + to_string(if_symbo) + ".txt");
+	ofstream result_output("./outputs/" + nn_name + "_" + to_string(steps) + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
 	{
 		result_output << reach_result << endl;
@@ -391,7 +399,10 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "rl_tanh256x256_"  + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.setOutputDims("x1", "x2");
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", nn_name + "_x1x2_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.setOutputDims("x5", "x6");
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", nn_name + "_x5x6_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
 
  
 
