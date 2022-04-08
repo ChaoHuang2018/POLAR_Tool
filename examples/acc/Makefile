@@ -7,12 +7,13 @@ CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: nn_acc
+all: nn_acc flowstar_1step
 
 nn_acc: nn_acc.o $(OBJS)
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
  
-
+flowstar_1step: flowstar_1step.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 
 
@@ -25,5 +26,5 @@ nn_acc: nn_acc.o $(OBJS)
 
 
 clean:
-	rm -f *.o nn_acc
+	rm -f *.o nn_acc flowstar_1step
 

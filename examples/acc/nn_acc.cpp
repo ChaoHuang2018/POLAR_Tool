@@ -240,12 +240,13 @@ int main(int argc, char *argv[])
 		// taylor propagation (new)
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Taylor", "Concrete");
 		TaylorModelVec<Real> tmv_output;
+		//tmv_output.tms.push_back(TaylorModel<Real>(-1.7690021, 1));
 
 		// not using symbolic remainder
 		// nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
 
         // using symbolic remainder
-		nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+		//nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
 
 		
 		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
