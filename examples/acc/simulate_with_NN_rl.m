@@ -67,7 +67,7 @@ for ct = 1:(Duration/Ts)
 end
 
 %plot(simulation_result(15,:),simulation_result(16,:), 'blue', simulation_result(17,:),simulation_result(18,:), 'red');
-plot(simulation_result(5,:),simulation_result(6,:), 'green');
+plot(simulation_result(5,:),simulation_result(6,:), 'red');
 
 % title('Acc, 'FontSize', 14)
 % xlabel('x1', 'FontSize', 14);

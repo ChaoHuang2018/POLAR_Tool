@@ -202,7 +202,7 @@ int main(int argc, char *argvs[])
 
 	Plot_Setting plot_setting(vars);
 
-    const string dir_name = "./outputs/"  + benchmark_name;
+    const string dir_name =  "./outputs/"  + benchmark_name + "_crown_flowstar";
     char* c = const_cast<char*>(dir_name.c_str());
 
 	int mkres = mkdir(c, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
@@ -214,7 +214,7 @@ int main(int argc, char *argvs[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x4", "x5");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/step" + to_string(stoi(argv[3])), result);
+    plot_setting.plot_2D_octagon_MATLAB(c, "/" + to_string(stoi(argv[3])), result);
 
 
 

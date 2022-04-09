@@ -12,7 +12,7 @@ flowstar:
   flowstar: "flowstar_1step"
 data:
   start: 0
-  end: 60
+  end: 50
   num_classes: 1
 init:
   min: [30.0, 1.4, 90.0, 10.0, 32.0, 30.0, 0.0, 0.0]
