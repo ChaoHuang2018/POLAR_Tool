@@ -1,7 +1,7 @@
 ### Instructions on running Alpha-beta-crown + flow*
 
 1. Requirements: pull alpha-beta-crown from <href>https://github.com/huanzhang12/alpha-beta-CROWN</href> and put the folder in the root directory `POLAR_Tool/`
-2. Update the `Makefile` in each of the `./benchmark1-6` directories, by adding an object `flowstar_1step_v1`. Refer to the example `Makefile` in `./acc` directory.
+2. Update the `Makefile` in each of the `./benchmark1-6` directories, by adding an object `flowstar_1step_v1`. Refer to the example `Makefile` in `./acc` directory. Then, make the objects. 
 3. Open terminal in the current directory (POLAR_Tool/examples/). Run command `python abcrown_flowstar_verifier.py --config ./benchmark dir/benchmark yaml file`. For instance, 
    * for acc, use command `python abcrown_flowstar_verifier.py --config ./acc/acc.yaml`.
    * for benchmark 1 relu, use command `python abcrown_flowstar_verifier.py --config ./benchmark1/benchmark1.yaml`.
