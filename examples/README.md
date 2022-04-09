@@ -12,3 +12,8 @@
    * For acc, the `.m` file will be in the `POLAR_Tool/examples/outputs/abcrown_flowstar_acc_tanh20x20x20_crown_flowstar` directory
    * For benchmark 1/2/.../6, the `.m` file will be in `POLAR_Tool/examples/outputs/abcrown_flowstar_benchmark$NUM_$NEURALNETWORK_crown_flowstar` where $NUM is the index of the benchmark and $NEURALNETWORK is the name of the neural network file, e.g., nn_1_relu, nn_1_sigmoid_crown.
   
+### Run ACC
+1. Go to `POLAR_Tool/examples/acc` directory.
+2. Run `./run_acc.sh`.
+3. The generated flowpipes are plotted in `POLAR_Tool/examples/acc/outputs/acc_tanh20x20x20_x4x5_steps_50_1.m`
+4. For matlab simulation, run `run("simulate_with_NN_rl.m")`.
