@@ -9,7 +9,7 @@ model:
   path: "acc/acc_tanh20x20x20_"
   plt_name: "abcrown_flowstar_acc_tanh20x20x20"
 flowstar:
-  flowstar: "flowstar_1step"
+  flowstar: "flowstar_1step_v1"
 data:
   start: 0
   end: 50
