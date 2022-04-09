@@ -40,8 +40,10 @@ def config_args():
             help='Complete verification verifier. "bab": branch and bound with beta-CROWN; "mip": mixed integer programming (MIP) formulation; "bab-refine": branch and bound with intermediate layer bounds computed by MIP.', hierarchy=h + ["complete_verifier"])
     arguments.Config.add_argument('--no_incomplete', action='store_false', dest='incomplete',
             help='Enable/Disable initial alpha-CROWN incomplete verification (this can save GPU memory when disabled).', hierarchy=h + ["enable_incomplete_verification"])
+    arguments.Config.add_argument('--no_complete', action='store_false', dest='complete',
+            help='Enable/Disable initial alpha-CROWN incomplete verification (this can save GPU memory when disabled).', hierarchy=h + ["enable_complete_verification"])
     arguments.Config.add_argument("--crown", action='store_true', help='Compute CROWN verified accuracy before verification (not used).', hierarchy=h + ["get_crown_verified_acc"])
-
+    
     h = ["flowstar"]
     arguments.Config.add_argument("--flowstar", type=str, help='flowstar exe file name', default = 'flowstar_1step', hierarchy=h + ["flowstar"])
     arguments.Config.add_argument("--order", type=int, default = 6, help='flowstar order', hierarchy=h + ["order"])
@@ -89,11 +91,11 @@ def flowstar(exp_name, flowstar_name, plt_name, step, ux_min, ux_max):
             x_range = [float(j) for j in lines[i].split(' ')]
             x_min[i] = x_range[0]
             x_max[i] = x_range[1]
-        print("state variables bounds: {} and {}".format(x_min, x_max))
+            print("state variable {}th bounds: {} and {}".format(i, x_min[i], x_max[i]))
         return explode, x_min, x_max
     except subprocess.CalledProcessError as e:
-        print("Flowstar exploded at step", step)
-        return False, None, None
+        print("Flowstar Error at step", step)
+        return True, None, None
 
     
 
@@ -141,15 +143,18 @@ def main():
     for plt_idx in plt_ids:
         assert len(plt_idx) == 2
         print("To be plotted: {}".format(plt_idx))
-    plt_paths = [os.path.join(os.path.dirname(network_path), "_".join(["outputs/abcrown_flowstar", plt_name, f"x{i}", f"x{j}", "step{}".format(len(list(step_ids)))]) + ".m") for (i, j) in plt_ids]
-
+    
     # Run step by step
     ux_min = {'x': [i for i in data_min], 'u': [None for _ in range(arguments.Config["data"]["num_classes"])]}
     ux_max = {'x': [i for i in data_max], 'u': [None for _ in range(arguments.Config["data"]["num_classes"])]}
 
     Xs = np.zeros((len(list(step_ids))+1, len(plt_ids), 4))
     Xs[0] = np.asarray([[data_min[plt_idx[0]], data_max[plt_idx[0]], data_min[plt_idx[1]], data_max[plt_idx[1]]] for plt_idx in plt_ids])
-
+    
+    plt_path = os.path.join("./outputs", "_".join([plt_name, "crown_flowstar"]), "_".join([plt_name, f"{len(step_ids)}steps.m"]))
+    print(plt_path)
+    os.system(f"rm {plt_path}")
+    os.system(f"touch {plt_path}")
     for step in step_ids:
         if len(input_ids) > 0:
             input_min = [data_min[i] for i in input_ids]
@@ -159,11 +164,13 @@ def main():
             input_max = data_max
         print(input_min, input_max)
         
-        u_min = crown_verify(step, model_ori_pos, input_min, input_max)
-        u_max = - crown_verify(step, model_ori_neg, input_min, input_max)
-        #u_min = ctrl_input_bound(model_ori_pos, input_min, input_max, alpha_only=True)
-        #u_max = -ctrl_input_bound(model_ori_neg, input_min, input_max, alpha_only=True)
-        #
+        if arguments.Config["general"]["enable_complete_verification"]:
+            u_min = crown_verify(step, model_ori_pos, input_min, input_max)
+            u_max = crown_verify(step, model_ori_neg, input_min, input_max)
+        else:
+            u_min = ctrl_input_bound(model_ori_pos, input_min, input_max, alpha_only=True)
+            u_max = ctrl_input_bound(model_ori_neg, input_min, input_max, alpha_only=True)
+        
        
         print(">>>>>>>>>>>>>>>>>>> Step {}: control output lower bound {} upper bound {}".format(step, u_min, u_max))
 
@@ -173,19 +180,26 @@ def main():
         ux_max['x'] = data_max[:]
          
         explode, data_min, data_max = flowstar(exp_name, flowstar_name, plt_name, step, ux_min, ux_max)
- 
+
         
         if explode:
-           Xs = Xs[:step + 1, :, :]
-           break
+            Xs = Xs[:step + 1, :, :]
+            break
         else:
-           Xs[step+1] = np.asarray([[data_min[plt_idx[0]], data_max[plt_idx[0]], data_min[plt_idx[1]], data_max[plt_idx[1]]] for plt_idx in plt_ids])
+            print(plt_path)
+            with open(plt_path, "a") as f_o:
+                with open(os.path.join("./outputs", "_".join([plt_name, "crown_flowstar"]), f"{step}.m"), "r") as f_i:
+                    for line in f_i:
+                        f_o.write(line)
+                    f_i.close()
+                f_o.close()
+            Xs[step+1] = np.asarray([[data_min[plt_idx[0]], data_max[plt_idx[0]], data_min[plt_idx[1]], data_max[plt_idx[1]]] for plt_idx in plt_ids])
+            
 
- 
+        
     for idx in range(len(plt_ids)):
         fig, ax = plt.subplots()
         for bound in Xs[:, idx]:
-            print(bound)
             x0_min, x0_max, x1_min, x1_max = bound
             ax.plot([x0_min]*2, [x1_min, x1_max], 'b')
             ax.plot([x0_max]*2, [x1_min, x1_max], 'b')
@@ -194,8 +208,8 @@ def main():
 
         #ax.set_xlim([-0.4, 1.2])
         #ax.set_ylim([-0.6, 0.8])
-        plt.show()
-        plt.savefig(plt_paths[idx])
+        #plt.show()
+        plt.savefig(os.path.join(exp_name, f"outputs/{plt_name}_x{plt_ids[idx][0]}x{plt_ids[idx][1]}.eps"))
 
 
 def ctrl_input_bound(model_ori, input_lb, input_ub, alpha_only=True):
@@ -232,7 +246,7 @@ def ctrl_input_bound(model_ori, input_lb, input_ub, alpha_only=True):
     print("lowerbound: {}".format(lower_bounds[-1][0]))
     print("upperbound: {}".format(upper_bounds[-1][0]))
     if alpha_only:
-        return lower_bounds[-1][0].cpu().numpy() 
+        return model_ori.unsign_offset_scale(lower_bounds[-1][0].cpu().numpy())
 
     
 
@@ -428,7 +442,9 @@ def crown_verify(step, model_ori, data_min, data_max):
         print(f'Result: Step {step} verification success (with branch and bound)!')
     # Make sure ALL tensors used in this loop are deleted here.
     del init_global_lb, saved_bounds, saved_slopes
-    return np.asarray(u_lb)
+     
+    return model_ori.unsign_offset_scale(np.asarray(u_lb))
+    
     return u_lb, u_ub
 
 
