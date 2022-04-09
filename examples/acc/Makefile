@@ -12,7 +12,7 @@ all: nn_acc flowstar_1step
 nn_acc: nn_acc.o $(OBJS)
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
  
-flowstar_1step: flowstar_1step.o
+flowstar_1step_v1: flowstar_1step.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 
