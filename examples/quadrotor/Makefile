@@ -12,6 +12,9 @@ all: polar_quadrotor_verisig
 polar_quadrotor_verisig: polar_quadrotor_verisig.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+abcrown_flowstar_verifier: abcrown_flowstar_verifier.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
 
 
 %.o: %.cc
@@ -23,5 +26,5 @@ polar_quadrotor_verisig: polar_quadrotor_verisig.o
 
 
 clean:
-	rm -f *.o polar_quadrotor_verisig
+	rm -f *.o polar_quadrotor_verisig abcrown_flowstar_verifier
 
