@@ -1,0 +1,3 @@
+Experiment name: acc
+Complete: 1/50
+Total time: 13.861932754516602
