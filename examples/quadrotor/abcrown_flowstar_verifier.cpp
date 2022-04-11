@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
 			if(!nn_output_file.good()) {
 				cout << "Pythono Error. Exit at Step " << iter << endl;
 				PYTHONO_EXIT_FLG = true;
-				break;
+				continue;
 			}
 
 			std::string nn_output_line;
@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
 
 		
 		if(segment < 3 && iter >= segment_ends[segment]) segment++;
-
+		
 		while(!mid_initial_sets.empty()){
 			initial_set = mid_initial_sets.front();
 			mid_initial_sets.pop();
@@ -384,7 +384,6 @@ int main(int argc, char *argv[])
 				symbolic_remainders.push(symbolic_remainder);
 				cout << initial_sets.size() << "Flowpipe(s) derived." << endl;
 				// cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
-				if(PYTHONO_EXIT_FLG) break;
 			}
 			else
 			{
@@ -393,6 +392,7 @@ int main(int argc, char *argv[])
 			}
 		}
 		cout<<"Total number of flowpipes after " << iter+1 << " steps: " << initial_sets.size() << endl;
+		
 	}
 
 
