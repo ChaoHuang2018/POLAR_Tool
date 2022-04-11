@@ -315,15 +315,12 @@ int main(int argc, char *argv[])
 			size_t pos = 0;
 			while((pos = nn_output_line.find(delimiter)) != std::string::npos) {
 				nn_outputs.push_back(nn_output_line.substr(0, pos));
-				cout << "huhuhuh" << nn_outputs.back() << "huhuhuh" << endl;
 				nn_output_line.erase(0, pos + delimiter.length());
 				if(nn_outputs.size() == 16) break;
 			}  
 
 	 		vector<Interval> nn_output_ints;
 			for(int i = 0; i < 8; i++) {
-				cout << "hehee" << stod(nn_outputs[2 * i]) << "hehee" << endl;
-				cout << "hahaha" << stod(nn_outputs[2 * i + 1]) << "hahaha" << endl;
 				nn_output_ints.push_back(Interval(stod(nn_outputs[2 * i]), stod(nn_outputs[2 * i + 1])));
 			}
 			TaylorModelVec<Real> tmv_output(nn_output_ints, initial_set.domain);
@@ -457,15 +454,19 @@ int main(int argc, char *argv[])
 
     plot_setting.setOutputDims("x1", "x4");
     plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x4_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x4_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
 
 	plot_setting.setOutputDims("x2", "x5");
 	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x2x5_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
-
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x2x5_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+	
 	plot_setting.setOutputDims("x3", "x6");
 	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x3x6_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x3x6_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
 
 	plot_setting.setOutputDims("x1", "x2");
     plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x2_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x2_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
 
 	return 0;
 }
