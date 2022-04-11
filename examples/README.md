@@ -25,4 +25,4 @@
 3. Go to `POLAR_Tool/examples/` directory.
 4. Run `./run_abcrown_quadrotor.sh`.
 5. Go to `POLAR_Tool/examples/outputs/abcrown_flowstar_quadrotor_crown_flowstar/` directory.
-6. Find the `x{NUM1}x{NUM2}_{NUM3}_steps_XXX_1_0.05.plt` files.
+6. Find the `x{NUM1}x{NUM2}_{NUM3}_steps_XXX.m` files.
