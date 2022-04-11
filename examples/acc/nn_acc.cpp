@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 	unsigned int partition_num = 4000;
 
 	unsigned int if_symbo = stoi(argv[5]);
-
+ 
 	double err_max = 0;
 	time_t start_timer;
 	time_t end_timer;
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
 		// nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
 
         // using symbolic remainder
-		//nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
+		nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
 
 		
 		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);

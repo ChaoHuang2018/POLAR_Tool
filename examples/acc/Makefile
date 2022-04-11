@@ -9,7 +9,7 @@ LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 all: nn_acc flowstar_1step
 
-nn_acc: nn_acc.o $(OBJS)
+nn_acc: nn_acc.o  
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
  
 flowstar_1step_v1: flowstar_1step.o
