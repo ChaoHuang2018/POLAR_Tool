@@ -1,5 +1,5 @@
 set terminal postscript enhanced color
-set output 'abcrown_flowstar_quadrotor_crown_flowstar/x1x2_30_steps_x_y_1_0.05.eps'
+set output 'abcrown_flowstar_quadrotor_crown_flowstar/x1x2_30_steps_x_y_1.eps'
 set style line 1 linecolor rgb "blue"
 set autoscale
 unset label

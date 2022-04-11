@@ -441,7 +441,7 @@ int main(int argc, char *argv[])
 
 	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/abcrown_flowstar_quadrotor_crown_flowstar/" + to_string(steps) + "_steps_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4) + ".txt");
+	ofstream result_output("./outputs/abcrown_flowstar_quadrotor_crown_flowstar/" + to_string(steps) + "_steps_" + to_string(if_symbo)  + ".txt");
 	if (result_output.is_open())
 	{
 		result_output << reach_result << endl;
@@ -453,20 +453,20 @@ int main(int argc, char *argv[])
 	// plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo), result);
 
     plot_setting.setOutputDims("x1", "x4");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x4_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x4_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x4_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo) , result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x4_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo) , result);
 
 	plot_setting.setOutputDims("x2", "x5");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x2x5_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x2x5_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x2x5_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo) , result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x2x5_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo) , result);
 	
 	plot_setting.setOutputDims("x3", "x6");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x3x6_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x3x6_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x3x6_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo) , result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x3x6_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo) , result);
 
 	plot_setting.setOutputDims("x1", "x2");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x2_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x2_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x2_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo) , result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "abcrown_flowstar_quadrotor_crown_flowstar/x1x2_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo) , result);
 
 	return 0;
 }
