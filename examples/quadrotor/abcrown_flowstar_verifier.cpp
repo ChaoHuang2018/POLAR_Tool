@@ -342,10 +342,11 @@ int main(int argc, char *argv[])
 			else if(possible_argmax.size() > 1){
 				cout<<"Flowpipe will split into " << possible_argmax.size() << " new flowpipes." << endl;
 				for(int i=0; i<possible_argmax.size(); i++){
-					vector<Interval> domain = copy_domain(initial_set.domain);
-					if(domain_contraction_int(tmv_output, domain, nn_out_guards[possible_argmax[i]], order, cutoff_threshold, setting.g_setting) == UNSAT) continue;
+					// vector<Interval> domain = copy_domain(initial_set.domain);
+					// if(domain_contraction_int(tmv_output, domain, nn_out_guards[possible_argmax[i]], order, cutoff_threshold, setting.g_setting) == UNSAT) continue;
 					cout<<"New split with the " << possible_argmax[i] << "-th control input." << endl;
-					Flowpipe new_initial_set(tmv_temp, domain);
+					// Flowpipe new_initial_set(tmv_temp, domain);
+					Flowpipe new_initial_set(initial_set);
 					Symbolic_Remainder new_symbolic_remainder(symbolic_remainder);
 					TaylorModelVec<Real> tmv_u = ctrl_lookup[possible_argmax[i]];
 					new_initial_set.tmvPre.tms[var_ids["u1"]] = tmv_u.tms[0];

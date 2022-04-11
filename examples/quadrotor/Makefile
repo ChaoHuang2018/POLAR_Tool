@@ -7,7 +7,7 @@ CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: polar_quadrotor_verisig
+all: polar_quadrotor_verisig abcrown_flowstar_verifier
 
 polar_quadrotor_verisig: polar_quadrotor_verisig.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
