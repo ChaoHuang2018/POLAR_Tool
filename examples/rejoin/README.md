@@ -30,49 +30,8 @@
 
 * `tmv_output` will be stored in `initial_set` which will be fed to the dynamics model and generate the flowpipe
 
-* Error log
-
-------Neuron 0 -------
-
-Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
-
-------Neuron 1 -------
-
-Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
-
-------Neuron 2 -------
-
-Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
-
-------Neuron 3 -------
-
-Input remainder: [ 0.000000000000000e+00 , 0.000000000000000e+00 ]
-
-------------- Layer 11 starts. -------------
-
-Output Layer 11
-
-Output Layer 11
-
-neural network output range by TMP: [ -1.704113899050357e-01 , -1.695886100949736e-01 ]
-
-Neural network taylor remainder: [ -4.113899050265230e-04 , 4.113899050265230e-04 ]	
-
-[ -0.000000000000000e+00 , 0.000000000000000e+00 ]	
-
-[ -3.806021521743103e-01 , 3.806021521743103e-01 ]	
-
-[ -0.000000000000000e+00 , 0.000000000000000e+00 ]	
-
-
-
-TM -- Propagation
-
-Terminated due to too large overestimation.
-
-
-
-## run `simulate_with_NN_rl.m`
+ 
+## run `simulate_with_NN_rl.m` for matlab simulation
 
 * Dynamics:
 
