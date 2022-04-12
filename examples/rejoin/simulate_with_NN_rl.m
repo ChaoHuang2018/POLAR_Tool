@@ -1,10 +1,10 @@
 %nn_rl;
 Ts = 1;  % Sample Time
 N = 3;    % Prediction horizon
-Duration = 200; % Simulation horizon
+Duration = 60; % Simulation horizon
 
-pos_radius = 100;
-ang_radius = 2 * pi;
+pos_radius = 1;
+ang_radius = 2 * pi * 0.4;
 
 global rejoin_radius;
 rejoin_radius = 500;
@@ -30,10 +30,10 @@ for m=1:1
 
 
 % Initial values for 21 state variables
-x12 = ang_radius * rand(1);
+x12 = - ang_radius * rand(1);
 x13 = ang_radius * rand(1);
-x1 = 7500 + pos_radius*rand(1);
-x2 = 7500 + pos_radius*rand(1);
+x1 = 100 + pos_radius*rand(1);
+x2 = 100 + pos_radius*rand(1);
 x0 = sqrt(x1*x1 + x2*x2);
 x4 = x1 + rejoin_radius* cos(rejoin_angle + pi + x13);
 x5 = x2 + rejoin_radius* sin(rejoin_angle + pi + x13);
