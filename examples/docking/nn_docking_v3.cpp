@@ -61,7 +61,11 @@ int main(int argc, char *argv[])
 	int x3_id = vars.declareVar("x3");	// x_vel
 	int x4_id = vars.declareVar("x4");	// y_vel
 	int x5_id = vars.declareVar("x5"); // ||v||
-	//int x6_id = vars.declareVar("x6");	// max_vel
+	int x6_id = vars.declareVar("x6");	// max_vel
+	//int x7_id = vars.declareVar("x7");	// norm_x_pos
+	//int x8_id = vars.declareVar("x8");	// norm_y_pos
+	//int x9_id = vars.declareVar("x9");	// norm_x_vel
+	//int x10_id = vars.declareVar("x10");	// norm_y_vel
  
 
 	int u1_id = vars.declareVar("u1");	// fx_mean
@@ -75,11 +79,11 @@ int main(int argc, char *argv[])
 	Expression<Real> deriv_x2("x4", vars); //   
 	Expression<Real> deriv_x3("2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.", vars); //  
 	Expression<Real> deriv_x4("-2.0 * 0.001027 * x3 + u3 / 12.", vars); //  
-	Expression<Real> deriv_x5("((2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.) * x3 + (-2.0 * 0.001027 * x3 + u2 / 12.) * x4) / x5", vars);  
-	//Expression<Real> deriv_x6("2.0 * 0.001027 * (x1 * x3 + x2 * x4) / sqrt(x1 * x1 + x2 * x2)", vars);  
+	Expression<Real> deriv_x5("((2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.) * x3 + (-2.0 * 0.001027 * x3 + u3 / 12.) * x4) / x5", vars);  
+	Expression<Real> deriv_x6("2.0 * 0.001027 * (x1 * x3 + x2 * x4) / sqrt(x1 * x1 + x2 * x2)", vars);  
 	//Expression<Real> deriv_x7("x2 / 1000.0", vars);  
-	//Expression<Real> deriv_x8("x3 / 1000.0", vars); // deriv_x7 = u3 * x7/x6 - u2 * x8
-	//Expression<Real> deriv_x9("(2.0 * 0.001027 * x3 + 3 * 0.001027 * 0.001027 * x1 + u0 / 12.) / 0.5", vars); // deriv_x8 = u3 * x8/x6 + u2 * x7
+	//Expression<Real> deriv_x8("x3 / 1000.0", vars); // deriv_x7 = u3 * x7/x6 - u3 * x8
+	//Expression<Real> deriv_x9("(2.0 * 0.001027 * x3 + 3 * 0.001027 * 0.001027 * x1 + u0 / 12.) / 0.5", vars); // deriv_x8 = u3 * x8/x6 + u3 * x7
 	//Expression<Real> deriv_x10("(-2.0 * 0.001027 * x2 + u1 / 12.) / 0.5", vars); // deriv_x9 = (2 * x10 * deriv(x10) + 2 * x11 * deriv(x11))/sqrt(x10*x10 + x11 * x11)
 	  
 	// Define the continuous dynamics according to 
@@ -95,7 +99,7 @@ int main(int argc, char *argv[])
 	ode_rhs[x3_id] = deriv_x3;
 	ode_rhs[x4_id] = deriv_x4;
 	ode_rhs[x5_id] = deriv_x5;
-	//ode_rhs[x6_id] = deriv_x6;
+	ode_rhs[x6_id] = deriv_x6;
 	//ode_rhs[x8_id] = deriv_x8;
 	//ode_rhs[x9_id] = deriv_x9;
 
@@ -120,8 +124,8 @@ int main(int argc, char *argv[])
 	setting.setTime(1);
 
 	// cutoff threshold
-	//setting.setCutoffThreshold(1e-10); //core dumped
-	setting.setCutoffThreshold(1e-7);
+	setting.setCutoffThreshold(1e-10); //core dumped
+	//setting.setCutoffThreshold(1e-7);
 
 	// queue size for the symbolic remainder
 	// Not in the newest version??
@@ -144,17 +148,17 @@ int main(int argc, char *argv[])
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	double w = stod(argv[1]); // 0.5
+	int w = stod(argv[1]); // 0.5
  
 	int steps = stoi(argv[2]);
 
 	Interval 
 		//init_x1(125 - 25, 125 + 25), 
 		//init_x2(125 - 25, 125 + 25); 
-		//init_x1(125 - 5, 125 + 5), 
-		//init_x2(125 - 5, 125 + 5); 
-		init_x1(24, 26), 
-		init_x2(24, 26); 
+		init_x1(25 - 0.1, 25 + 0.1), 
+		init_x2(25 - 0.1, 25 + 0.1); 
+		//init_x1(50 - 1, 50 + 1), 
+		//init_x2(50 - 1, 50 + 1); 
 	
 	Interval 
 		init_x6(init_x1.pow(2) + init_x2.pow(2));
@@ -162,16 +166,30 @@ int main(int argc, char *argv[])
 		init_x6.mul_assign(2.0 * 0.001027);
 		init_x6.add_assign(0.2);
 	cout << "1111" << endl;
+	
+	 
+	 
 	Interval
 		//init_x3(init_x5 * Interval(-1, 1));
-		init_x3(-init_x6.inf() * 0.5, init_x6.inf() * 0.5);
-	Interval
-		init_x4(-init_x6.inf() * 0.5, init_x6.inf() * 0.5);
+		//init_x3(init_x6 * (-0.7));
+		
+		//test 1
+		//init_x3(-init_x6.sup() * 0.6, -init_x6.sup() * 0.6);
+		//test 2
+		init_x3(init_x6.sup() * 0.5, init_x6.sup() * 0.6);
+	Interval 
+		//init_x5(init_x6 * Interval(0, 1));
+		//init_x4(init_x6 * (-0.7));
+		
+		//test 1
+		//init_x4(-init_x6.sup() * 0.6, -init_x6.sup() * 0.6);
+		//test 2
+		init_x4(init_x6.sup() * 0.5, init_x6.sup() * 0.6);
 	Interval
 		init_x5(init_x3.pow(2) + init_x4.pow(2));
 		init_x5.abs_assign();
-		init_x5.sqrt_assign();
-	  
+		init_x5.sqrt_assign();	
+	
 	Interval 
 		init_u1(0),
 		init_u2(0),
@@ -185,7 +203,7 @@ int main(int argc, char *argv[])
 	X0.push_back(init_x3);
 	X0.push_back(init_x4);
 	X0.push_back(init_x5);
-	//X0.push_back(init_x6);
+	X0.push_back(init_x6);
  
 	X0.push_back(init_u1);
 	X0.push_back(init_u2);
@@ -202,7 +220,8 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// define the neural network controller
-	string nn_name = "./docking_tanh64x64";
+	string nn_name = "./docking_tanh" + to_string(w) + "x" + to_string(w);
+	cout << nn_name << endl;
  
 	NeuralNetwork nn(nn_name);
 
@@ -215,7 +234,7 @@ int main(int argc, char *argv[])
 	// the order in use
 	// unsigned int order = 5;
 	//Interval cutoff_threshold(-1e-7, 1e-7);
-	Interval cutoff_threshold(-1e-10, 1e-10);
+	Interval cutoff_threshold(-1e-7, 1e-7);
 	unsigned int bernstein_order = stoi(argv[3]);
 	unsigned int partition_num = 4000;
 
@@ -262,33 +281,10 @@ int main(int argc, char *argv[])
 			double norm = 1.;
 			if(i <= 1) norm = 1000.0;
 			else if(i <= 3) norm = 0.5;
-			else if(i == 4) norm = 1.0;
-			/*
-			{
-				TaylorModel<Real> tm2sq;
-				tmv_temp.tms[2].mul_ctrunc(tm2sq, tmv_temp.tms[2], initial_set.domain, order, cutoff_threshold);
-				TaylorModel<Real> tm3sq;
-				tmv_temp.tms[3].mul_ctrunc(tm3sq, tmv_temp.tms[3], initial_set.domain, order, cutoff_threshold);
-				TaylorModel<Real> tm4;
-				(tm2sq + tm3sq).sqrt_taylor(tm4, initial_set.domain, order, cutoff_threshold, setting.g_setting);
-				tmv_input.tms.push_back(tm4);
-				continue;
-			} 
-			*/
-			else if(i == 5) {
-				TaylorModel<Real> tm0sq;
-				tmv_temp.tms[0].mul_ctrunc(tm0sq, tmv_temp.tms[0], initial_set.domain, order, cutoff_threshold);
-				TaylorModel<Real> tm1sq;
-				tmv_temp.tms[1].mul_ctrunc(tm1sq, tmv_temp.tms[1], initial_set.domain, order, cutoff_threshold);
-				TaylorModel<Real> tm5;
-				(tm0sq + tm1sq).sqrt_taylor(tm5, initial_set.domain, order, cutoff_threshold, setting.g_setting);
-				tm5 *= (2.0 * 0.001027);
-				tm5 += 0.2;
-				tmv_input.tms.push_back(tm5);
-				break;
-			} 
-			tmv_input.tms.push_back(tmv_temp.tms[i] / norm);
+			else norm = 1.;
+			tmv_input.tms.push_back(initial_set.tmvPre.tms[i] / norm);
 			//tmv_input.tms.push_back(tmv_temp.tms[i]);
+	 
 		}
 
 		for (TaylorModel<Real> tm: tmv_input.tms) {
@@ -330,9 +326,9 @@ int main(int argc, char *argv[])
 
 
 		initial_set.tmvPre.tms[u1_id] = tmv_output.tms[0];
-		initial_set.tmvPre.tms[u2_id] = tmv_output.tms[1];
+		initial_set.tmvPre.tms[u2_id] = tmv_output.tms[1] * 0.0;
 		initial_set.tmvPre.tms[u3_id] = tmv_output.tms[2];
-		initial_set.tmvPre.tms[u4_id] = tmv_output.tms[3];
+		initial_set.tmvPre.tms[u4_id] = tmv_output.tms[3] * 0.0;
 
 		// taylor
 		// NNTaylor nn_taylor1(nn);
@@ -363,13 +359,6 @@ int main(int argc, char *argv[])
 			
 		cout << "TM -- Propagation" << endl;
 
-
-		for (TaylorModel<Real> tm: initial_set.tmvPre.tms) {
-			Interval box;
-			tm.intEval(box, initial_set.domain);
-			cout << "Dynamics variables interval: [" << box.inf() << ", " << box.sup() << "]" << endl; 
-		}
-
 		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
@@ -383,7 +372,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			printf("Terminated due to too large overestimation.\n");
-			return 1;
+			//return 1;
 		}
 	}
 
@@ -399,8 +388,7 @@ int main(int argc, char *argv[])
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting(vars);
-	plot_setting.setOutputDims("x1", "x2");
-
+	
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if (mkres < 0 && errno != EEXIST)
 	{
@@ -410,7 +398,7 @@ int main(int argc, char *argv[])
 
 	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/rl_tanh256x256_" + to_string(steps) + "_" + to_string(if_symbo) + ".txt");
+	ofstream result_output("./outputs/" + nn_name + "_" + to_string(steps) + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
 	{
 		result_output << reach_result << endl;
@@ -418,7 +406,10 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "rl_tanh256x256_"  + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.setOutputDims("x1", "x2");
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v3_", nn_name + "_x1x2_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.setOutputDims("x5", "x6");
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v3_", nn_name + "_x5x6_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
 
  
 

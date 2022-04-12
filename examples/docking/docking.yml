@@ -1,0 +1,25 @@
+time: 0.5
+max jumps: 150
+gnuplot: 'octagon _f5, _f6'
+adaptive steps: '{min 1e-6, max 0.01}'
+precision: '100'
+
+init: 
+  mode: _cont_docking
+  states:
+    - x1 in [24, 26]
+    - x2 in [24, 26]
+    - x3 in [0.16223766945751364, 0.16223766945751364]
+    - x4 in [0.16223766945751364, 0.16223766945751364]
+    - x5 in [0.22943871247461906, 0.22943871247461906]
+    - x6 in [0.2697150717707441, 0.27552466108497276]
+
+unsafe:
+  - mode: unsafe1
+    states:
+    - x6 - x5 <= 0.0 
+
+print: 'on'
+plot: true
+dump: true
+

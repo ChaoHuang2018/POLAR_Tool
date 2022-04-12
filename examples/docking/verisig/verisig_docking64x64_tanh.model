@@ -1,0 +1,316 @@
+hybrid reachability
+{
+	 state var _f1, _f2, _f3, _f4, _f5, _f6, x0, x1, x2, x3, x4, x5, u0, u1, u2, worldtime, clock
+
+	setting
+	{
+		adaptive steps {min 1e-6, max 0.005}
+		time 5
+		remainder estimation 1e-1
+		identity precondition 
+		matlab octagon x0, x1
+		fixed orders 4
+		cutoff 1e-7
+		precision 100
+		output attitude_control_sig_tmp
+		max jumps 181
+		print on
+	}
+
+	modes
+	{
+		m0
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x0' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				x4' = 0
+				x5' = 0
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		DNNm1
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x0' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				x4' = 0
+				x5' = 0
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		_cont_sys
+		{
+			nonpoly ode
+			{
+				worldtime' = 1.0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x0' = u0/4 + x1*x2/4
+				x1' = u1/2 - 3*x0*x2/2
+				_f2' = 0
+				x2' = u2 + 2*x0*x1
+				_f1' = 0
+				x3' = x1*(x3^2/2 + x4^2/2 + x5^2/2 - x5/2) + x2*(x3^2/2 + x4^2/2 + x4/2 + x5^2/2) + x0*(x3^2/2 + x4^2/2 + x5^2/2 + 1/2)
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				x4' = x0*(x3^2/2 + x4^2/2 + x5^2/2 + x5/2) + x2*(x3^2/2 - x3/2 + x4^2/2 + x5^2/2) + x1*(x3^2/2 + x4^2/2 + x5^2/2 + 1/2)
+				x5' = x0*(x3^2/2 + x4^2/2 - x4/2 + x5^2/2) + x1*(x3^2/2 + x3/2 + x4^2/2 + x5^2/2) + x2*(x3^2/2 + x4^2/2 + x5^2/2 + 1/2)
+			}
+			inv
+			{
+				clock <= 0.2
+			}
+		}
+		unsafe1
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x0' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				x4' = 0
+				x5' = 0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		startmode
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x0' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				x4' = 0
+				x5' = 0
+			}
+			inv
+			{
+				clock <= 0.0
+			}
+		}
+		unsafe2
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x0' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				x4' = 0
+				x5' = 0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		unsafe3
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x0' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				x4' = 0
+				x5' = 0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		unsafe4
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x0' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				x4' = 0
+				x5' = 0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+	}
+	jumps
+	{
+		m0 -> DNNm1
+		guard { }
+		reset { clock' := 0 }
+		interval aggregation
+		_cont_sys -> unsafe1
+		guard { worldtime = 3.0 x0 >= 0.07 }
+		reset { clock' := 0.0 }
+		interval aggregation
+		_cont_sys -> unsafe2
+		guard { worldtime = 3.0 x0 <= 0.05 }
+		reset { clock' := 0.0 }
+		interval aggregation
+		_cont_sys -> unsafe3
+		guard { worldtime = 3.0 x1 >= -0.15 }
+		reset { clock' := 0.0 }
+		interval aggregation
+		_cont_sys -> unsafe4
+		guard { worldtime = 3.0 x1 <= -0.17 }
+		reset { clock' := 0.0 }
+		interval aggregation
+		DNNm1 -> _cont_sys
+		guard { }
+		reset { u0' := _f1 u1' := _f2 u2' := _f3 clock' := 0.0 }
+		interval aggregation
+		_cont_sys -> m0
+		guard { clock = 0.2 }
+		reset { _f2' := x1 _f1' := x0 clock' := 0.0 _f4' := x3 _f3' := x2 _f5' := x4 _f6' := x5 }
+		interval aggregation
+		startmode -> m0
+		guard { clock = 0.0 }
+		reset { _f2' := x1 _f1' := x0 clock' := 0.0 _f4' := x3 _f3' := x2 _f5' := x4 _f6' := x5 }
+		interval aggregation
+	}
+	init
+	{
+		startmode
+		{
+			x0 in [-0.26, -0.24]
+			x1 in [-0.26, -0.24]
+			x2 in [0.34, 0.36]
+			x3 in [-0.36, -0.34]
+			x4 in [0.44, 0.46]
+			x5 in [-0.36, -0.34]
+			_f1 in [0, 0]
+			_f2 in [0, 0]
+			_f3 in [0, 0]
+			_f4 in [0, 0]
+			_f5 in [0, 0]
+			_f6 in [0, 0]
+			u0 in [0, 0]
+			u1 in [0, 0]
+			u2 in [0, 0]
+			worldtime in [0, 0]
+			clock in [0, 0]
+		}
+	}
+}
+unsafe
+{
+	unsafe1
+	{
+		x0 >= 0.2
+	}
+	unsafe2
+	{
+		x0 <= -0.4
+	}
+	unsafe3
+	{
+		x1 >= -0.6
+	}
+	unsafe4
+	{
+		x1 <= -0.91
+	}
+}

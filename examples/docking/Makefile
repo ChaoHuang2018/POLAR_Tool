@@ -12,7 +12,14 @@ nn_docking_v1: nn_docking_v1.o
 
 nn_docking_v2: nn_docking_v2.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
- 
+
+nn_docking_v3: nn_docking_v3.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS) 
+
+
+flowstar_1step_v1: flowstar_1step_v1.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
 
 
 %.o: %.cc
@@ -24,5 +31,4 @@ nn_docking_v2: nn_docking_v2.o
 
 
 clean:
-	rm -f *.o nn_docking  
-
+	rm -f *.o nn_docking_v2  

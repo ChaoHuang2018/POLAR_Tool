@@ -1,5 +1,5 @@
 %nn_rl;
-Ts = 0.1;  % Sample Time
+Ts = 1;  % Sample Time
 N = 3;    % Prediction horizon
 Duration = 120; % Simulation horizon
 
@@ -21,13 +21,13 @@ fileID = fopen('nn_rl_simulation.txt','w');
 
 
 
-for m=1:1
+for m=1:5
 x0 = 25 + 2 * rand(1) - 1; %125; % + pos_radius*rand(1);
 x1 = 25 + 2 * rand(1) - 1; %125; % + pos_radius*rand(1);
 %x2 = (0.2 + 2.0 * 0.001027 * sqrt(x0 * x0 + x1 * x1)) * (-0.5); % * rand(1) * cosd(ang_radius * rand(1));
 %x3 = (0.2 + 2.0 * 0.001027 * sqrt(x0 * x0 + x1 * x1)) * (-0.5); % * rand(1) * sind(ang_radius * rand(1));
-x2 = 0.2 + (2.0 * 0.001027 * sqrt(26 * 26 + 26 * 26)) * (0.5); % * rand(1) * cosd(ang_radius * rand(1));
-x3 = 0.2 + (2.0 * 0.001027 * sqrt(26 * 26 + 26 * 26)) * (0.5); % * rand(1) * sind(ang_radius * rand(1));
+x2 = (0.2 + (2.0 * 0.001027 * sqrt(26 * 26 + 26 * 26))) * (0.6); % * rand(1) * cosd(ang_radius * rand(1));
+x3 = (0.2 + (2.0 * 0.001027 * sqrt(26 * 26 + 26 * 26))) * (0.6); % * rand(1) * sind(ang_radius * rand(1));
 x4 = sqrt(x2 * x2 + x3 * x3);
 x5 = (0.2 + 2.0 * 0.001027 * sqrt(x0 * x0 + x1 * x1));
 %x5 = (0.2 + 2.0 * 0.001027 * sqrt(26 * 26 + 26 * 26));

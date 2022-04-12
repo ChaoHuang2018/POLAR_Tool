@@ -155,8 +155,8 @@ int main(int argc, char *argv[])
 	Interval 
 		//init_x1(125 - 25, 125 + 25), 
 		//init_x2(125 - 25, 125 + 25); 
-		init_x1(50 - 1, 50 + 1), 
-		init_x2(50 - 1, 50 + 1); 
+		init_x1(25 - 0.1, 25 + 0.1), 
+		init_x2(25 - 0.1, 25 + 0.1); 
 		//init_x1(50 - 1, 50 + 1), 
 		//init_x2(50 - 1, 50 + 1); 
 	
@@ -172,11 +172,11 @@ int main(int argc, char *argv[])
 	Interval
 		//init_x3(init_x5 * Interval(-1, 1));
 		//init_x3(init_x6 * (-0.7));
-		init_x3(-init_x6.sup() * 0.5, -init_x6.sup() * 0.5);
+		init_x3(-init_x6.sup() * -0.6, -init_x6.sup() * -0.5);
 	Interval 
 		//init_x5(init_x6 * Interval(0, 1));
 		//init_x4(init_x6 * (-0.7));
-		init_x4(-init_x6.sup() * 0.5, -init_x6.sup() * 0.5);
+		init_x4(-init_x6.sup() * -0.6, -init_x6.sup() * -0.5);
 
 	Interval
 		init_x5(init_x3.pow(2) + init_x4.pow(2));
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			printf("Terminated due to too large overestimation.\n");
-			return 1;
+			//return 1;
 		}
 	}
 
@@ -400,9 +400,9 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
 	plot_setting.setOutputDims("x1", "x2");
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", nn_name + "_x1x2_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v1_", nn_name + "_x1x2_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
 	plot_setting.setOutputDims("x5", "x6");
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/", nn_name + "_x5x6_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v1_", nn_name + "_x5x6_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
 
  
 
