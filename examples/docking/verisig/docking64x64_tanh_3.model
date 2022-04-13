@@ -12,7 +12,7 @@ hybrid reachability
 		fixed orders 6
 		cutoff 1e-10
 		precision 100
-		output docking_64x64tanh_3_verisig2_x5x6_6steps
+		output docking_64x64tanh_3_verisig2_x5x6_120steps
 		max jumps 500
 		print on
 	}
