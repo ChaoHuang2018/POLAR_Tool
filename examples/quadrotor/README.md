@@ -4,6 +4,10 @@ This is the Quadrotor example that also used in [Verisig](https://https://github
 ## Experiment results:
 We verify the quadrotor controller for 30 control steps.
 
+### Simulation result
+We compare our result with several simulated trajectories
+![Simulation and Pola flowpipes](simulation.png)
+
 ### Baseline
 We compare our results with the Verisig result. Verisig verification takes 1385 seconds.
 ![Verisig x-y flowpipes](outputs/autosig.png)
