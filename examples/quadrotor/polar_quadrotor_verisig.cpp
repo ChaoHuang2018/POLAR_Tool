@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
 
 	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/quadrotor_polar/quadrotor_stepsize_" + to_string(stepsize).substr(0,4) + "_" + to_string(if_symbo) + ".txt");
+	ofstream result_output("./outputs/quadrotor_polar/quadrotor_stepsize_" + to_string(stepsize).substr(2,2) + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
 	{
 		result_output << reach_result << endl;
@@ -403,10 +403,10 @@ int main(int argc, char *argv[])
 	// plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo), result);
 
     plot_setting.setOutputDims("x1", "x2");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/quadrotor_xy_stepsize_" + to_string(stepsize).substr(0,4) + "_" + to_string(if_symbo), result);
+    plot_setting.plot_2D_octagon_MATLAB(c, "/quadrotor_xy_stepsize_" + to_string(stepsize).substr(2,2) + "_" + to_string(if_symbo), result);
 
 	plot_setting.setOutputDims("x2", "x3");
-	plot_setting.plot_2D_octagon_MATLAB(c, "/quadrotor_yz_stepsize_" + to_string(stepsize).substr(0,4) + "_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_MATLAB(c, "/quadrotor_yz_stepsize_" + to_string(stepsize).substr(2,2) + "_" + to_string(if_symbo), result);
 
 	return 0;
 }

@@ -42,6 +42,7 @@ x5 = 0;
 x6 = 0;
 
 x = [x1;x2;x3;x4;x5;x6];
+pre_process = [0.2;0.2;0.2;0.1;0.1;0.1];
 
 simulation_result = x;
 
@@ -55,8 +56,8 @@ x_now = x;
 
 % Start simulation
 for step = 1:steps
-    
-      u2 = NN_output(x_now,'tanh20x20');
+      
+      u2 = NN_output(x_now .* pre_process,'tanh20x20');
      %disp(u2);
       
       x_next = system_eq_dis(x_now, Ts, u2, step);
@@ -67,7 +68,7 @@ end
 
 
 % figure;
-plot(simulation_result(1,:),simulation_result(2,:), 'color', [210/255, 95/255, 95/255]);
+plot(simulation_result(2,:),simulation_result(3,:), 'color', [210/255, 95/255, 95/255]);
 
 title('Quadrotor', 'FontSize', 14)
 xlabel('${x}$','interpreter','latex', 'FontWeight','bold')
