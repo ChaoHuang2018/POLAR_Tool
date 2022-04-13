@@ -26,14 +26,14 @@ from auto_LiRPA.perturbations import PerturbationLpNorm
 from bab_verification_general import mip, incomplete_verifier, bab
 
 from model_defs import AttitudeController, POLARController
-
+ 
 import traceback
 
 
 def config_args():
     # Add arguments specific for this front-end.
     h = ["general"]
-    arguments.Config.add_argument("--network", type=str, help='Path the network model, e.g., models/POLAR/ACC/acc_tanh20x20x20_ for ACC.', hierarchy=h + ["network"])
+    arguments.Config.add_argument("--network", type=str, help='Path the network model, e.g., models/POLAR/ACC/acc_tanh20x20x20_ for ACC', hierarchy=h + ["network"])
     arguments.Config.add_argument("--mode", type=str, default="verified-acc", choices=["verified-acc", "runnerup", "clean-acc", "specify-target"],
             help='Verify against all labels ("verified-acc" mode), or just the runnerup labels ("runnerup" mode), or using a specified label in dataset ("speicify-target" mode, only used for oval20).', hierarchy=h + ["mode"])
     arguments.Config.add_argument('--complete_verifier', choices=["bab", "mip", "bab-refine", "skip"], default="bab",
@@ -43,18 +43,21 @@ def config_args():
     arguments.Config.add_argument('--no_complete', action='store_false', dest='complete',
             help='Enable/Disable initial alpha-CROWN incomplete verification (this can save GPU memory when disabled).', hierarchy=h + ["enable_complete_verification"])
     arguments.Config.add_argument("--crown", action='store_true', help='Compute CROWN verified accuracy before verification (not used).', hierarchy=h + ["get_crown_verified_acc"])
-
+    
     h = ["flowstar"]
-    arguments.Config.add_argument("--flowstar", type=str, help='Flowstar exe file name.', default = 'flowstar_1step', hierarchy=h + ["flowstar"])
-    arguments.Config.add_argument("--order", type=int, default = 6, help='Flowstar order.', hierarchy=h + ["order"])
-
+    arguments.Config.add_argument("--flowstar", type=str, help='flowstar exe file name', default = 'flowstar_1step', hierarchy=h + ["flowstar"])
+    arguments.Config.add_argument("--order", type=int, default = 6, help='flowstar order', hierarchy=h + ["order"])
+    
 
     h = ["model"]
     arguments.Config.add_argument("--name", type=str, default="please_specify_model_name", help='Name of model. Model must be defined in the load_verification_dataset() function in utils.py.', hierarchy=h + ["name"])
     #arguments.Config.add_argument("--path", type=str, default="please_specify_model_path", help='Path of model.', hierarchy=h + ["model_path"])
-    arguments.Config.add_argument("--input_ids", nargs='+', type=float, default=[], help='NN input dims among the state variables.', hierarchy=h + ["input_ids"])
-    arguments.Config.add_argument("--plt_ids", nargs='+', type=float, default=[], help='The state variable ids to be plotted by flowstar.', hierarchy=h + ["plt_ids"])
-    arguments.Config.add_argument("--plt_name", type=str, default=None, help='Name of plt file name.', hierarchy=h + ["plt_name"])
+    arguments.Config.add_argument("--input_ids", nargs='+', type=float, default=[], help='NN input dims among the state variables', hierarchy=h + ["input_ids"])
+    arguments.Config.add_argument("--plt_ids", nargs='+', type=float, default=[], help='The state variable ids to be plotted by flowstar', hierarchy=h + ["plt_ids"])
+    arguments.Config.add_argument("--plt_name", type=str, default=None, help='Name of plt file name. ', hierarchy=h + ["plt_name"])
+    arguments.Config.add_argument("--normalization", nargs='+', type=float, default=[], help='normalize nn input vector.', hierarchy=h + ["normalization"])
+    
+
 
     h = ["init"]
     arguments.Config.add_argument("--min", nargs='+', type=float, default=[], help='Min initial input vector.', hierarchy=h + ["min"])
@@ -67,18 +70,18 @@ def config_args():
 
 
 def flowstar(exp_name, flowstar_name, plt_name, step, ux_min, ux_max):
-
+    
     u_min = ux_min['u']
     u_max = ux_max['u']
     x_min = ux_min['x']
     x_max = ux_max['x']
-
+ 
     assert len(x_min) == len(x_max) and len(u_min) == len(u_max)
     print("******CTRL BOUND*********", u_min, u_max)
     explode = False
     command = ['6', plt_name, str(step)]
     for j in range(len(x_min)):
-        command += [str(i) for i in [x_min[j], x_max[j]]]
+        command += [str(i) for i in [x_min[j], x_max[j]]] 
     for j in range(len(u_min)):
         command += [str(i) for i in [u_min[j], u_max[j]]]
     command = "::".join(command) + "::"
@@ -97,7 +100,7 @@ def flowstar(exp_name, flowstar_name, plt_name, step, ux_min, ux_max):
         print("Flowstar Error at step", step)
         return True, None, None
 
-
+    
 
 def main():
     print(f'Experiments at {time.ctime()} on {socket.gethostname()}')
@@ -129,7 +132,7 @@ def main():
         plt_name = exp_name
     network_path = os.path.join(os.path.dirname(__file__), arguments.Config['model']['path'])
     #model_ori = POLARController(network_path).to(arguments.Config["general"]["device"])
-
+    
     model_ori_pos = AttitudeController(network_path, 1).to(arguments.Config["general"]["device"])
     model_ori_neg = AttitudeController(network_path, -1).to(arguments.Config["general"]["device"])
     input_ids = arguments.Config['model']['input_ids']
@@ -143,45 +146,52 @@ def main():
     for plt_idx in plt_ids:
         assert len(plt_idx) == 2
         print("To be plotted: {}".format(plt_idx))
-
+    
     # Run step by step
     ux_min = {'x': [i for i in data_min], 'u': [None for _ in range(arguments.Config["data"]["num_classes"])]}
     ux_max = {'x': [i for i in data_max], 'u': [None for _ in range(arguments.Config["data"]["num_classes"])]}
 
     Xs = np.zeros((len(list(step_ids))+1, len(plt_ids), 4))
     Xs[0] = np.asarray([[data_min[plt_idx[0]], data_max[plt_idx[0]], data_min[plt_idx[1]], data_max[plt_idx[1]]] for plt_idx in plt_ids])
-
+    
     plt_path = os.path.join("./outputs", "_".join([plt_name, "crown_flowstar"]), "_".join([plt_name, f"{len(step_ids)}steps.m"]))
     print(plt_path)
     os.system(f"rm {plt_path}")
     os.system(f"touch {plt_path}")
+    start_time = time.time()
+    norms = arguments.Config['model']['normalization']
+    
     for step in step_ids:
         if len(input_ids) > 0:
-            input_min = [data_min[i] for i in input_ids]
-            input_max = [data_max[i] for i in input_ids]
+            if len(norms) == 0:
+                norms = np.ones([len(input_ids)]).tolist()
+            input_min = [data_min[i] / norms[i] for i in input_ids]
+            input_max = [data_max[i] / norms[i] for i in input_ids]
         else:
-            input_min = data_min
-            input_max = data_max
+            if len(norms) == 0:
+                norms = np.ones([len(input_ids)]).tolist()
+            input_min = [data_min[i] / norms[i] for i in range(len(data_min))]
+            input_max = [data_max[i] / norms[i] for i in range(len(data_max))]
         print(input_min, input_max)
-
+        
         if arguments.Config["general"]["enable_complete_verification"]:
             u_min = crown_verify(step, model_ori_pos, input_min, input_max)
             u_max = crown_verify(step, model_ori_neg, input_min, input_max)
         else:
             u_min = ctrl_input_bound(model_ori_pos, input_min, input_max, alpha_only=True)
             u_max = ctrl_input_bound(model_ori_neg, input_min, input_max, alpha_only=True)
-
-
+        
+       
         print(">>>>>>>>>>>>>>>>>>> Step {}: control output lower bound {} upper bound {}".format(step, u_min, u_max))
 
         ux_min['u'] = u_min
         ux_max['u'] = u_max
         ux_min['x'] = data_min[:]
         ux_max['x'] = data_max[:]
-
+         
         explode, data_min, data_max = flowstar(exp_name, flowstar_name, plt_name, step, ux_min, ux_max)
 
-
+        
         if explode:
             Xs = Xs[:step + 1, :, :]
             break
@@ -194,8 +204,13 @@ def main():
                     f_i.close()
                 f_o.close()
             Xs[step+1] = np.asarray([[data_min[plt_idx[0]], data_max[plt_idx[0]], data_min[plt_idx[1]], data_max[plt_idx[1]]] for plt_idx in plt_ids])
-
-
+            
+    end_time = time.time()
+    with open(os.path.join(exp_name, f"outputs/{plt_name}.txt"), 'w') as f:
+        f.write(f"Experiment name: {exp_name}\n")
+        f.write(f"Complete: {Xs.shape[0]}/{len(list(step_ids))}\n")
+        f.write(f"Total time: {end_time - start_time}\n")
+        f.close()
 
     for idx in range(len(plt_ids)):
         fig, ax = plt.subplots()
@@ -248,7 +263,7 @@ def ctrl_input_bound(model_ori, input_lb, input_ub, alpha_only=True):
     if alpha_only:
         return model_ori.unsign_offset_scale(lower_bounds[-1][0].cpu().numpy())
 
-
+    
 
 
 def crown_verify(step, model_ori, data_min, data_max):
@@ -272,7 +287,7 @@ def crown_verify(step, model_ori, data_min, data_max):
     data = (data_ub + data_lb)/2.
     x = data.unsqueeze(0).to(dtype=torch.get_default_dtype(), device=arguments.Config["general"]["device"])
     perturb_eps = (data_ub - data).unsqueeze(0).to(dtype=torch.get_default_dtype(), device=arguments.Config["general"]["device"])
-
+    
     #model_ori.scale(\
     #    w = (x_med - x_lb).flatten().cpu().numpy().tolist(), \
     #        b = x_med.flatten().cpu().numpy().tolist(), \
@@ -286,8 +301,8 @@ def crown_verify(step, model_ori, data_min, data_max):
     with torch.no_grad():
         u = model_ori(x)
         print("Median input {} ==> output {}".format(x, u))
-
-
+    
+    
     y = None
 
     if arguments.Config["general"]["enable_incomplete_verification"] or arguments.Config["general"]["complete_verifier"] == "bab-refine":
@@ -311,7 +326,7 @@ def crown_verify(step, model_ori, data_min, data_max):
         arguments.Config["bab"]["timeout"] -= (time.time()-start_incomplete)
         ret.append([step, -1, 0, time.time()-start_incomplete, -1, np.inf, np.inf])
         #return lower_bounds[0].flatten().detach().cpu().numpy().tolist(), upper_bounds[0].flatten().detach().cpu().numpy().tolist()
-
+ 
         if arguments.Config["general"]["mode"] == "verified-acc":
             if arguments.Config["general"]["enable_incomplete_verification"] and init_global_lb is not None:
                 # We have initial incomplete bounds.
@@ -442,13 +457,13 @@ def crown_verify(step, model_ori, data_min, data_max):
         print(f'Result: Step {step} verification success (with branch and bound)!')
     # Make sure ALL tensors used in this loop are deleted here.
     del init_global_lb, saved_bounds, saved_slopes
-
+     
     return model_ori.unsign_offset_scale(np.asarray(u_lb))
-
+    
     return u_lb, u_ub
 
 
 if __name__ == "__main__":
     config_args()
-    main()
+    main()       
 
