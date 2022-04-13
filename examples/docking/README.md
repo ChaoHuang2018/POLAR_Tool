@@ -6,7 +6,7 @@
 
 ## Alpha-beta crown + Flowstar
     
-    *   Run `make flowstar_1step_v1`; go to ./POLAR_Tool/examples`; run `python abcrown_flowstar_verifier.py --config ./docking/docking_v4.yaml`
+    *   Run `make flowstar_1step_v1`; go to parent dictory POLAR_Tool/examples`; run `python abcrown_flowstar_verifier.py --config ./docking/docking_v4.yaml`
     
     *   The results, including the `.m` and `.txt` files will be in `POLAR_Tool/examples/outputs/abcrown_flowstar_docking_tanh64x64_v4_crown_flowstar/`.
     
