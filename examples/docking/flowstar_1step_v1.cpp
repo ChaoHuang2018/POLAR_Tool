@@ -65,7 +65,7 @@ int main(int argc, char *argvs[])
 	Expression<Real> deriv_x2("x4", vars); //   
 	Expression<Real> deriv_x3("2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.", vars); //  
 	Expression<Real> deriv_x4("-2.0 * 0.001027 * x3 + u3 / 12.", vars); //  
-	Expression<Real> deriv_x5("((2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.) * x3 + (-2.0 * 0.001027 * x3 + u2 / 12.) * x4) / x5", vars);  
+	Expression<Real> deriv_x5("((2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.) * x3 + (-2.0 * 0.001027 * x3 + u3 / 12.) * x4) / x5", vars);  
 	Expression<Real> deriv_x6("2.0 * 0.001027 * (x1 * x3 + x2 * x4) / sqrt(x1 * x1 + x2 * x2)", vars);  
 	//Expression<Real> deriv_x7("x2 / 1000.0", vars);  
 	//Expression<Real> deriv_x8("x3 / 1000.0", vars); // deriv_x7 = u3 * x7/x6 - u2 * x8
@@ -141,6 +141,11 @@ int main(int argc, char *argvs[])
 		init_x4(stod(argv[10]), stod(argv[11])), 
 		init_x5(stod(argv[12]), stod(argv[13])),
 		init_x6(stod(argv[14]), stod(argv[15])),
+		//init_u1(-0.5, -0.5),
+		//init_u2(0.0, 0.0),
+		//init_u3(0.0, 0.0),
+		//init_u4(0.0, 0.0); // w=0.05
+	
 		init_u1(stod(argv[16]), stod(argv[17])),
 		init_u2(stod(argv[18]), stod(argv[19])),
 		init_u3(stod(argv[20]), stod(argv[21])),
@@ -167,8 +172,8 @@ int main(int argc, char *argvs[])
 
 	// no unsafe set
 	vector<Constraint> unsafeSet;
-	Constraint c1("x5 - x6", vars);		// x0 <= 0.2
- 	unsafeSet.push_back(c1);
+	//Constraint c1("x5 - x6", vars);		// x0 <= 0.2
+ 	//unsafeSet.push_back(c1);
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -224,7 +229,7 @@ int main(int argc, char *argvs[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-    plot_setting.setOutputDims("x4", "x5");
+    plot_setting.setOutputDims("x5", "x6");
     plot_setting.plot_2D_octagon_MATLAB(c, "/step" + to_string(stoi(argv[3])), result);
 
 	
