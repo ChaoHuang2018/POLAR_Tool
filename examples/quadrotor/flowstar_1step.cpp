@@ -237,7 +237,10 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x1", "x2");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/step_" + to_string(iter) + "_" + to_string(flowpipe_id), result);
+    plot_setting.plot_2D_octagon_MATLAB(c, "/xy_step_" + to_string(iter) + "_" + to_string(flowpipe_id), result);
+
+    plot_setting.setOutputDims("x2", "x3");
+    plot_setting.plot_2D_octagon_MATLAB(c, "/yz_step_" + to_string(iter) + "_" + to_string(flowpipe_id), result);
 
 
 

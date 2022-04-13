@@ -35,15 +35,23 @@ def load_yml_model(network = 'tanh20x20'):
 
 
 
-def simulate_one_step(x, ctrl_model, ctrl_func, ctrl_step):
+def simulate_one_step(x, ctrl_model, ctrl_func, ctrl_step, iter):
+    target_v = [-0.25, 0.25]
+    if iter  >= 10:
+        target_v = [-0.25, -0.25]
+    if iter >= 20:
+        target_v = [0.0, 0.25]
+    if iter >= 25:
+        target_v = [0.25, -0.25]
+
     simulate_step = 5e-5
     u = ctrl_func(x, ctrl_model)
     steps = int(ctrl_step/simulate_step)
     xs = np.zeros((10, len(x)))
     for i in range(steps):
         x_next = np.zeros_like(x)
-        x_next[0] = x[0] + (x[3] - 0.25)*simulate_step
-        x_next[1] = x[1] + (x[4] + 0.25)*simulate_step
+        x_next[0] = x[0] + (x[3] + target_v[0])*simulate_step
+        x_next[1] = x[1] + (x[4] + target_v[1])*simulate_step
         x_next[2] = x[2] + (x[5])*simulate_step
         x_next[3] = x[3] + (9.81*math.sin(u[0])/math.cos(u[0]))*simulate_step
         x_next[4] = x[4] + (-9.81*math.sin(u[1])/math.cos(u[1]))*simulate_step
@@ -134,7 +142,7 @@ def simulate_one_trajectory(x0, model, ctrl_func, n_steps = 6, ctrl_step = 2e-1)
     # u_min = u_max = ctrl_func(x, model)
     X = np.zeros((n_steps*10, 6))
     for i in range(n_steps):
-        xs, u = simulate_one_step(x, model, ctrl_func, ctrl_step)
+        xs, u = simulate_one_step(x, model, ctrl_func, ctrl_step, i)
         x = xs[-1]
         X[i*10:(i+1)*10] = xs
     # print("x_min =", x_min, "\nx_max =", x_max)

@@ -154,6 +154,8 @@ def main(steps = 5, flowstar_stepsize = 0.05):
     flowpipes_this_step = [(xs_min, xs_max)]
     out_of_bound = False
 
+    t0 = time.time()
+
     for step in range(steps):
         flowpipes_next_step = []
         in_step_id = 0
@@ -200,20 +202,28 @@ def main(steps = 5, flowstar_stepsize = 0.05):
                 in_step_id += 1
         flowpipes_this_step = flowpipes_next_step
         if out_of_bound:
+            print("CROWN-FLOWSTAR terminated at step", step)
             break
 
+    runtime = int(time.time() - t0 + 1)     # Ceiling to an int
+    print(f"Total time = {runtime} seconds.")
 
-    fig, ax = plt.subplots()
-    for xs_min, xs_max in zip(Xs_min, Xs_max):
-        x0_min, x0_max, x1_min, x1_max = xs_min[0], xs_max[0], xs_min[1], xs_max[1]
-        ax.plot([x0_min]*2, [x1_min, x1_max], 'b')
-        ax.plot([x0_max]*2, [x1_min, x1_max], 'b')
-        ax.plot([x0_min, x0_max], [x1_min]*2, 'b')
-        ax.plot([x0_min, x0_max], [x1_max]*2, 'b')
+    with open('./outputs/quadrotor_crown_flowstar/quadrotor_crown_result.txt', 'w') as f:
+        res = "No" if out_of_bound else "Yes"
+        f.write(f"Verification result: {res} ({step})\n")
+        f.write(f"Running time: {runtime} seconds\n")
 
-    # ax.set_xlim([-0.35, 0.35])
-    # ax.set_ylim([-0.35, 0.35])
-    plt.show()
+    # fig, ax = plt.subplots()
+    # for xs_min, xs_max in zip(Xs_min, Xs_max):
+    #     x0_min, x0_max, x1_min, x1_max = xs_min[0], xs_max[0], xs_min[1], xs_max[1]
+    #     ax.plot([x0_min]*2, [x1_min, x1_max], 'b')
+    #     ax.plot([x0_max]*2, [x1_min, x1_max], 'b')
+    #     ax.plot([x0_min, x0_max], [x1_min]*2, 'b')
+    #     ax.plot([x0_min, x0_max], [x1_max]*2, 'b')
+
+    # # ax.set_xlim([-0.35, 0.35])
+    # # ax.set_ylim([-0.35, 0.35])
+    # plt.show()
 
 
 

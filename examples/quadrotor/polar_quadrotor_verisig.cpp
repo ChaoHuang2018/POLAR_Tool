@@ -379,7 +379,10 @@ int main(int argc, char *argv[])
 
 	Plot_Setting plot_setting(vars);
 
-	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+	const string dir_name = "./outputs/quadrotor_polar";
+    char* c = const_cast<char*>(dir_name.c_str());
+
+	int mkres = mkdir(c, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if (mkres < 0 && errno != EEXIST)
 	{
 		printf("Can not create the directory for images.\n");
@@ -388,7 +391,7 @@ int main(int argc, char *argv[])
 
 	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4) + ".txt");
+	ofstream result_output("./outputs/quadrotor_polar/quadrotor_stepsize_" + to_string(stepsize).substr(2,2) + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
 	{
 		result_output << reach_result << endl;
@@ -399,17 +402,11 @@ int main(int argc, char *argv[])
 	// plot_setting.setOutputDims("x1", "x2");
 	// plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_" + to_string(if_symbo), result);
 
-    plot_setting.setOutputDims("x1", "x4");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_x_vx_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+    plot_setting.setOutputDims("x1", "x2");
+    plot_setting.plot_2D_octagon_MATLAB(c, "/quadrotor_xy_stepsize_" + to_string(stepsize).substr(2,2) + "_" + to_string(if_symbo), result);
 
-	plot_setting.setOutputDims("x2", "x5");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_y_vy_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
-
-	plot_setting.setOutputDims("x3", "x6");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_z_vz_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
-
-	plot_setting.setOutputDims("x1", "x2");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "polar_quadrotor_verisig_" + to_string(steps) + "_steps_x_y_" + to_string(if_symbo) + "_" + to_string(stepsize).substr(0,4), result);
+	plot_setting.setOutputDims("x2", "x3");
+	plot_setting.plot_2D_octagon_MATLAB(c, "/quadrotor_yz_stepsize_" + to_string(stepsize).substr(2,2) + "_" + to_string(if_symbo), result);
 
 	return 0;
 }
