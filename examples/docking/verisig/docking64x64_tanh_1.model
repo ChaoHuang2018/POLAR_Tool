@@ -5,15 +5,15 @@ hybrid reachability
 	setting
 	{
 		adaptive steps {min 1e-4, max 0.005}
-		time 120
+		time 7
 		remainder estimation 1e-1
 		identity precondition 
 		matlab octagon x5, x6
 		fixed orders 4
-		cutoff 1e-7
+		cutoff 1e-10
 		precision 100
-		output docking_64x64tanh_1_verisig2_x5x6_120steps
-		max jumps 500
+		output docking_64x64tanh_1_verisig2_x5x6_6steps
+		max jumps 20
 		print on
 	}
 
@@ -141,7 +141,7 @@ hybrid reachability
 		interval aggregation
 		DNNm1 -> _cont_docking
 		guard { }
-		reset { clock' := 0.0}
+		reset {  u1' := _f1 u2' := _f2 u3' := _f3 u4' := _f4 clock' := 0.0}
 		interval aggregation
 		_cont_docking -> m0
 		guard { clock = 1.0 }
@@ -156,12 +156,13 @@ hybrid reachability
 	{
 		startmode
 		{
-			x1 in [24.9, 25.1]
-			x2 in [24.9, 25.1]
-			x3 in [-0.16531479665098364, -0.13776233054248638]
-			x4 in [-0.16531479665098364, -0.13776233054248638]
-			x5 in [0.1948253562373095, 0.23379042748477138]
-			x6 in [0.272329386962147, 0.2729103458935699]
+	 
+			x1 in [24, 26]
+			x2 in [24, 26]
+			x3 in [-0.13776233054248638, -0.13776233054248638]
+			x4 in [-0.13776233054248638, -0.13776233054248638]
+			x5 in [0.1948253562373095, 0.1948253562373095]
+			x6 in [0.2697150717707441, 0.27552466108497276]
 			_f1 in [0, 0]
 			_f2 in [0, 0]
 			_f3 in [0, 0]
