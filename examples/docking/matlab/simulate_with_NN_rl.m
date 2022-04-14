@@ -60,8 +60,8 @@ for ct = 1:(Duration/Ts)
 
     u = NN_output_rl(x_input,0,1,'docking_tanh64x64_mat');
     u_tmp = zeros(2,1);
-    u_tmp(1) = u(1);
-    u_tmp(2) = u(3);
+    u_tmp(1) = tanh(u(1));
+    u_tmp(2) = tanh(u(3));
      
     %u = zeros(4, 1);
     disp(u_tmp);
