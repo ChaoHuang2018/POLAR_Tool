@@ -1,3 +1,3 @@
 Experiment name: acc
-Complete: 1/50
-Total time: 13.861932754516602
+Complete: 51/50
+Total time: 705.1059436798096

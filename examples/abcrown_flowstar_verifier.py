@@ -206,10 +206,14 @@ def main():
             Xs[step+1] = np.asarray([[data_min[plt_idx[0]], data_max[plt_idx[0]], data_min[plt_idx[1]], data_max[plt_idx[1]]] for plt_idx in plt_ids])
             
     end_time = time.time()
-    with open(os.path.join(exp_name, f"outputs/{plt_name}.txt"), 'w') as f:
+    with open(os.path.join("./outputs", "_".join([plt_name, "crown_flowstar"]), f"{plt_name}.txt"), 'w') as f:
         f.write(f"Experiment name: {exp_name}\n")
+        print(f"Experiment name: {exp_name}\n")
         f.write(f"Complete: {Xs.shape[0]}/{len(list(step_ids))}\n")
+        print((f"Complete: {Xs.shape[0]}/{len(list(step_ids))}\n"))
         f.write(f"Total time: {end_time - start_time}\n")
+        print(f"Total time: {end_time - start_time}\n")
+        print("Saved in {}".format(os.path.join(exp_name, f"outputs/{plt_name}.txt")))
         f.close()
 
     for idx in range(len(plt_ids)):
@@ -224,7 +228,7 @@ def main():
         #ax.set_xlim([-0.4, 1.2])
         #ax.set_ylim([-0.6, 0.8])
         #plt.show()
-        plt.savefig(os.path.join(exp_name, f"outputs/{plt_name}_x{plt_ids[idx][0]}x{plt_ids[idx][1]}.eps"))
+        plt.savefig(os.path.join("./outputs", "_".join([plt_name, "crown_flowstar"]), f"{plt_name}_x{plt_ids[idx][0]}x{plt_ids[idx][1]}.eps"))
 
 
 def ctrl_input_bound(model_ori, input_lb, input_ub, alpha_only=True):
