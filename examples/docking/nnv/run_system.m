@@ -45,12 +45,12 @@ U = 0; % don't check safety for intermediate flowpipes
 [safe, counterExamples, verifyTime] = ncs.verify(reachPRM, U);
 
 %% compute reachability safety property at the end
-map_mat = [0 0 0 0 1 0; 0 0 0 0 0 1];
+map_mat = [1 0 0 0 0 0; 0 1 0 0 0 0];
 map_vec = [];
 all_flowpipes = ncs.getOutputReachSet(map_mat, map_vec);
 last_flowpipe = Star.get_hypercube_hull(all_flowpipes{length(all_flowpipes)})
 
-if last_flowpipe.ub(1) >= last_flowpipe.lb(2)
+if last_flowpipe.ub(1) == 0 && last_flowpipe.lb(2) == 0
     safe = 'UNSAFE';
 end
 
