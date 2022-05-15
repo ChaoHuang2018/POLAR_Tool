@@ -12,23 +12,23 @@ Neuron::Neuron(string act) {
     activation = act;
 }
 
-void Neuron::taylor_model_approx(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const {
+void Neuron::taylor_model_approx(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting, string verbose) const {
     
 	if (activation == "sigmoid")
 	{
-		this->sigmoid_taylor(result, input, domain, polar_setting, setting);
+		this->sigmoid_taylor(result, input, domain, polar_setting, setting, verbose);
 	}
 	else if (activation == "tanh")
 	{
-		this->tanh_taylor(result, input, domain, polar_setting, setting);
+		this->tanh_taylor(result, input, domain, polar_setting, setting, verbose);
 	}
 	else if (activation == "ReLU")
 	{
-		this->relu_taylor(result, input, domain, polar_setting, setting);
+		this->relu_taylor(result, input, domain, polar_setting, setting, verbose);
 	}
 	else if (activation == "Affine")
 	{
-		this->affine_taylor(result, input, domain, polar_setting, setting);
+		this->affine_taylor(result, input, domain, polar_setting, setting, verbose);
 	}
 	else
 	{
@@ -36,7 +36,7 @@ void Neuron::taylor_model_approx(TaylorModel<Real> &result, TaylorModel<Real> &i
 	}
 }
 
-void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
+void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting, string verbose) const
 {
     unsigned int taylor_order = polar_setting.get_taylor_order();
     unsigned int bernstein_order = polar_setting.get_bernstein_order();
@@ -69,8 +69,6 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 	TaylorModel<Real> result_berns;
 	result_berns = tmTemp;
 	result_berns.remainder += rem;
-    
-    cout << "result_berns: " << result_berns.remainder << endl;
     
 
 	// cout << "Berns time: " << seconds << " seconds" << endl;
@@ -106,17 +104,25 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 	TaylorModel<Real> result_taylor;
 	tmTemp2.rec_taylor(result_taylor, domain, taylor_order, setting.tm_setting.cutoff_threshold, setting.g_setting);
 
-    cout << "result_taylor: " << result_taylor.remainder << endl;
+//    cout << "result_taylor: " << result_taylor.remainder << endl;
     // exit(0);
 	// cout << "Taylor time: " << seconds << " seconds" << endl;
 
 	if (neuron_approx_type == "Berns")
 	{
 		result = result_berns;
+        if (verbose == "on")
+        {
+            cout << "BP poly: " << up << ", BP remainder:" << rem << endl;
+            cout << "TM remainder after compose by BP: " << result_berns.remainder << endl;
+        }
 	}
 	else if (neuron_approx_type == "Taylor")
 	{
 		result = result_taylor;
+        if (verbose == "on")
+        {
+        }
 	}
 	else
 	{
@@ -131,10 +137,10 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 			// cout << "Taylor" << endl;
 		}
 	}
-    cout << "after activation, remainder: " << result.remainder << endl;
+//    cout << "after activation, remainder: " << result.remainder << endl;
 }
 
-void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
+void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting, string verbose) const
 {
     unsigned int taylor_order = polar_setting.get_taylor_order();
     unsigned int bernstein_order = polar_setting.get_bernstein_order();
@@ -217,7 +223,7 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     }
 }
 
-void Neuron::relu_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
+void Neuron::relu_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting, string verbose) const
 {
     unsigned int taylor_order = polar_setting.get_taylor_order();
     unsigned int bernstein_order = polar_setting.get_bernstein_order();
@@ -248,10 +254,10 @@ void Neuron::relu_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     result = tmTemp;
     // cout << "Coeff length: " << result.expansion.terms.size() << endl;
     result.remainder += rem;
-    cout << "after activation, remainder: " << result.remainder << endl;
+//    cout << "after activation, remainder: " << result.remainder << endl;
 }
 
-void Neuron::affine_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
+void Neuron::affine_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting, string verbose) const
 {
     result = input;
     

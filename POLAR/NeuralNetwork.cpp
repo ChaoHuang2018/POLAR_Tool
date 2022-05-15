@@ -38,10 +38,10 @@ void Layer::post_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &in
     
     for (unsigned int i = 0; i < input.tms.size(); ++i)
     {
-        cout << "------"
-             << "Neuron " << i << " -------" << endl;
+//        cout << "------"
+//             << "Neuron " << i << " -------" << endl;
         TaylorModel<Real> tmTemp;
-        cout << "Input remainder: " << input.tms[i].remainder << endl;
+//        cout << "Input remainder: " << input.tms[i].remainder << endl;
         neuron_list[i].taylor_model_approx(tmTemp, input.tms[i], domain, polar_setting, setting);
         result.tms.push_back(tmTemp);
     }
@@ -231,9 +231,9 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
     // cout << "1111111111111111111111" << endl;
     tmv_all_layer.push_back(result);
 
-    Interval box;
-    result.tms[0].intEval(box, domain);
-    cout << "neural network output range by TMP: " << box << endl;
+//    Interval box;
+//    result.tms[0].intEval(box, domain);
+//    cout << "neural network output range by TMP: " << box << endl;
 }
 
 void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
@@ -451,9 +451,9 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
     }
    // tmv_output = scalar * tmv_output;
 
-    Interval box;
-    tmv_output.tms[0].intEval(box, domain);
-    cout << "neural network output range by TMP: " << box << endl;
+//    Interval box;
+//    tmv_output.tms[0].intEval(box, domain);
+//    cout << "neural network output range by TMP: " << box << endl;
 }
 
 
