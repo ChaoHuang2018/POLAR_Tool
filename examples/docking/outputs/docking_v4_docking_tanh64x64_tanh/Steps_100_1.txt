@@ -1,2 +1,0 @@
-Verification result: Unknown(35)
-Running Time: 8163.000000 seconds
