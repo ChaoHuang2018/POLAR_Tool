@@ -1,0 +1,61 @@
+continuous reachability
+{
+ state var x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, t
+
+ setting
+ {
+  fixed steps 0.025
+  time 5
+  remainder estimation 1e-2
+  identity precondition
+  matlab interval t,x3
+  fixed orders 4
+  cutoff 1e-6
+  precision 53
+  output Quadrotor
+  print on
+ }
+	
+ nonpoly ode { 20 }
+ {
+  x1' = cos(x8)*cos(x9)*x4 + (sin(x7)*sin(x8)*cos(x9) - cos(x7)*sin(x9))*x5 + (cos(x7)*sin(x8)*cos(x9) + sin(x7)*sin(x9))*x6
+  x2' = cos(x8)*sin(x9)*x4 + (sin(x7)*sin(x8)*sin(x9) + cos(x7)*cos(x9))*x5 + (cos(x7)*sin(x8)*sin(x9) - sin(x7)*cos(x9))*x6
+  x3' = sin(x8)*x4 - sin(x7)*cos(x8)*x5 - cos(x7)*cos(x8)*x6
+
+  x4' = x12*x5 - x11*x6 - 9.81*sin(x8)
+  x5' = x10*x6 - x12*x4 + 9.81*cos(x8)*sin(x7)
+  x6' = x11*x4 - x10*x5 + 9.81*cos(x8)*cos(x7) - 9.81 + 7.14285714285714*(x3 - 1) - 2.14285714285714*x6
+  
+  x7' = x10 + (sin(x7)*(sin(x8)/cos(x8)))*x11 + (cos(x7)*(sin(x8)/cos(x8)))*x12
+  x8' = cos(x7)*x11 - sin(x7)*x12
+  x9' = (sin(x7)/cos(x8))*x11 + (cos(x7)/cos(x8))*x12
+  
+  x10' = -0.92592592592593*x11*x12 - 18.51851851851852*(x7 + x10)
+  x11' = 0.92592592592593*x10*x12 - 18.51851851851852*(x8 + x11)
+  x12' = 0
+  
+  t' = 1
+ }
+ 
+ init
+ {
+  x1 in [-0.4,0.4]
+  x2 in [-0.4,0.4]
+  x3 in [-0.4,0.4]
+  x4 in [-0.4,0.4]
+  x5 in [-0.4,0.4]
+  x6 in [-0.4,0.4]
+  x7 in [0,0]
+  x8 in [0,0]
+  x9 in [0,0]
+  x10 in [0,0]
+  x11 in [0,0]
+  x12 in [0,0]
+  t in [0,0]
+ }
+}
+
+unsafe
+{
+ x3 >= 1.4
+}
