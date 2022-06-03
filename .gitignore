@@ -1,6 +1,6 @@
 # Flow* is not included
 flowstar/
-
+.DS
 # temo files
 *.tmp
 
