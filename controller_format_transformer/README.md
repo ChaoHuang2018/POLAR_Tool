@@ -3,4 +3,5 @@
 txt2onnx.py -i <inputfile> -o <outputfile>
 
 inputfile: the file name of the input txt neural network
+
 outputfile: the file name of the output onnx neural network
