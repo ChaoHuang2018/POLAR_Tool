@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
 
     Variables vars;
 
-    unsigned int order = 4;
-    unsigned int bernstein_order = 4;
+    unsigned int order = 3;
+    unsigned int bernstein_order = 3;
     unsigned int partition_num = 2000;
 
     unsigned int numVars = 1;
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
 	// remainder estimation
     vector<Interval> domain;
-	Interval I(-0.1, 0.1);
+	Interval I(-1, 1);
 
     domain.push_back(I);
 
@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
 
 	setting.prepare();
 
-    Polynomial<Real> p1("1 - 0.5 * x", vars);
-    Interval r1(-0.4, 0.4);
+    Polynomial<Real> p1("0.1*x - 0.1 * x^2", vars);
+    Interval r1(-0.1, 0.1);
     TaylorModel<Real> tm_input(p1, r1);
     
 //    cout << "11111111" << endl;
@@ -72,10 +72,15 @@ int main(int argc, char *argv[])
     Interval r2(0);
     TaylorModel<Real> tm_input2(p2, r2);
     
+    vector<Interval> domain_x;
+    Interval I_x(-0.1-0.1, 0.1+0.1);
+
+    domain_x.push_back(I_x);
+    
     
     PolarSetting polar_setting_tm(order, bernstein_order, partition_num, "Taylor", "Concrete");
     
-    s_neuron.taylor_model_approx(tm_output, tm_input2, domain, polar_setting_tm, setting);
+    s_neuron.taylor_model_approx(tm_output, tm_input2, domain_x, polar_setting_tm, setting);
 //    cout << "TM approximation poly: " << tm_output.expansion << endl;
     cout << "TM approximation remainder: " << tm_output.remainder << endl;
     tm_output.output(cout, vars);
