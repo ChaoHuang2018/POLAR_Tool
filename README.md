@@ -103,7 +103,7 @@ tanh // Activation function of the output layer
 0 // Offset of the neural network
 4 // Scala of the neural network
 ```
-Then we can verify the NNCS with the following command under `example1/benchmark1`:
+Then we can verify the NNCS with the following command under [*example1/benchmark1*](/examples/benchmark1/):
 ```bash
 make reachnn_benchmark_1 && ./reachnn_benchmark_1 0.05 35 4 6 1 relu_tanh
 ```
