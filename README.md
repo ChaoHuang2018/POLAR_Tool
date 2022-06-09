@@ -103,9 +103,9 @@ tanh // Activation function of the output layer
 0 // Offset of the neural network
 4 // Scala of the neural network
 ```
-Then we can verify the NNCS with the following command:
+Then we can verify the NNCS with the following command under `example1/benchmark1`:
 ```bash
-make && ./reachnn_benchmark_1 0.05 35 4 6 1 relu_tanh
+make reachnn_benchmark_1 && ./reachnn_benchmark_1 0.05 35 4 6 1 relu_tanh
 ```
 where 0.05 is the width of the initial set, 35 is the total steps that need to be verified, 4 is the order of Bernstein Polynomial, 6 is the order of Taylor Model, 1 specifies option to use symbolic remainder and relu_tanh specifies the NN controller with ReLU and tanh activation functions which points to [*nn_1_relu_tanh*](/examples/benchmark1/nn_1_relu_tanh) file. 
 
