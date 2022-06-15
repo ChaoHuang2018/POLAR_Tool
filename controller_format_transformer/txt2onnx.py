@@ -99,6 +99,8 @@ class NeuralNetwork(object):
         model_output = "control"
         control = helper.make_tensor_value_info(model_output, TensorProto.FLOAT, [self.num_of_outputs])
 
+
+        initializer_list = []
         for layer_idx in range(len(self.layers)):
             hidden_layer = self.layers[layer_idx]
 
@@ -114,6 +116,8 @@ class NeuralNetwork(object):
                 outputs=[hidden_linear_output_name]
             )
             model_nodes.append(hidden_layer_linear_node)
+            initializer_list.append(weight)
+            initializer_list.append(bias)
 
             # activation
             hidden_activation_output_name = "layer_activation_output" + str(layer_idx)
@@ -127,7 +131,7 @@ class NeuralNetwork(object):
             if hidden_layer.act == "tanh":
                 activation = "Tanh"
             if hidden_layer.act == "Affine":
-                activation = "Indentity"
+                activation = "Identity"
 
             hidden_layer_activation_node = onnx.helper.make_node(
                 op_type=activation,
@@ -147,13 +151,16 @@ class NeuralNetwork(object):
             outputs=[model_output]
         )
         model_nodes.append(output_node)
+        initializer_list.append(w)
+        initializer_list.append(b)
 
         # Create the graph (GraphProto)
         graph = onnx.helper.make_graph(
             nodes=model_nodes,
             name="NNController",
             inputs=[state],  # Graph input
-            outputs=[control]  # Graph output
+            outputs=[control],  # Graph output
+            initializer=initializer_list
         )
 
         onnx_model = onnx.helper.make_model(graph)
@@ -183,8 +190,16 @@ def main(argv):
     nn.write_onnx(outputfile)
     print('Input file is "' + inputfile)
     print('Output file is "' + outputfile)
+
+
+    # for testing
     onnx_model = onnx.load('./' + outputfile + '.onnx')
-    print(onnx_model)
+    onnx.checker.check_model(onnx_model)
+    # print(onnx_model)
+    # [tensor] = [t for t in onnx_model.graph.initializer if t.name == "scala_factor"]
+    # tensor = numpy_helper.to_array(tensor)
+    # print(tensor)
+
 
 if __name__ == "__main__":
    main(sys.argv[1:])
