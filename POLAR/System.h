@@ -1,6 +1,7 @@
 #include "../flowstar/Continuous.h"
 #include <fstream>
 #include "../nlohmann/json.hpp"
+#include "NeuralNetwork.h"
 
 using json = nlohmann::json;
 using namespace flowstar;
@@ -17,6 +18,7 @@ public:
     vector<string> control_name_list;
     vector<string> ode_list;
     double control_stepsize;
+    NeuralNetwork nn;
 
 public:
     System();

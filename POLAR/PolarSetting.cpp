@@ -32,7 +32,7 @@ PolarSetting::PolarSetting(const unsigned int taylor_order, const unsigned int b
 
 PolarSetting::PolarSetting(string filename)
 {
-    cout << "Parse the setting of POLAR." << endl;
+    cout << "Load the setting of POLAR..." << endl;
     ifstream input(filename);
     
     if (filename.substr(filename.find_last_of(".") + 1) == "json")
@@ -40,11 +40,15 @@ PolarSetting::PolarSetting(string filename)
         // Parse json
         json j = json::parse(input);
         
-        taylor_order = j["taylor_order"];
-        bernstein_order = j["bernstein_order"];
-        partition_num = j["partition_num"];
-        neuron_approx_type = j["neuron_approx_type"];
-        remainder_type = j["remainder_type"];
+        taylor_order = j["POLAR_setting"]["taylor_order"];
+        bernstein_order = j["POLAR_setting"]["bernstein_order"];
+        partition_num = j["POLAR_setting"]["partition_num"];
+        neuron_approx_type = j["POLAR_setting"]["neuron_approx_type"];
+        remainder_type = j["POLAR_setting"]["remainder_type"];
+        
+        cutoff_threshold = j["flowstar_setting"]["cutoff_threshold"];
+        flowpipe_stepsize = j["flowstar_setting"]["flowpipe_stepsize"];
+        cout << "Succeed." << endl;
     }
     else
     {
@@ -120,4 +124,24 @@ void PolarSetting::set_remainder_type(string remainder_type) {
 
 string PolarSetting::get_remainder_type() {
     return this->remainder_type;
+}
+
+void PolarSetting::set_cutoff_threshold(double cutoff_threshold)
+{
+    this->cutoff_threshold = cutoff_threshold;
+}
+
+double PolarSetting::get_cutoff_threshold()
+{
+    return this->cutoff_threshold;
+}
+
+void PolarSetting::set_flowpipe_stepsize(double flowpipe_stepsize)
+{
+    this->flowpipe_stepsize = flowpipe_stepsize;
+}
+
+double PolarSetting::get_flowpipe_stepsize()
+{
+    return this->flowpipe_stepsize;
 }

@@ -1,4 +1,5 @@
 #include "System.h"
+#include <assert.h>
 
 using namespace flowstar;
 using namespace std;
@@ -12,27 +13,32 @@ System::System()
 
 System::System(string filename)
 {
-    cout << "Parse the system dynamics." << endl;
+    cout << "Load the system dynamics..." << endl;
     ifstream input(filename);
     
     if (filename.substr(filename.find_last_of(".") + 1) == "json")
     {
         // Parse json
         json j = json::parse(input);
-        num_of_states = j["num_of_states"];
-        num_of_control = j["num_of_control"];
-        state_name_list = j["state_name_list"];
-        control_name_list = j["control_name_list"];
-        for (int i = 0; i < j["ode_list"].size(); i++)
+        num_of_states = j["dynamics"]["state_name_list"].size();
+        num_of_control = j["dynamics"]["control_name_list"].size();
+        state_name_list = j["dynamics"]["state_name_list"];
+        control_name_list = j["dynamics"]["control_name_list"];
+        assert(j["dynamics"]["state_name_list"].size() == j["dynamics"]["ode_list"].size() && "Miss states or ODEs.");
+        for (int i = 0; i < j["dynamics"]["ode_list"].size(); i++)
         {
-            ode_list.push_back(j["ode_list"][i]);
+            ode_list.push_back(j["dynamics"]["ode_list"][i]);
         }
 //        for (int i = 0; i < num_of_control; i++)
 //        {
 //            getline(input, line);
 //            ode_list.push_back(Expression_AST<Real>("0"));
 //        }
-        control_stepsize = j["control_stepsize"];
+        control_stepsize = j["dynamics"]["control_stepsize"];
+        
+        string nn_file = j["neural_network"];
+        nn = NeuralNetwork(nn_file);
+        cout << "Succeed." << endl;
     }
     else
     {   // Parse txt

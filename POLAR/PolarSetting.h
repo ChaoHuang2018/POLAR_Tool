@@ -19,6 +19,9 @@ protected:
     // Concrete, Symbolic
     string remainder_type;
     
+    double cutoff_threshold;
+    double flowpipe_stepsize;
+    
     int validate();
     
 public:
@@ -47,5 +50,13 @@ public:
     void set_remainder_type(string remainder_type);
 
     string get_remainder_type();
+    
+    void set_cutoff_threshold(double cutoff_threshold);
+    
+    double get_cutoff_threshold();
+    
+    void set_flowpipe_stepsize(double flowpipe_stepsize);
+    
+    double get_flowpipe_stepsize();
 
 };

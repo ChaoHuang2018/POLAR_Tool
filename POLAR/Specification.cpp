@@ -30,7 +30,7 @@ Specification::Specification()
 
 Specification::Specification(string filename)
 {
-    cout << "Parse the specification." << endl;
+    cout << "Load the specification..." << endl;
     ifstream input(filename);
     
     
@@ -45,7 +45,7 @@ Specification::Specification(string filename)
             vector<string> temp = split(j["init"][i], delim1);
             Interval init_temp(stod(temp[0]),stod(temp[1]));
             init.push_back(init_temp);
-            cout << init_temp << endl;
+//            cout << init_temp << endl;
         }
         
         time_steps = j["time_steps"];
@@ -56,6 +56,7 @@ Specification::Specification(string filename)
             Interval unsafe_temp(stod(temp[0]),stod(temp[1]));
             unsafe.push_back(unsafe_temp);
         }
+        cout << "Succeed." << endl;
     }
     else
     {

@@ -3,8 +3,9 @@
 using namespace flowstar;
 using namespace std;
 
-void nncs_reachability(System s, NeuralNetwork nn, Specification spec, PolarSetting ps)
+void nncs_reachability(System s, Specification spec, PolarSetting ps)
 {
+    NeuralNetwork nn = s.nn;
     unsigned int numVars = s.num_of_states + s.num_of_control;
     
     intervalNumPrecision = 300;
@@ -42,14 +43,14 @@ void nncs_reachability(System s, NeuralNetwork nn, Specification spec, PolarSett
     Computational_Setting setting;
     
     // stepsize and order for reachability analysis
-    setting.setFixedStepsize(0.005, ps.get_taylor_order());
-    cout << "taylor order: " << ps.get_taylor_order() << endl;
+    setting.setFixedStepsize(ps.get_flowpipe_stepsize(), ps.get_taylor_order());
+//    cout << "taylor order: " << ps.get_taylor_order() << endl;
 
     // time horizon for a single control step
     setting.setTime(s.control_stepsize);
 
     // cutoff threshold
-    setting.setCutoffThreshold(1e-8);
+    setting.setCutoffThreshold(ps.get_cutoff_threshold());
 
     // print out the steps
     setting.printOff();
@@ -122,14 +123,14 @@ void nncs_reachability(System s, NeuralNetwork nn, Specification spec, PolarSett
         for (int i = 0; i < s.num_of_control; i++)
         {
             initial_set.tmvPre.tms[var_id_list[s.num_of_states + i]] = tmv_output.tms[i];
-            initial_set.tmvPre.tms[var_id_list[s.num_of_states + i]].output(cout, vars);
-            cout << endl;
+//            initial_set.tmvPre.tms[var_id_list[s.num_of_states + i]].output(cout, vars);
+//            cout << endl;
         }
         
 //        cout << "size: " << initial_set.tmvPre.tms.size() << endl;
         
-//        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
-        dynamics.reach(result, setting, initial_set, unsafeSet);
+        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+//        dynamics.reach(result, setting, initial_set, unsafeSet);
 
         
         if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
