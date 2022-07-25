@@ -54,13 +54,15 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 
 	Interval rem(-error, error);
 
-	// cout << "up: " << up << endl;
+//	cout << "up: " << up << endl;
 	TaylorModel<Real> tmTemp(up.coefficients[up.coefficients.size() - 1], domain.size());
 
     // cout << "cut: " << setting.tm_setting.cutoff_threshold << endl;
 	for (int i = up.coefficients.size() - 2; i >= 0; --i)
 	{
 		tmTemp.mul_ctrunc_assign(input, domain, taylor_order, setting.tm_setting.cutoff_threshold);
+//        cout << "input: " << i << ", " << input.remainder << endl;
+//        cout << "tmTemp: " << i << ", " << tmTemp.remainder << endl;
 
 		TaylorModel<Real> tmTemp2(up.coefficients[i], domain.size());
 		tmTemp += tmTemp2;
@@ -69,22 +71,23 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 	TaylorModel<Real> result_berns;
 	result_berns = tmTemp;
 	result_berns.remainder += rem;
+//    cout << "rem: " << rem << endl;
     
 
 	// cout << "Berns time: " << seconds << " seconds" << endl;
-/*  
-    Variables vars;
-    vars.declareVar("t");
-    int x0_id = vars.declareVar("x0");
-    int x1_id = vars.declareVar("x1");
-    int x2_id = vars.declareVar("x2");
-    int x3_id = vars.declareVar("x3");
-    int x4_id = vars.declareVar("x4");
-    int x5_id = vars.declareVar("x5");
-    int u0_id = vars.declareVar("u0");
-    int u1_id = vars.declareVar("u1");
-    int u2_id = vars.declareVar("u2");
-*/    
+  
+//    Variables vars;
+//    vars.declareVar("t");
+//    int x0_id = vars.declareVar("x0");
+//    int x1_id = vars.declareVar("x1");
+//    int x2_id = vars.declareVar("x2");
+//    int x3_id = vars.declareVar("x3");
+//    int x4_id = vars.declareVar("x4");
+//    int x5_id = vars.declareVar("x5");
+//    int u0_id = vars.declareVar("u0");
+//    int u1_id = vars.declareVar("u1");
+//    int u2_id = vars.declareVar("u2");
+    
 	TaylorModel<Real> tmTemp1 = (input) * (-1);
 //    tmTemp1.output(cout, vars);
 //    cout << endl;
@@ -103,6 +106,7 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
 
 	TaylorModel<Real> result_taylor;
 	tmTemp2.rec_taylor(result_taylor, domain, taylor_order, setting.tm_setting.cutoff_threshold, setting.g_setting);
+//    result_taylor.output(cout, vars);
 
 //    cout << "result_taylor: " << result_taylor.remainder << endl;
     // exit(0);

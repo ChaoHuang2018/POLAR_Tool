@@ -118,7 +118,12 @@ int main(int argc, char *argv[])
 		TaylorModelVec<Real> tmv_input;
 
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
+        initial_set.tmvPre.tms[0].output(cout, vars);
+        cout << endl;
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
+        initial_set.tmvPre.tms[1].output(cout, vars);
+        cout << endl;
+        initial_set.tmvPre.tms[2].output(cout, vars);
 
 		// TaylorModelVec<Real> tmv_temp;
 		// initial_set.compose(tmv_temp, order, cutoff_threshold);
@@ -147,6 +152,8 @@ int main(int argc, char *argv[])
 
 
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
+        initial_set.tmvPre.tms[u_id].output(cout, vars);
+        cout << endl;
 
 		// if(if_symbo == 0){
 		// 	dynamics.reach(result, setting, initial_set, unsafeSet);

@@ -153,7 +153,7 @@ UnivariatePolynomial<Real> gen_bern_poly(string act, Interval intv, int d)
         fun_act = tanh;
     }
 
-    if ((b - a <= -1e-10) || (fun_act(b) - fun_act(a) <= -1e-10))
+    if ((b - a <= 1e-10) || (fun_act(b) - fun_act(a) <= 1e-10))
     {
         return bern_poly + fun_act((a + b) / 2);
     }
@@ -301,9 +301,11 @@ double gen_bern_err_by_sample(UnivariatePolynomial<Real> berns, string act, Inte
         fun_act = tanh;
     }
 
-    if (b - a <= -1e-10)
+    if (b - a <= 1e-12)
     {
-        return max(fun_act((a + b) / 2) - fun_act(a), fun_act(b) - fun_act((a + b) / 2));
+//        cout << max(fun_act((a + b) / 2) - fun_act(a), fun_act(b) - fun_act((a + b) / 2)) << endl;
+//        return max(fun_act((a + b) / 2) - fun_act(a), fun_act(b) - fun_act((a + b) / 2));
+        return 1e-12 * 0.25;
     }
 
     // for all the Lipschitz continuous activation function
@@ -350,3 +352,4 @@ double gen_bern_err_by_sample(UnivariatePolynomial<Real> berns, string act, Inte
 
     return overhead + sample_diff;
 }
+

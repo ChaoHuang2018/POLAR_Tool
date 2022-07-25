@@ -1,5 +1,6 @@
 #include "PolarSetting.h"
 
+using json = nlohmann::json;
 using namespace std;
 
 int PolarSetting::validate(){
@@ -26,6 +27,58 @@ PolarSetting::PolarSetting(const unsigned int taylor_order, const unsigned int b
     if (validate() == 0) {
         cout << "Wrong neuron approximation type or wrong Taylor model remainder type!" << endl;
         abort();
+    }
+}
+
+PolarSetting::PolarSetting(string filename)
+{
+    cout << "Parse the setting of POLAR." << endl;
+    ifstream input(filename);
+    
+    if (filename.substr(filename.find_last_of(".") + 1) == "json")
+    {
+        // Parse json
+        json j = json::parse(input);
+        
+        taylor_order = j["taylor_order"];
+        bernstein_order = j["bernstein_order"];
+        partition_num = j["partition_num"];
+        neuron_approx_type = j["neuron_approx_type"];
+        remainder_type = j["remainder_type"];
+    }
+    else
+    {
+        string line;
+
+        // Parse the structure of neural networks
+        if (getline(input, line))
+        {
+        }
+        else
+        {
+            cout << "failed to read file: Polar Setting" << endl;
+        }
+        try
+        {
+            taylor_order = stoi(line);
+        }
+        catch (invalid_argument &e)
+        {
+            cout << "Problem during string/integer conversion!" << endl;
+            cout << line << endl;
+        }
+        
+        getline(input, line);
+        bernstein_order = stoi(line);
+        
+        getline(input, line);
+        partition_num = stoi(line);
+        
+        getline(input, line);
+        neuron_approx_type = line;
+        
+        getline(input, line);
+        remainder_type = line;
     }
 }
 

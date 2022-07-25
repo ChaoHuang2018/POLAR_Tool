@@ -1,5 +1,8 @@
+#include <fstream>
 #include <iostream>
+#include "../nlohmann/json.hpp"
 
+using json = nlohmann::json;
 using namespace std;
 
 class PolarSetting
@@ -22,6 +25,8 @@ public:
     PolarSetting();
     
     PolarSetting(const unsigned int taylor_order, const unsigned int bernstein_order, const unsigned int partition_num, string neuron_approx_type, string remainder_type);
+    
+    PolarSetting(string filename);
 
     void set_taylor_order(unsigned int taylor_order);
 

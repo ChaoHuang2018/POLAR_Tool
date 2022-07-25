@@ -1,0 +1,7 @@
+{
+    "taylor_order": 6,
+    "bernstein_order": 4,
+    "partition_num": 4000,
+    "neuron_approx_type": "Taylor",
+    "remainder_type": "Concrete"
+}

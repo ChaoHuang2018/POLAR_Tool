@@ -62,7 +62,7 @@ NeuralNetwork::NeuralNetwork(string filename)
     }
     else
     {
-        cout << "failed to read file" << endl;
+        cout << "failed to read file: Neural Network." << endl;
     }
     try
     {
@@ -155,6 +155,9 @@ NeuralNetwork::NeuralNetwork(string filename)
     
     getline(input, line);
     scale_factor = stod(line);
+    
+//    cout << "number of hidden layers: " << layers.size() << endl;
+
 }
 
 void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
@@ -173,10 +176,12 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
         
         TaylorModelVec<Real> tmvTemp_pre;
         layer.pre_activate(tmvTemp_pre, tmv_all_layer[s], domain);
+//        cout << "pre: " << tmvTemp_pre.tms[0].remainder << endl;
         
         
         TaylorModelVec<Real> tmvTemp_post;
         layer.post_activate(tmvTemp_post, tmvTemp_pre, domain, polar_setting, setting);
+//        cout << "post: " << tmvTemp_post.tms[0].remainder << endl;
 
         tmv_all_layer.push_back(tmvTemp_post);
         
@@ -184,6 +189,7 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
 
     // cout << "size: " << tmv_all_layer.size() << endl;
     result = tmv_all_layer.back();
+//    cout << "result: " << result.tms[0].remainder << endl;
 
     Matrix<Real> offset_vector(num_of_outputs, 1);
     
