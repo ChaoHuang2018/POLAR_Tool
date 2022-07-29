@@ -13,9 +13,6 @@ def keras2txt(h5_file, txt_file):
     input_dim = model.layers[0].get_config()['batch_input_shape'][1]
     # get the output dim
     output_dim = model.layers[-1].get_config()['units']
-    # get the number of hidden layers
-    num_of_hidden_layer = len(model.layers) - 2
-
     # var to record number of hidden neurons
     num_of_hidden_neurons = []
     # var to record types of activation function
@@ -23,10 +20,23 @@ def keras2txt(h5_file, txt_file):
 
     for _layer in model.layers[1:]:
         layer_config = _layer.get_config()
-        # append the current layer's number of neurons
-        num_of_hidden_neurons.append(layer_config['units'])
-        # append the current layer's activation function type
-        activations.append(layer_config['activation'])
+        if 'layers' in layer_config:
+            # if there is a functional model in a layer, this layer actually
+            # contains layers that cannot be read from the model directly.
+            for _layer_in_model in _layer.layers[1:]:
+                layer_config = _layer_in_model.get_config()
+                # append the current layer's number of neurons
+                num_of_hidden_neurons.append(layer_config['units'])
+                # append the current layer's activation function type
+                activations.append(layer_config['activation'])
+        else:
+            # append the current layer's number of neurons
+            num_of_hidden_neurons.append(layer_config['units'])
+            # append the current layer's activation function type
+            activations.append(layer_config['activation'])
+
+    # get the number of hidden layers
+    num_of_hidden_layer = len(activations) - 1
 
     with open(txt_file, 'w') as output_file:
         # write the neural network architecture
@@ -44,14 +54,36 @@ def keras2txt(h5_file, txt_file):
 
         # write weights and biases
         for _layer in model.layers[1:]:
-            weights, biases = _layer.get_weights()
-            # wrtie weights
-            for _col in range(weights.shape[1]):
-                for _row in range(weights.shape[0]):
-                    output_file.write('{}'.format(weights[_row, _col]) + '\n')
-            # write biases
-            for _idx_neuron in range(biases.shape[0]):
-                output_file.write('{}'.format(biases[_idx_neuron]) + '\n')
+            layer_config = _layer.get_config()
+            if 'layers' in layer_config:
+                # if there is a functional model in a layer, this layer
+                # actually contains layers that cannot be read from the model
+                # directly.
+                for _layer_in_model in _layer.layers[1:]:
+                    weights, biases = _layer_in_model.get_weights()
+                    # wrtie weights
+                    for _col in range(weights.shape[1]):
+                        for _row in range(weights.shape[0]):
+                            output_file.write(
+                                '{}'.format(weights[_row, _col]) + '\n'
+                            )
+                    # write biases
+                    for _idx_neuron in range(biases.shape[0]):
+                        output_file.write('{}'.format(
+                            biases[_idx_neuron]) + '\n'
+                        )
+
+            else:
+                weights, biases = _layer.get_weights()
+                # wrtie weights
+                for _col in range(weights.shape[1]):
+                    for _row in range(weights.shape[0]):
+                        output_file.write('{}'.format(
+                            weights[_row, _col]) + '\n'
+                        )
+                # write biases
+                for _idx_neuron in range(biases.shape[0]):
+                    output_file.write('{}'.format(biases[_idx_neuron]) + '\n')
 
         # write default scalar and offset
         output_file.write('{}'.format(0) + '\n')
