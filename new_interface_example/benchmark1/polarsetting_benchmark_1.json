@@ -9,5 +9,9 @@
     "flowstar_setting": {
         "cutoff_threshold": 1e-8,
         "flowpipe_stepsize": 0.005
+    },
+    "output_setting": {
+        "output_dimension": ["x0", "x1"],
+        "output_filename": "benchmark1"
     }
 }

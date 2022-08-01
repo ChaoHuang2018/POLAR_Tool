@@ -35,7 +35,9 @@ System::System(string filename)
 //            ode_list.push_back(Expression_AST<Real>("0"));
 //        }
         control_stepsize = j["dynamics"]["control_stepsize"];
+        cout << "Succeed." << endl;
         
+        cout << "Load the neural network controller..." << endl;
         string nn_file = j["neural_network"];
         nn = NeuralNetwork(nn_file);
         cout << "Succeed." << endl;

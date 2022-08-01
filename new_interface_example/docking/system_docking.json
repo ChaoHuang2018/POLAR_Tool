@@ -1,0 +1,9 @@
+{
+    "dynamics": {
+        "state_name_list": ["x", "y", "vx", "vy"],
+        "control_name_list": ["u1", "u2"],
+        "ode_list": ["vx", "vy", "0.002054 * vy + 0.000003164187 * x + u1", "-0.002054 * vx + u2"],
+        "control_stepsize": 0.1
+    },
+    "neural_network": "ckpt_200_with_pre_post_processing"
+}

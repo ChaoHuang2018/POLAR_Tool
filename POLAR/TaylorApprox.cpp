@@ -92,3 +92,9 @@ void sigmoid_taylor_expansion(UnivariatePolynomial<Real> &sigmoid_poly, Interval
     Interval norm_intv(-(b-a)/2,(b-a)/2);
     sigmoid_remainder = de_remainder/factorial[order+1]*norm_intv.pow(order+1);
 }
+
+
+void tanh_taylor_expansion(UnivariatePolynomial<Real> &tanh_poly, Interval &tanh_remainder, Interval intv, int order)
+{
+    
+}

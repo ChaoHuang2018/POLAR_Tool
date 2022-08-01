@@ -48,6 +48,9 @@ PolarSetting::PolarSetting(string filename)
         
         cutoff_threshold = j["flowstar_setting"]["cutoff_threshold"];
         flowpipe_stepsize = j["flowstar_setting"]["flowpipe_stepsize"];
+        
+        output_dim = j["output_setting"]["output_dimension"];
+        output_filename = j["output_setting"]["output_filename"];
         cout << "Succeed." << endl;
     }
     else
@@ -144,4 +147,24 @@ void PolarSetting::set_flowpipe_stepsize(double flowpipe_stepsize)
 double PolarSetting::get_flowpipe_stepsize()
 {
     return this->flowpipe_stepsize;
+}
+
+void PolarSetting::set_output_dim(vector<string> output_dim)
+{
+    this->output_dim = output_dim;
+}
+
+vector<string> PolarSetting::get_output_dim()
+{
+    return this->output_dim;
+}
+
+void PolarSetting::set_output_filename(string output_filename)
+{
+    this->output_filename = output_filename;
+}
+
+string PolarSetting::get_output_filename()
+{
+    return this->output_filename;
 }

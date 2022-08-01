@@ -6,8 +6,11 @@ CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g -L$(LIB_HOME) -L/usr/local/lib
 OBJS = NeuralNetwork.o BernsteinPoly.o Neuron.o PolarSetting.o System.o Specification.o Polar.o
 
-all: polar_lib
+all: polar_lib polar_tool
 # all: benchmark6_tanh
+
+polar_tool: Polar_tool.o
+	g++ -O3 -w $(LINK_FLAGS) -L./ -o $@ $^ $(LIBS) -lpolar
 
 polar_lib: $(OBJS)
 	ar rcs libpolar.a $^

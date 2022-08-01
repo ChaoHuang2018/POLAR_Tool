@@ -24,7 +24,7 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
     }
     
     int domainDim = numVars + 1;
-    
+ /*
     vector<Expression<Real>> ode_rhs(numVars);
     for (int i = 0; i < s.num_of_states; i++)
     {
@@ -36,33 +36,27 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
         Expression<Real> temp_deriv("0", vars);
         ode_rhs[var_id_list[i]] = temp_deriv;
     }
-    
-    Deterministic_Continuous_Dynamics dynamics(ode_rhs);
+*/
+    ODE<Real> dynamics(s.ode_list, vars);
     
     // Flow* setting
-    Computational_Setting setting;
+    Computational_Setting setting(vars);
     
     // stepsize and order for reachability analysis
     setting.setFixedStepsize(ps.get_flowpipe_stepsize(), ps.get_taylor_order());
 //    cout << "taylor order: " << ps.get_taylor_order() << endl;
 
-    // time horizon for a single control step
-    setting.setTime(s.control_stepsize);
+    setting.printOff();
 
     // cutoff threshold
     setting.setCutoffThreshold(ps.get_cutoff_threshold());
-
-    // print out the steps
-    setting.printOff();
 
     // remainder estimation
     Interval I(-0.01, 0.01);
     vector<Interval> remainder_estimation(numVars, I);
     setting.setRemainderEstimation(remainder_estimation);
 
-    //setting.printOn();
-    setting.prepare();
-    
+
     int steps = spec.time_steps;
     
     
@@ -129,7 +123,7 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
         
 //        cout << "size: " << initial_set.tmvPre.tms.size() << endl;
         
-        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        dynamics.reach(result, initial_set, s.control_stepsize, setting, unsafeSet, symbolic_remainder);
 //        dynamics.reach(result, setting, initial_set, unsafeSet);
 
         
@@ -157,8 +151,9 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
 
     // plot the flowpipes in the x-y plane
     Plot_Setting plot_setting(vars);
+    plot_setting.setOutputDims(ps.get_output_dim()[0], ps.get_output_dim()[1]);
 
-    int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    int mkres = mkdir("../outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (mkres < 0 && errno != EEXIST)
     {
         printf("Can not create the directory for images.\n");
@@ -168,4 +163,6 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
     std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
     
     cout << running_time << endl;
+    
+    plot_setting.plot_2D_octagon_GNUPLOT("../outputs/", ps.get_output_filename(), result.tmv_flowpipes);
 }

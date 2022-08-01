@@ -1,15 +1,15 @@
 CXX = g++
 HOME= /usr/local/include
-POLAR_HOME = ../POLAR
-FLOWSTAR_HOME = ../flowstar
+POLAR_HOME = ../../POLAR
+FLOWSTAR_HOME = ../../flowstar
 LIBS = -lpolar -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk
 CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: benchmark_1
+all: docking
 
-benchmark_1: benchmark_1.o
+docking: docking.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 %.o: %.cc
@@ -21,5 +21,5 @@ benchmark_1: benchmark_1.o
 
 
 clean:
-	rm -f *.o benchmark_1
+	rm -f *.o docking
 

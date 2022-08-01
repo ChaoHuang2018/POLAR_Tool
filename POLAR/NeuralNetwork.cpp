@@ -123,8 +123,8 @@ NeuralNetwork::NeuralNetwork(string filename)
         bias0[i][0] = stod(line);
     }
     Layer input_layer(activation[0], weight0, bias0);
-    // cout << "weight0: " << weight0 << endl;
-    // cout << "bias0: " << bias0 << endl;
+//     cout << "weight0: " << weight0 << endl;
+//     cout << "bias0: " << bias0 << endl;
     layers.push_back(input_layer);
 
     // compute the parameters of hidden layers
@@ -137,7 +137,9 @@ NeuralNetwork::NeuralNetwork(string filename)
         {
             for (int j = 0; j < network_structure[layer_idx]; j++)
             {
+//                cout << "index: " << layer_idx << ", " << i << ", " << j << endl;
                 getline(input, line);
+//                cout << line << endl;
                 weight[i][j] = stod(line);
             }
             getline(input, line);
@@ -242,467 +244,301 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
 //    cout << "neural network output range by TMP: " << box << endl;
 }
 
-void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
+void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting)
 {
-    Interval intUnit(-1, 1);
+	// array to keep the matrices of the linear transformations
+	vector<Matrix<Real> > Q;
+
+//cout << "Symbolic remainders are used in layer-by-layer propagation." <<endl;
+	// array to keep the temporary remainders J
+	vector<Matrix<Interval> > J;
 
 
-    Flowpipe fp_layer_input(input, domain, setting.tm_setting.cutoff_threshold);
+	// the latest remainder
+	Matrix<Interval> latest_J;
+
+	Matrix<Interval> I1(input.tms.size(), 1);
+
+	for(int i=0; i<input.tms.size(); ++i)
+	{
+		I1[i][0] = input.tms[i].remainder;
+	}
+
+	int numOfLayers = num_of_hidden_layers + 1;
+
+	TaylorModelVec<Real> q_i = input;
 
 
-    Symbolic_Remainder symbolic_remainder(fp_layer_input, 0);
+	for(int k=0; k<numOfLayers; ++k)
+	{
+		TaylorModelVec<Real> tmv_layer_input;
+
+		// computing the range of the Taylor model
+		vector<Interval> input_range;
 
 
-    unsigned int numOfLayers = num_of_hidden_layers + 1;
+		tmv_layer_input = layers[k].weight * q_i;
 
-    unsigned int layer_input_dim = fp_layer_input.tmv.tms.size();
+	    for (int j=0; j<layers[k].bias.rows(); j++)
+	    {
+	        Polynomial<Real> poly_temp(layers[k].bias[j][0], domain.size());
+	        tmv_layer_input.tms[j].expansion += poly_temp;
+	    }
+
+	    tmv_layer_input.intEval(input_range, domain);
 
 
-    for (unsigned int K = 0; true; ++K)
+
+		// obtaining the vector of Bernstein overapproximations for the activation functions in the k-th layer
+		vector<UnivariatePolynomial<Real> > Berns_poly(input_range.size());
+		vector<Interval> Berns_rem(input_range.size());
+
+		if(layers[k].activation != "Affine")
+		{
+			for(int j=0; j<input_range.size(); ++j)
+			{
+				Berns_poly[j] = gen_bern_poly(layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
+
+				double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
+
+				Interval rem(-error, error);
+				Berns_rem[j] = rem;
+			}
+		}
+
+
+
+
+
+		// extracting the linear part
+		Matrix<Real> Q_i(input_range.size());
+
+		if(layers[k].activation != "Affine")
+		{
+			for(int j=0; j<Berns_poly.size(); ++j)
+			{
+				Q_i[j][j] = Berns_poly[j].coefficients[1];
+			}
+		}
+
+//		Matrix<Real> Phi_i_Berns = Q_i_Berns * layers[k].weight;
+
+
+
+		// computing the new TM q_i
+		TaylorModelVec<Real> tmvTemp;
+
+		int order = polar_setting.get_taylor_order();
+
+		if(layers[k].activation != "Affine")
+		{
+			for(int j=0; j<Berns_poly.size(); ++j)
+			{
+				TaylorModel<Real> tmTemp(Berns_poly[j].coefficients.back(), domain.size());
+
+				// the nonlinear part
+				for (int i = Berns_poly[j].coefficients.size() - 2; i >= 2; --i)
+				{
+					tmTemp.mul_ctrunc_assign(tmv_layer_input.tms[j], domain, order, setting.tm_setting.cutoff_threshold);
+
+					TaylorModel<Real> tmTemp2(Berns_poly[j].coefficients[i], domain.size());
+					tmTemp += tmTemp2;
+				}
+
+				// the linear part
+				if(Berns_poly[j].coefficients.size() > 1)
+				{
+					tmTemp.expansion += tmv_layer_input.tms[j].expansion * Berns_poly[j].coefficients[1];
+				}
+
+				// the constant
+				if(Berns_poly[j].coefficients.size() > 0)
+				{
+					Polynomial<Real> polyTemp(Berns_poly[j].coefficients[0], domain.size());
+					tmTemp.expansion += polyTemp;
+				}
+
+				tmTemp.remainder += Berns_rem[j];
+
+				tmvTemp.tms.push_back(tmTemp);
+			}
+		}
+		else
+		{
+			tmvTemp = tmv_layer_input;
+		}
+
+
+
+		// obtaining the vector of Taylor overapproximations for the activation functions in the k-th layer
+
+		vector<UnivariateTaylorModel<Real> > utm_activation(input_range.size());
+
+		TaylorModelVec<Real> tmv_layer_input_precond = tmv_layer_input;
+
+		interval_utm_setting.order = polar_setting.get_bernstein_order();
+
+		if(layers[k].activation != "Affine")
+		{
+			if(layers[k].activation == "sigmoid")
+			{
+				for(int j=0; j<input_range.size(); ++j)
+				{
+					Real const_part;
+					tmv_layer_input_precond.tms[j].constant(const_part);
+					tmv_layer_input_precond.tms[j].rmConstant();
+
+					UnivariateTaylorModel<Real> utm_x;
+					utm_x.expansion.coefficients.push_back(const_part);
+					utm_x.expansion.coefficients.push_back(1);
+
+					Interval x_range = input_range[j] - const_part;
+					interval_utm_setting.val = x_range;
+
+					utm_x.sigmoid_taylor(utm_activation[j], x_range,  polar_setting.get_bernstein_order(), setting.g_setting);
+				}
+			}
+			else if(layers[k].activation == "tanh")
+			{
+				for(int j=0; j<input_range.size(); ++j)
+				{
+					Real const_part;
+					tmv_layer_input_precond.tms[j].constant(const_part);
+					tmv_layer_input_precond.tms[j].rmConstant();
+
+					UnivariateTaylorModel<Real> utm_x;
+					utm_x.expansion.coefficients.push_back(const_part);
+					utm_x.expansion.coefficients.push_back(1);
+
+					Interval x_range = input_range[j] - const_part;
+					interval_utm_setting.val = x_range;
+
+					utm_x.tanh_taylor(utm_activation[j], x_range, polar_setting.get_bernstein_order(), setting.g_setting);
+				}
+			}
+		}
+
+		// extracting the linear part
+		Matrix<Real> Q_i_Taylor(input_range.size());
+
+
+
+		if(layers[k].activation != "Affine")
+		{
+			for(int j=0; j<utm_activation.size(); ++j)
+			{
+				if(utm_activation[j].expansion.coefficients.size() > 1)
+					Q_i_Taylor[j][j] = utm_activation[j].expansion.coefficients[1];
+				else
+					Q_i_Taylor[j][j] = 0;
+			}
+		}
+
+
+
+		order = polar_setting.get_taylor_order();
+
+		if(layers[k].activation != "Affine")
+		{
+			for(int j=0; j<utm_activation.size(); ++j)
+			{
+				TaylorModel<Real> tmTemp(utm_activation[j].expansion.coefficients.back(), domain.size());
+
+				// the nonlinear part
+				for (int i = utm_activation[j].expansion.coefficients.size() - 2; i >= 2; --i)
+				{
+					tmTemp.mul_ctrunc_assign(tmv_layer_input_precond.tms[j], domain, order, setting.tm_setting.cutoff_threshold);
+
+					TaylorModel<Real> tmTemp2(utm_activation[j].expansion.coefficients[i], domain.size());
+					tmTemp += tmTemp2;
+				}
+
+				// the linear part
+				if(utm_activation[j].expansion.coefficients.size() > 1)
+				{
+					tmTemp.expansion += tmv_layer_input_precond.tms[j].expansion * utm_activation[j].expansion.coefficients[1];
+				}
+
+				// the constant
+				if(utm_activation[j].expansion.coefficients.size() > 0)
+				{
+					Polynomial<Real> polyTemp(utm_activation[j].expansion.coefficients[0], domain.size());
+					tmTemp.expansion += polyTemp;
+				}
+
+				tmTemp.remainder += utm_activation[j].remainder;
+
+				if(tmTemp.remainder.width() < tmvTemp.tms[j].remainder.width())
+				{
+					tmvTemp.tms[j] = tmTemp;
+					Q_i[j][j] = Q_i_Taylor[j][j];
+				}
+			}
+		}
+
+
+
+
+
+		Matrix<Real> Phi_i = Q_i * layers[k].weight;
+
+
+
+		Matrix<Interval> J_k(tmvTemp.tms.size(), 1);
+		tmvTemp.Remainder(J_k);
+
+
+
+		// updating Q
+		for(int j=0; j<Q.size(); ++j)
+		{
+			Q[j] = Phi_i * Q[j];
+		}
+
+		Q.push_back(Phi_i);
+
+
+		// updating latest_J
+		latest_J = J_k;
+
+		for(int j=0; j<J.size(); ++j)
+		{
+			latest_J += Q[j+1] * J[j];
+		}
+
+		J.push_back(J_k);
+
+
+		// updating q_i
+		q_i = tmvTemp;
+
+		Matrix<Interval> imTemp = Q[0] * I1;
+
+		for(int j=0; j<q_i.tms.size(); ++j)
+		{
+			q_i.tms[j].remainder += latest_J[j][0] + imTemp[j][0];
+		}
+	}
+
+	tmv_output = q_i;
+
+
+	// applying the scalars and offset
+    for(int i = 0; i < tmv_output.tms.size(); ++i)
     {
-        cout << "------------- Layer " << K << " starts. -------------" << endl;
-
-        Flowpipe fp_layer_output;
-
-        // evaluate the the initial set x0
-        TaylorModelVec<Real> tmv_of_x0;
-
-        if (K == numOfLayers)
-        {
-            tmv_of_x0 = fp_layer_input.tmvPre;
-        }
-        else
-        {
-            Layer layer = layers[K];
-            Matrix<Real> weight = layer.get_weight();
-            tmv_of_x0 = weight * fp_layer_input.tmvPre;
-        }
-
-        // the center point of x0's polynomial part
-        std::vector<Real> const_of_x0;
-        tmv_of_x0.constant(const_of_x0);
-
-        unsigned int rangeDim = tmv_of_x0.tms.size();
-
-        for (unsigned int j = 0; j < rangeDim; ++j)
-        {
-            Real c;
-            tmv_of_x0.tms[j].remainder.remove_midpoint(c);
-            const_of_x0[j] += c;
-
-            if (K < numOfLayers)
-            {
-                Layer layer = layers[K];
-                Matrix<Real> bias = layer.get_bias();
-
-                const_of_x0[j] += bias[j][0];
-            }
-        }
-
-        // introduce a new variable r0 such that x0 = c0 + A*r0, then r0 is origin-centered
-        tmv_of_x0.rmConstant();
-
-        // decompose the linear and nonlinear part
-        TaylorModelVec<Real> x0_linear, x0_other;
-        tmv_of_x0.decompose(x0_linear, x0_other);
-
-        Matrix<Real> Phi_L_i(rangeDim, fp_layer_input.tmv.tms.size());
-
-        x0_linear.linearCoefficients(Phi_L_i);
-
-        Phi_L_i.right_scale_assign(symbolic_remainder.scalars);
-
-        // compute the remainder part under the linear transformation
-        Matrix<Interval> J_i(rangeDim, 1);
-
-        for (unsigned int i = 0; i < symbolic_remainder.Phi_L.size(); ++i)
-        {
-            symbolic_remainder.Phi_L[i] = Phi_L_i * symbolic_remainder.Phi_L[i];
-        }
-
-        symbolic_remainder.Phi_L.push_back(Phi_L_i);
-
-        for (unsigned int i = 1; i < symbolic_remainder.Phi_L.size(); ++i)
-        {
-            J_i += symbolic_remainder.Phi_L[i] * symbolic_remainder.J[i - 1];
-        }
-
-        Matrix<Interval> J_ip1(rangeDim, 1);
-
-        std::vector<Interval> range_of_x0;
-
-        // compute the local initial set
-        if (symbolic_remainder.J.size() > 0)
-        {
-            // compute the polynomial part under the linear transformation
-
-            std::vector<Polynomial<Real> > initial_linear = symbolic_remainder.Phi_L[0] * symbolic_remainder.polynomial_of_initial_set;
-
-            // compute the other part
-            std::vector<Interval> tmvPolyRange;
-            fp_layer_input.tmv.polyRange(tmvPolyRange, fp_layer_input.domain);
-            x0_other.insert_ctrunc(fp_layer_output.tmv, fp_layer_input.tmv, tmvPolyRange, fp_layer_input.domain, polar_setting.get_taylor_order(), setting.tm_setting.cutoff_threshold);
-
-            fp_layer_output.tmv.Remainder(J_ip1);
-
-
-            for (int i = 0; i < rangeDim; ++i)
-            {
-                fp_layer_output.tmv.tms[i].expansion += initial_linear[i];
-            }
-
-            for (int i = 0; i < rangeDim; ++i)
-            {
-                fp_layer_output.tmv.tms[i].remainder = J_ip1[i][0] + J_i[i][0];
-            }
-
-            fp_layer_output.tmv.intEval(range_of_x0, fp_layer_input.domain);
-
-        }
-        else
-        {
-            std::vector<Interval> tmvPolyRange;
-            fp_layer_input.tmv.polyRange(tmvPolyRange, fp_layer_input.domain);
-            tmv_of_x0.insert_ctrunc(fp_layer_output.tmv, fp_layer_input.tmv, tmvPolyRange, fp_layer_input.domain, polar_setting.get_taylor_order(), setting.tm_setting.cutoff_threshold);
-
-            fp_layer_output.tmv.intEval(range_of_x0, fp_layer_input.domain);
-
-            fp_layer_output.tmv.Remainder(J_ip1);
-        }
-
-        symbolic_remainder.J.push_back(J_ip1);
-
-        if (K == numOfLayers)
-        {
-            tmv_output = fp_layer_output.tmv;
-
-            for (int i = 0; i < tmv_output.tms.size(); ++i)
-            {
-            	Polynomial<Real> tmp_poly(const_of_x0[i], domain.size());
-                tmv_output.tms[i].expansion += tmp_poly;
-            }
-
-            break;
-        }
-
-        // Compute the scaling matrix S.
-        std::vector<Real> S, invS;
-
-        if (symbolic_remainder.scalars.size() != rangeDim)
-        {
-            symbolic_remainder.scalars.resize(rangeDim, 0);
-        }
-
-        for (int i = 0; i < range_of_x0.size(); ++i)
-        {
-            Real sup;
-            range_of_x0[i].mag(sup);
-
-            if (sup == 0)
-            {
-                S.push_back(0);
-                invS.push_back(1);
-                symbolic_remainder.scalars[i] = 0;
-            }
-            else
-            {
-                S.push_back(sup);
-                Real tmp = 1 / sup;
-                invS.push_back(tmp);
-                symbolic_remainder.scalars[i] = tmp;
-            }
-        }
-
-        fp_layer_output.tmv.scale_assign(invS);
-
-
-        for (int i = 0; i < rangeDim; ++i)
-        {
-            range_of_x0[i] += const_of_x0[i];
-        }
-
-        // Computing a TM overapproximation of the activation function sigmoid(c + z) such that z in I
-        std::vector<Interval> newDomain;
-        TaylorModelVec<Real> tmv_simple_layer_input(range_of_x0, newDomain);
-
-
-        Layer layer = layers[K];
-        // tmv_simple_layer_input.activate(fp_layer_output.tmvPre, newDomain, layer.get_activation(), ti.order, ti.bernstein_order, ti.partition_num, ti.cutoff_threshold, ti.g_setting, 2);
-
-        layer.post_activate(fp_layer_output.tmvPre,tmv_simple_layer_input, newDomain, polar_setting, setting);
-
-        fp_layer_input.tmv = fp_layer_output.tmv;
-        fp_layer_input.tmvPre = fp_layer_output.tmvPre;
-    }
-
-    // cout << tmv_output.tms.size() << endl;
-
-    for (int i = 0; i < num_of_outputs; i++)
-    {
-        if (tmv_output.tms[i].expansion.terms.size() == 0)
+        if(tmv_output.tms[i].expansion.terms.size() == 0)
         {
             Polynomial<Real> tmp_poly(-offset, domain.size());
             tmv_output.tms[i].expansion = tmp_poly;
-        } else
+        }
+        else
         {
             tmv_output.tms[i].expansion -= offset;
         }
     }
 
-    Matrix<Real> scalar(num_of_outputs, num_of_outputs);
-    for (int i = 0; i < num_of_outputs; i++)
+    for(int i = 0; i < tmv_output.tms.size(); ++i)
     {
- //       scalar[i][i] = scale_factor;
         tmv_output.tms[i] *= scale_factor;
     }
-   // tmv_output = scalar * tmv_output;
-
-//    Interval box;
-//    tmv_output.tms[0].intEval(box, domain);
-//    cout << "neural network output range by TMP: " << box << endl;
 }
-
-
-//void NNTaylor::NN_Reach(TaylorModelVec<Real> &tmv_output, TaylorModelVec<Real> &tmv_input, TaylorInfo ti, vector<Interval> &tmv_domain)
-//{
-//    Interval intUnit(-1, 1);
-//
-//    TaylorModelVec<Real> tmv_layer_input = tmv_input;
-//
-//    Flowpipe fp_layer_input(tmv_layer_input, tmv_domain, ti.cutoff_threshold);
-//
-//    Symbolic_Remainder symbolic_remainder(fp_layer_input);
-//
-//    unsigned int numOfLayers = nn.get_num_of_hidden_layers() + 1;
-//
-//    unsigned int layer_input_dim = tmv_domain.size() - 1;
-//
-//    for (unsigned int K = 0; true; ++K)
-//    {
-//        cout << "------------- Layer " << K << " starts. -------------" << endl;
-//
-//        Flowpipe fp_layer_output;
-//
-//        // evaluate the the initial set x0
-//        TaylorModelVec<Real> tmv_of_x0;
-//
-//        if (K == numOfLayers)
-//        {
-//            tmv_of_x0 = fp_layer_input.tmvPre;
-//        }
-//        else
-//        {
-//            Layer layer = this->nn.get_layers()[K];
-//            Matrix<Interval> weight = layer.get_weight();
-//
-//            Matrix<Real> weight_value(weight.rows(), weight.cols());
-//            for (int i = 0; i < weight.rows(); i++)
-//            {
-//                for (int j = 0; j < weight.cols(); j++)
-//                {
-//                    weight_value[i][j] = weight[i][j].sup();
-//                }
-//            }
-//
-//            //cout << weight_value << endl;
-//            //cout << fp_layer_input.tmvPre.tms.size() << endl;
-//            tmv_of_x0 = weight_value * fp_layer_input.tmvPre;
-//        }
-//
-//        // the center point of x0's polynomial part
-//        std::vector<Real> const_of_x0;
-//        tmv_of_x0.constant(const_of_x0);
-//
-//        unsigned int rangeDim = tmv_of_x0.tms.size();
-//        unsigned int rangeDimExt = rangeDim + 1;
-//
-//        for (unsigned int j = 0; j < rangeDim; ++j)
-//        {
-//            Real c;
-//            tmv_of_x0.tms[j].remainder.remove_midpoint(c);
-//            const_of_x0[j] += c;
-//
-//            if (K < numOfLayers)
-//            {
-//                Layer layer = this->nn.get_layers()[K];
-//                Matrix<Interval> bias = layer.get_bias();
-//
-//                Matrix<Real> bias_value(bias.rows(), bias.cols());
-//                for (int i = 0; i < bias.rows(); i++)
-//                {
-//                    for (int j = 0; j < bias.cols(); j++)
-//                    {
-//                        bias_value[i][j] = bias[i][j].sup();
-//                    }
-//                }
-//
-//                const_of_x0[j] += bias_value[j][0];
-//            }
-//        }
-//
-//        // introduce a new variable r0 such that x0 = c0 + A*r0, then r0 is origin-centered
-//        tmv_of_x0.rmConstant();
-//
-//        // decompose the linear and nonlinear part
-//        TaylorModelVec<Real> x0_linear, x0_other;
-//        tmv_of_x0.decompose(x0_linear, x0_other);
-//
-//        Matrix<Real> Phi_L_i(rangeDim, layer_input_dim);
-//
-//        x0_linear.linearCoefficients(Phi_L_i);
-//
-//        Matrix<Real> local_trans_linear = Phi_L_i;
-//        Phi_L_i.right_scale_assign(symbolic_remainder.scalars);
-//        // compute the remainder part under the linear transformation
-//        Matrix<Interval> J_i(rangeDim, 1);
-//
-//        for (unsigned int i = 0; i < symbolic_remainder.Phi_L.size(); ++i)
-//        {
-//            symbolic_remainder.Phi_L[i] = Phi_L_i * symbolic_remainder.Phi_L[i];
-//        }
-//
-//        symbolic_remainder.Phi_L.push_back(Phi_L_i);
-//
-//        for (unsigned int i = 1; i < symbolic_remainder.Phi_L.size(); ++i)
-//        {
-//            J_i += symbolic_remainder.Phi_L[i] * symbolic_remainder.J[i - 1];
-//        }
-//
-//        Matrix<Interval> J_ip1(rangeDim, 1);
-//
-//        std::vector<Interval> range_of_x0;
-//
-//        // compute the local initial set
-//        if (symbolic_remainder.J.size() > 0)
-//        {
-//            // cout << symbolic_remainder.Phi_L[0].cols() << endl;
-//            // cout << symbolic_remainder.polynomial_of_initial_set.size() << endl;
-//            // compute the polynomial part under the linear transformation
-//            std::vector<Polynomial<Real>> initial_linear = symbolic_remainder.Phi_L[0] * symbolic_remainder.polynomial_of_initial_set;
-//
-//            // compute the other part
-//            std::vector<Interval> tmvPolyRange;
-//            fp_layer_input.tmv.polyRange(tmvPolyRange, fp_layer_input.domain);
-//            x0_other.insert_ctrunc(fp_layer_output.tmv, fp_layer_input.tmv, tmvPolyRange, fp_layer_input.domain, ti.order, ti.cutoff_threshold);
-//
-//            fp_layer_output.tmv.Remainder(J_ip1);
-//
-//            Matrix<Interval> x0_rem(rangeDim, 1);
-//            tmv_of_x0.Remainder(x0_rem);
-//            J_ip1 += x0_rem;
-//
-//            for (int i = 0; i < rangeDim; ++i)
-//            {
-//                fp_layer_output.tmv.tms[i].expansion += initial_linear[i];
-//            }
-//
-//            for (int i = 0; i < rangeDim; ++i)
-//            {
-//                fp_layer_output.tmv.tms[i].remainder = J_ip1[i][0] + J_i[i][0];
-//            }
-//
-//            fp_layer_output.tmv.intEval(range_of_x0, fp_layer_input.domain);
-//        }
-//        else
-//        {
-//            std::vector<Interval> tmvPolyRange;
-//            fp_layer_input.tmv.polyRange(tmvPolyRange, fp_layer_input.domain);
-//            tmv_of_x0.insert_ctrunc(fp_layer_output.tmv, fp_layer_input.tmv, tmvPolyRange, fp_layer_input.domain, ti.order, ti.cutoff_threshold);
-//
-//            fp_layer_output.tmv.intEval(range_of_x0, fp_layer_input.domain);
-//
-//            fp_layer_output.tmv.Remainder(J_ip1);
-//        }
-//
-//        symbolic_remainder.J.push_back(J_ip1);
-//
-//        if (K == numOfLayers)
-//        {
-//            tmv_output = fp_layer_output.tmv;
-//
-//            for (int i = 0; i < tmv_output.tms.size(); ++i)
-//            {
-//                tmv_output.tms[i] += const_of_x0[i];
-//            }
-//
-//            break;
-//        }
-//
-//        // Compute the scaling matrix S.
-//        std::vector<Real> S, invS;
-//
-//        if (symbolic_remainder.scalars.size() != rangeDim)
-//        {
-//            symbolic_remainder.scalars.resize(rangeDim, 0);
-//        }
-//
-//        for (int i = 0; i < rangeDim; ++i)
-//        {
-//            Real sup;
-//            range_of_x0[i].mag(sup);
-//
-//            if (sup == 0)
-//            {
-//                S.push_back(0);
-//                invS.push_back(1);
-//                symbolic_remainder.scalars[i] = 0;
-//            }
-//            else
-//            {
-//                S.push_back(sup);
-//                Real tmp = 1 / sup;
-//                invS.push_back(tmp);
-//                symbolic_remainder.scalars[i] = tmp;
-//                // range_of_x0[i] = intUnit;
-//            }
-//        }
-//
-//        fp_layer_output.tmv.scale_assign(invS);
-//
-//        for (int i = 0; i < rangeDim; ++i)
-//        {
-//            range_of_x0[i] += const_of_x0[i];
-//        }
-//
-//        // Computing a TM overapproximation of the activation function sigmoid(c + z) such that z in I
-//        std::vector<Interval> newDomain;
-//        TaylorModelVec<Real> tmv_simple_layer_input(range_of_x0, newDomain);
-//
-//        //        tmv_simple_layer_input.output(std::cout, stateVars, tmVars);
-//        //        std::cout << std::endl << std::endl;
-//        Layer layer = this->nn.get_layers()[K];
-//        tmv_simple_layer_input.activate(fp_layer_output.tmvPre, newDomain, layer.get_activation(), ti.order, ti.bernstein_order, ti.partition_num, ti.cutoff_threshold, ti.g_setting, 2);
-//
-//        //        tmv_simple_layer_output.output(std::cout, stateVars, tmVars);
-//        //        std::cout << std::endl << std::endl;
-//
-//        fp_layer_input.tmv = fp_layer_output.tmv;
-//        fp_layer_input.tmvPre = fp_layer_output.tmvPre;
-//
-//        layer_input_dim = layer.get_neuron_number_this_layer();
-//    }
-//
-//    // cout << tmv_output.tms.size() << endl;
-//
-//    Matrix<Real> offset(nn.get_num_of_outputs(), 1);
-//    for (int i = 0; i < nn.get_num_of_outputs(); i++)
-//    {
-//        offset[i][0] = -nn.get_offset().sup();
-//    }
-//    //cout << tmv_output.tms.size() << endl;
-//    //cout << offset.rows() << endl;
-//
-//    tmv_output += offset;
-//
-//    Matrix<Real> scalar(nn.get_num_of_outputs(), nn.get_num_of_outputs());
-//    for (int i = 0; i < nn.get_num_of_outputs(); i++)
-//    {
-//        scalar[i][i] = nn.get_scale_factor().sup();
-//    }
-//    tmv_output = scalar * tmv_output;
-//    // cout << "1111111111111111111111" << endl;
-//
-//    Interval box;
-//    tmv_output.tms[0].intEval(box, tmv_domain);
-//    cout << "neural network output range by TMP_symbolic_remainder: " << box << endl;
-//}

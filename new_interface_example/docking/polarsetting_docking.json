@@ -1,0 +1,17 @@
+{
+    "POLAR_setting": {
+        "taylor_order": 4,
+        "bernstein_order": 4,
+        "partition_num": 20,
+        "neuron_approx_type": "Mixed",
+        "remainder_type": "Symbolic"
+    },
+    "flowstar_setting": {
+        "cutoff_threshold": 1e-8,
+        "flowpipe_stepsize": 0.05
+    },
+    "output_setting": {
+        "output_dimension": ["x", "y"],
+        "output_filename": "docking"
+    }
+}

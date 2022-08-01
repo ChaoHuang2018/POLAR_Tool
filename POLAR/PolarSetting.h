@@ -22,6 +22,10 @@ protected:
     double cutoff_threshold;
     double flowpipe_stepsize;
     
+    //output setting
+    vector<string> output_dim;
+    string output_filename;
+    
     int validate();
     
 public:
@@ -58,5 +62,13 @@ public:
     void set_flowpipe_stepsize(double flowpipe_stepsize);
     
     double get_flowpipe_stepsize();
+    
+    void set_output_dim(vector<string> output_dim);
+    
+    vector<string> get_output_dim();
+    
+    void set_output_filename(string output_filename);
+
+    string get_output_filename();
 
 };

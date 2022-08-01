@@ -5,7 +5,7 @@ using namespace std;
 
 class Layer
 {
-protected:
+public:
     // activation of this layer: can be 'ReLU' or 'tanh' or 'sigmoid'
     string activation;
     // even though weight and bias are real matrix, we use interval to describe the access of each matrix for convenience
@@ -91,6 +91,6 @@ public:
     
     void get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const;
     
-    void get_output_tmv_symbolic(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const;
+    void get_output_tmv_symbolic(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting);
     
 };
