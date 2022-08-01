@@ -48,6 +48,7 @@ PolarSetting::PolarSetting(string filename)
         
         cutoff_threshold = j["flowstar_setting"]["cutoff_threshold"];
         flowpipe_stepsize = j["flowstar_setting"]["flowpipe_stepsize"];
+        symbolic_queue_size = j["flowstar_setting"]["symbolic_queue_size"];
         
         output_dim = j["output_setting"]["output_dimension"];
         output_filename = j["output_setting"]["output_filename"];
@@ -167,4 +168,14 @@ void PolarSetting::set_output_filename(string output_filename)
 string PolarSetting::get_output_filename()
 {
     return this->output_filename;
+}
+
+void PolarSetting::set_symbolic_queue_size(unsigned int symbolic_queue_size)
+{
+    this->symbolic_queue_size = symbolic_queue_size;
+}
+
+unsigned int PolarSetting::get_symbolic_queue_size()
+{
+    return this->symbolic_queue_size;
 }

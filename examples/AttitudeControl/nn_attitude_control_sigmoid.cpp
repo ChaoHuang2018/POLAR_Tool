@@ -27,31 +27,10 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
-	Expression<Real> deriv_x0("0.25*(u0 + x1*x2)", vars); // theta_r = 0
-	Expression<Real> deriv_x1("0.5*(u1 - 3*x0*x2)", vars);
-	Expression<Real> deriv_x2("u2 + 2*x0*x1", vars);
-	Expression<Real> deriv_x3("0.5*x1*(x3^2 + x4^2 + x5^2 - x5) + 0.5*x2*(x3^2 + x4^2 + x4 + x5^2) + 0.5*x0*(x3^2 + x4^2 + x5^2 + 1)", vars);
-	Expression<Real> deriv_x4("0.5*x0*(x3^2 + x4^2 + x5^2 + x5) + 0.5*x2*(x3^2 - x3 + x4^2 + x5^2) + 0.5*x1*(x3^2 + x4^2 + x5^2 + 1)", vars);
-	Expression<Real> deriv_x5("0.5*x0*(x3^2 + x4^2 - x4 + x5^2) + 0.5*x1*(x3^2 + x3 + x4^2 + x5^2) + 0.5*x2*(x3^2 + x4^2 + x5^2 + 1)", vars);
-	Expression<Real> deriv_u0("0", vars);
-	Expression<Real> deriv_u1("0", vars);
-	Expression<Real> deriv_u2("0", vars);
-
-	vector<Expression<Real>> ode_rhs(numVars);
-	ode_rhs[x0_id] = deriv_x0;
-	ode_rhs[x1_id] = deriv_x1;
-	ode_rhs[x2_id] = deriv_x2;
-	ode_rhs[x3_id] = deriv_x3;
-	ode_rhs[x4_id] = deriv_x4;
-	ode_rhs[x5_id] = deriv_x5;
-	ode_rhs[u0_id] = deriv_u0;
-	ode_rhs[u1_id] = deriv_u1;
-	ode_rhs[u2_id] = deriv_u2;
-
-	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
+    ODE<Real> dynamics({"0.25*(u0 + x1*x2)", "0.5*(u1 - 3*x0*x2)", "u2 + 2*x0*x1", "0.5*x1*(x3^2 + x4^2 + x5^2 - x5) + 0.5*x2*(x3^2 + x4^2 + x4 + x5^2) + 0.5*x0*(x3^2 + x4^2 + x5^2 + 1)", "0.5*x0*(x3^2 + x4^2 + x5^2 + x5) + 0.5*x2*(x3^2 - x3 + x4^2 + x5^2) + 0.5*x1*(x3^2 + x4^2 + x5^2 + 1)", "0.5*x0*(x3^2 + x4^2 - x4 + x5^2) + 0.5*x1*(x3^2 + x3 + x4^2 + x5^2) + 0.5*x2*(x3^2 + x4^2 + x5^2 + 1)"}, vars);
 
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[4]);
 
@@ -59,7 +38,7 @@ int main(int argc, char *argv[])
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.1);
+//	setting.setTime(0.1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-7);
@@ -74,7 +53,6 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
     //setting.g_setting.prepareForReachability(15);
   //  cout << "--------" << setting.g_setting.factorial_rec.size() << ", " << setting.g_setting.power_4.size() << ", " << setting.g_setting.double_factorial.size() << endl;
 
@@ -104,7 +82,7 @@ int main(int argc, char *argv[])
     Symbolic_Remainder symbolic_remainder(initial_set, 2000);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -177,7 +155,7 @@ int main(int argc, char *argv[])
         initial_set.tmvPre.tms[u2_id] = tmv_output.tms[2];
         cout << "TM -- Propagation" << endl;
 
-        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -221,13 +199,13 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x1");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x0_x1_" + to_string(if_symbo), result);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x0_x1_" + to_string(if_symbo), result.tmv_flowpipes);
 
 	plot_setting.setOutputDims("x2", "x3");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x2_x3_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x2_x3_" + to_string(if_symbo), result.tmv_flowpipes);
 
 	plot_setting.setOutputDims("x4", "x5");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x4_x5_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x4_x5_" + to_string(if_symbo), result.tmv_flowpipes);
 
 	return 0;
 }

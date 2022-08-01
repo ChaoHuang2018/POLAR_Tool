@@ -1,18 +1,18 @@
 {
     "POLAR_setting": {
-        "taylor_order": 6,
+        "taylor_order": 4,
         "bernstein_order": 4,
         "partition_num": 4000,
         "neuron_approx_type": "Taylor",
-        "remainder_type": "Concrete"
+        "remainder_type": "Symbolic"
     },
     "flowstar_setting": {
-        "cutoff_threshold": 1e-8,
+        "cutoff_threshold": 1e-7,
         "flowpipe_stepsize": 0.005,
         "symbolic_queue_size": 500
     },
     "output_setting": {
-        "output_dimension": ["x0", "x1"],
-        "output_filename": "benchmark1"
+        "output_dimension": ["t", "x3"],
+        "output_filename": "QUAD20"
     }
 }

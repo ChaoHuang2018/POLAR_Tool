@@ -68,10 +68,10 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
     }
     Flowpipe initial_set(init);
     
-    Symbolic_Remainder symbolic_remainder(initial_set, 500);
+    Symbolic_Remainder symbolic_remainder(initial_set, ps.get_symbolic_queue_size());
     
     // no unsafe set
-    vector<Constraint> unsafeSet;
+    vector<Constraint> safeSet;
     
     // result of the reachability computation
     Result_of_Reachability result;
@@ -109,8 +109,8 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
             nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, ps, setting);
         }
         
-        Matrix<Interval> rm1(1, 1);
-        tmv_output.Remainder(rm1);
+//        Matrix<Interval> rm1(1, 1);
+//        tmv_output.Remainder(rm1);
 //        cout << "Neural network taylor remainder: " << rm1 << endl;
 //        cout << tmv_output.tms[0].remainder << endl;
         
@@ -123,11 +123,11 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
         
 //        cout << "size: " << initial_set.tmvPre.tms.size() << endl;
         
-        dynamics.reach(result, initial_set, s.control_stepsize, setting, unsafeSet, symbolic_remainder);
-//        dynamics.reach(result, setting, initial_set, unsafeSet);
+        dynamics.reach(result, initial_set, s.control_stepsize, setting, safeSet, symbolic_remainder);
+//      dynamics.reach(result, initial_set, s.control_stepsize, setting, safeSet);
 
         
-        if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
+        if (result.isCompleted())
         {
             initial_set = result.fp_end_of_time;
 //            cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
@@ -139,11 +139,11 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
         }
     }
     
-    vector<Interval> end_box;
-    string reach_result;
-    reach_result = result.status;
-    result.fp_end_of_time.intEval(end_box, ps.get_taylor_order(), setting.tm_setting.cutoff_threshold);
-    
+//    vector<Interval> end_box;
+//    string reach_result;
+//    reach_result = result.status;
+//    result.fp_end_of_time.intEval(end_box, ps.get_taylor_order(), setting.tm_setting.cutoff_threshold);
+
     time(&end_timer);
     seconds = difftime(start_timer, end_timer);
     

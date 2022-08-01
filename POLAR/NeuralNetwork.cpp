@@ -123,8 +123,8 @@ NeuralNetwork::NeuralNetwork(string filename)
         bias0[i][0] = stod(line);
     }
     Layer input_layer(activation[0], weight0, bias0);
-//     cout << "weight0: " << weight0 << endl;
-//     cout << "bias0: " << bias0 << endl;
+    // cout << "weight0: " << weight0 << endl;
+    // cout << "bias0: " << bias0 << endl;
     layers.push_back(input_layer);
 
     // compute the parameters of hidden layers
@@ -137,9 +137,7 @@ NeuralNetwork::NeuralNetwork(string filename)
         {
             for (int j = 0; j < network_structure[layer_idx]; j++)
             {
-//                cout << "index: " << layer_idx << ", " << i << ", " << j << endl;
                 getline(input, line);
-//                cout << line << endl;
                 weight[i][j] = stod(line);
             }
             getline(input, line);
@@ -372,109 +370,109 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> &tmv_output, Ta
 
 		// obtaining the vector of Taylor overapproximations for the activation functions in the k-th layer
 
-		vector<UnivariateTaylorModel<Real> > utm_activation(input_range.size());
-
-		TaylorModelVec<Real> tmv_layer_input_precond = tmv_layer_input;
-
-		interval_utm_setting.order = polar_setting.get_bernstein_order();
-
-		if(layers[k].activation != "Affine")
-		{
-			if(layers[k].activation == "sigmoid")
-			{
-				for(int j=0; j<input_range.size(); ++j)
-				{
-					Real const_part;
-					tmv_layer_input_precond.tms[j].constant(const_part);
-					tmv_layer_input_precond.tms[j].rmConstant();
-
-					UnivariateTaylorModel<Real> utm_x;
-					utm_x.expansion.coefficients.push_back(const_part);
-					utm_x.expansion.coefficients.push_back(1);
-
-					Interval x_range = input_range[j] - const_part;
-					interval_utm_setting.val = x_range;
-
-					utm_x.sigmoid_taylor(utm_activation[j], x_range,  polar_setting.get_bernstein_order(), setting.g_setting);
-				}
-			}
-			else if(layers[k].activation == "tanh")
-			{
-				for(int j=0; j<input_range.size(); ++j)
-				{
-					Real const_part;
-					tmv_layer_input_precond.tms[j].constant(const_part);
-					tmv_layer_input_precond.tms[j].rmConstant();
-
-					UnivariateTaylorModel<Real> utm_x;
-					utm_x.expansion.coefficients.push_back(const_part);
-					utm_x.expansion.coefficients.push_back(1);
-
-					Interval x_range = input_range[j] - const_part;
-					interval_utm_setting.val = x_range;
-
-					utm_x.tanh_taylor(utm_activation[j], x_range, polar_setting.get_bernstein_order(), setting.g_setting);
-				}
-			}
-		}
-
-		// extracting the linear part
-		Matrix<Real> Q_i_Taylor(input_range.size());
-
-
-
-		if(layers[k].activation != "Affine")
-		{
-			for(int j=0; j<utm_activation.size(); ++j)
-			{
-				if(utm_activation[j].expansion.coefficients.size() > 1)
-					Q_i_Taylor[j][j] = utm_activation[j].expansion.coefficients[1];
-				else
-					Q_i_Taylor[j][j] = 0;
-			}
-		}
-
-
-
-		order = polar_setting.get_taylor_order();
-
-		if(layers[k].activation != "Affine")
-		{
-			for(int j=0; j<utm_activation.size(); ++j)
-			{
-				TaylorModel<Real> tmTemp(utm_activation[j].expansion.coefficients.back(), domain.size());
-
-				// the nonlinear part
-				for (int i = utm_activation[j].expansion.coefficients.size() - 2; i >= 2; --i)
-				{
-					tmTemp.mul_ctrunc_assign(tmv_layer_input_precond.tms[j], domain, order, setting.tm_setting.cutoff_threshold);
-
-					TaylorModel<Real> tmTemp2(utm_activation[j].expansion.coefficients[i], domain.size());
-					tmTemp += tmTemp2;
-				}
-
-				// the linear part
-				if(utm_activation[j].expansion.coefficients.size() > 1)
-				{
-					tmTemp.expansion += tmv_layer_input_precond.tms[j].expansion * utm_activation[j].expansion.coefficients[1];
-				}
-
-				// the constant
-				if(utm_activation[j].expansion.coefficients.size() > 0)
-				{
-					Polynomial<Real> polyTemp(utm_activation[j].expansion.coefficients[0], domain.size());
-					tmTemp.expansion += polyTemp;
-				}
-
-				tmTemp.remainder += utm_activation[j].remainder;
-
-				if(tmTemp.remainder.width() < tmvTemp.tms[j].remainder.width())
-				{
-					tmvTemp.tms[j] = tmTemp;
-					Q_i[j][j] = Q_i_Taylor[j][j];
-				}
-			}
-		}
+//		vector<UnivariateTaylorModel<Real> > utm_activation(input_range.size());
+//
+//		TaylorModelVec<Real> tmv_layer_input_precond = tmv_layer_input;
+//
+//		interval_utm_setting.order = polar_setting.get_bernstein_order();
+//
+//		if(layers[k].activation != "Affine")
+//		{
+//			if(layers[k].activation == "sigmoid")
+//			{
+//				for(int j=0; j<input_range.size(); ++j)
+//				{
+//					Real const_part;
+//					tmv_layer_input_precond.tms[j].constant(const_part);
+//					tmv_layer_input_precond.tms[j].rmConstant();
+//
+//					UnivariateTaylorModel<Real> utm_x;
+//					utm_x.expansion.coefficients.push_back(const_part);
+//					utm_x.expansion.coefficients.push_back(1);
+//
+//					Interval x_range = input_range[j] - const_part;
+//					interval_utm_setting.val = x_range;
+//
+//					utm_x.sigmoid_taylor(utm_activation[j], x_range,  polar_setting.get_bernstein_order(), setting.g_setting);
+//				}
+//			}
+//			else if(layers[k].activation == "tanh")
+//			{
+//				for(int j=0; j<input_range.size(); ++j)
+//				{
+//					Real const_part;
+//					tmv_layer_input_precond.tms[j].constant(const_part);
+//					tmv_layer_input_precond.tms[j].rmConstant();
+//
+//					UnivariateTaylorModel<Real> utm_x;
+//					utm_x.expansion.coefficients.push_back(const_part);
+//					utm_x.expansion.coefficients.push_back(1);
+//
+//					Interval x_range = input_range[j] - const_part;
+//					interval_utm_setting.val = x_range;
+//
+//					utm_x.tanh_taylor(utm_activation[j], x_range, polar_setting.get_bernstein_order(), setting.g_setting);
+//				}
+//			}
+//		}
+//
+//		// extracting the linear part
+//		Matrix<Real> Q_i_Taylor(input_range.size());
+//
+//
+//
+//		if(layers[k].activation != "Affine")
+//		{
+//			for(int j=0; j<utm_activation.size(); ++j)
+//			{
+//				if(utm_activation[j].expansion.coefficients.size() > 1)
+//					Q_i_Taylor[j][j] = utm_activation[j].expansion.coefficients[1];
+//				else
+//					Q_i_Taylor[j][j] = 0;
+//			}
+//		}
+//
+//
+//
+//		order = polar_setting.get_taylor_order();
+//
+//		if(layers[k].activation != "Affine")
+//		{
+//			for(int j=0; j<utm_activation.size(); ++j)
+//			{
+//				TaylorModel<Real> tmTemp(utm_activation[j].expansion.coefficients.back(), domain.size());
+//
+//				// the nonlinear part
+//				for (int i = utm_activation[j].expansion.coefficients.size() - 2; i >= 2; --i)
+//				{
+//					tmTemp.mul_ctrunc_assign(tmv_layer_input_precond.tms[j], domain, order, setting.tm_setting.cutoff_threshold);
+//
+//					TaylorModel<Real> tmTemp2(utm_activation[j].expansion.coefficients[i], domain.size());
+//					tmTemp += tmTemp2;
+//				}
+//
+//				// the linear part
+//				if(utm_activation[j].expansion.coefficients.size() > 1)
+//				{
+//					tmTemp.expansion += tmv_layer_input_precond.tms[j].expansion * utm_activation[j].expansion.coefficients[1];
+//				}
+//
+//				// the constant
+//				if(utm_activation[j].expansion.coefficients.size() > 0)
+//				{
+//					Polynomial<Real> polyTemp(utm_activation[j].expansion.coefficients[0], domain.size());
+//					tmTemp.expansion += polyTemp;
+//				}
+//
+//				tmTemp.remainder += utm_activation[j].remainder;
+//
+//				if(tmTemp.remainder.width() < tmvTemp.tms[j].remainder.width())
+//				{
+//					tmvTemp.tms[j] = tmTemp;
+//					Q_i[j][j] = Q_i_Taylor[j][j];
+//				}
+//			}
+//		}
 
 
 

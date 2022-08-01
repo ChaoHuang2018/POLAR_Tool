@@ -19,8 +19,10 @@ protected:
     // Concrete, Symbolic
     string remainder_type;
     
+    //polar setting
     double cutoff_threshold;
     double flowpipe_stepsize;
+    unsigned int symbolic_queue_size;
     
     //output setting
     vector<string> output_dim;
@@ -70,5 +72,9 @@ public:
     void set_output_filename(string output_filename);
 
     string get_output_filename();
+    
+    void set_symbolic_queue_size(unsigned int symbolic_queue_size);
+
+    unsigned int get_symbolic_queue_size();
 
 };

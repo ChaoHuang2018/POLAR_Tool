@@ -24,5 +24,5 @@ polar_lib: $(OBJS)
 
 
 clean:
-	rm -f *.o libpolar.a
+	rm -f *.o libpolar.a polar_tool
 

@@ -21,6 +21,7 @@ System::System(string filename)
         // Parse json
         json j = json::parse(input);
         num_of_states = j["dynamics"]["state_name_list"].size();
+//        cout << this->num_of_states << endl;
         num_of_control = j["dynamics"]["control_name_list"].size();
         state_name_list = j["dynamics"]["state_name_list"];
         control_name_list = j["dynamics"]["control_name_list"];
