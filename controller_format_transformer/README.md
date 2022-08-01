@@ -13,9 +13,9 @@ outputfile: the file name of the output onnx neural network
 * Make sure that onnx and onnxruntime are install, i.e. pip install xxxx
  
 * Run 
-
+```
 python torch2onnx.py <inputfile>
-
+```
 
 * The outputfile has the same file name as inputfile except for the `.onnx` suffix.
 
@@ -23,6 +23,6 @@ python torch2onnx.py <inputfile>
 ### Instructions: Transform an original onnx neural network to txt-format model
 
 * Run 
-
+```
 python keras2txt.py --keras_model_file=<inputfile> --output_txt_model_file=<outputfile>
-
+```
