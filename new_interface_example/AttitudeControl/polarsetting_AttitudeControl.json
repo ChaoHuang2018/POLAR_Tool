@@ -2,17 +2,17 @@
     "POLAR_setting": {
         "taylor_order": 4,
         "bernstein_order": 4,
-        "partition_num": 4000,
-        "neuron_approx_type": "Berns",
+        "partition_num": 100,
+        "neuron_approx_type": "Mix",
         "remainder_type": "Symbolic"
     },
     "flowstar_setting": {
         "cutoff_threshold": 1e-7,
-        "flowpipe_stepsize": 0.005,
-        "symbolic_queue_size": 2000
+        "flowpipe_stepsize": 0.05,
+        "symbolic_queue_size": 400
     },
     "output_setting": {
-        "output_dimension": ["x0", "x1"],
+        "output_dimension": ["x1", "x4"],
         "output_filename": "AttitudeControl"
     }
 }
