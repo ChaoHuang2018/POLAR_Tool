@@ -9,8 +9,8 @@ OBJS = NeuralNetwork.o BernsteinPoly.o Neuron.o PolarSetting.o System.o Specific
 all: polar_lib polar_tool
 # all: benchmark6_tanh
 
-polar_tool: Polar_tool.o
-	g++ -O3 -w $(LINK_FLAGS) -L./ -o $@ $^ $(LIBS) -lpolar
+polar_tool: Polar_tool.o $(OBJS)
+	g++ -O3 -w $(LINK_FLAGS) -L./ -o $@ $^ $(LIBS)
 
 polar_lib: $(OBJS)
 	ar rcs libpolar.a $^
