@@ -48,7 +48,9 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
     input.intEval(tmRange, domain);
 
 	
-	UnivariatePolynomial<Real> up = gen_bern_poly("sigmoid", tmRange, bernstein_order);
+    UnivariatePolynomial<Real> up;
+    
+    gen_bern_poly(up, "sigmoid", tmRange, bernstein_order);
 
 	double error = gen_bern_err_by_sample(up, "sigmoid", tmRange, partition_num);
 
@@ -155,7 +157,8 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     Interval tmRange;
     input.intEval(tmRange, domain);
     
-    UnivariatePolynomial<Real> up = gen_bern_poly("tanh", tmRange, bernstein_order);
+    UnivariatePolynomial<Real> up;
+    gen_bern_poly(up, "tanh", tmRange, bernstein_order);
 
     double error = gen_bern_err_by_sample(up, "tanh", tmRange, partition_num);
 
@@ -238,7 +241,8 @@ void Neuron::relu_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     Interval tmRange;
     input.intEval(tmRange, domain);
     
-    UnivariatePolynomial<Real> up = gen_bern_poly("ReLU", tmRange, bernstein_order);
+    UnivariatePolynomial<Real> up;
+    gen_bern_poly(up, "ReLU", tmRange, bernstein_order);
 
     double error = gen_bern_err_by_sample(up, "ReLU", tmRange, partition_num);
 

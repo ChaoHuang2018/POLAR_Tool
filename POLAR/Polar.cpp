@@ -71,7 +71,18 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
     Symbolic_Remainder symbolic_remainder(initial_set, ps.get_symbolic_queue_size());
     
     // no unsafe set
+//    vector<Constraint> safeSet;
+    // safe set
     vector<Constraint> safeSet;
+//    cout << "123:" << spec.safe_set.size() << endl;
+    for (int i = 0; i < spec.safe_set.size(); i++)
+    {
+//        cout << "111" << endl;
+//        cout << spec.safe_set[i] << endl;
+        Constraint cons_temp(spec.safe_set[i], vars);
+//        cout << "222" << endl;
+        safeSet.push_back(cons_temp);
+    }
     
     // result of the reachability computation
     Result_of_Reachability result;

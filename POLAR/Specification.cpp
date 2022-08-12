@@ -50,12 +50,16 @@ Specification::Specification(string filename)
         
         time_steps = j["time_steps"];
         
-        for (int i = 0; i < j["unsafe"].size(); i++)
+        for (int i = 0; i < j["safe_set"].size(); i++)
         {
-            vector<string> temp = split(j["unsafe"][i], delim1);
-            Interval unsafe_temp(stod(temp[0]),stod(temp[1]));
-            unsafe.push_back(unsafe_temp);
+//            vector<string> temp = split(j["safe_set"][i], delim1);
+//            Interval unsafe_temp(stod(temp[0]),stod(temp[1]));
+//            safe_set.push_back(unsafe_temp);
+            safe_set.push_back(j["safe_set"][i]);
+//            cout << safe_set[i] << endl;
         }
+//        cout << safe_set[0] << endl;
+//        cout << safe_set.size() << endl;
         cout << "Succeed." << endl;
     }
     else

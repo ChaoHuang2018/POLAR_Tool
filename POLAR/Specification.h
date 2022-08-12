@@ -15,6 +15,7 @@ public:
     vector<Interval> init;
     int time_steps;
     vector<Interval> unsafe;
+    vector<string> safe_set;
 
 public:
     Specification();

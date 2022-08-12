@@ -42,7 +42,7 @@ double tanh(double x)
     return result;
 }
 
-double relu_lips(Interval intv)
+double relu_lips(Interval &intv)
 {
     double a = intv.inf();
     double b = intv.sup();
@@ -65,7 +65,7 @@ double sigmoid_de(double x)
     return result;
 }
 
-double sigmoid_lips(Interval intv)
+double sigmoid_lips(Interval &intv)
 {
     double a = intv.inf();
     double b = intv.sup();
@@ -98,7 +98,7 @@ double tanh_de(double x)
     return result;
 }
 
-double tanh_lips(Interval intv)
+double tanh_lips(Interval &intv)
 {
     double a = intv.inf();
     double b = intv.sup();
@@ -123,7 +123,7 @@ double tanh_lips(Interval intv)
     return lips;
 }
 
-UnivariatePolynomial<Real> gen_bern_poly(string act, Interval intv, int d)
+void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval intv, int d)
 {
     time_t start_timer;
     time_t end_timer;
@@ -155,7 +155,7 @@ UnivariatePolynomial<Real> gen_bern_poly(string act, Interval intv, int d)
 
     if ((b - a <= 1e-10) || (fun_act(b) - fun_act(a) <= 1e-10))
     {
-        return bern_poly + fun_act((a + b) / 2);
+        result = bern_poly + fun_act((a + b) / 2);
     }
 
     int d_max = 8;
@@ -234,7 +234,7 @@ UnivariatePolynomial<Real> gen_bern_poly(string act, Interval intv, int d)
 //     cout << "Interval: " << intv << endl;
 //     cout << "Bernstein Polynomial: " << bern_poly << endl;
 
-    return bern_poly;
+    result = bern_poly;
 }
 
 double gen_bern_err(string act, Interval intv, int degree)
@@ -257,7 +257,7 @@ double gen_bern_err(string act, Interval intv, int degree)
     return 1.0 / (2 * sqrt(degree)) * lips * intv.width();
 }
 
-double gen_bern_err_by_sample(UnivariatePolynomial<Real> berns, string act, Interval intv, int partition)
+double gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Interval intv, int partition)
 {
     time_t start_timer0;
     time_t start_timer;

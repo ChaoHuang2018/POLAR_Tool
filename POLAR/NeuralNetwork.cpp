@@ -300,7 +300,10 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 		{
 			for(int j=0; j<input_range.size(); ++j)
 			{
-				Berns_poly[j] = gen_bern_poly(layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
+                UnivariatePolynomial<Real> up;
+                gen_bern_poly(up, layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
+                
+                Berns_poly[j] = up;
 
 				double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
 
