@@ -1,0 +1,9 @@
+{
+    "dynamics": {
+        "state_name_list": ["x0", "x1"],
+        "control_name_list": ["u0"],
+        "ode_list": ["x1", "2*sin(x0)+8*u0"],
+        "control_stepsize": 0.05
+    },
+    "neural_network": "controller_single_pendulum_POLAR"
+}

@@ -1,0 +1,9 @@
+{
+    "dynamics": {
+        "state_name_list": ["x0", "x1", "x2", "x3"],
+        "control_name_list": ["u0", "u1"],
+        "ode_list": ["x2", "x3", "cos(x0-x1)*((x2*x2)*sin(x0-x1)-cos(x0-x1)*(2*sin(x0)-x3*x3*sin(x0-x1)/2+4*u0)+2*sin(x1)+8*u1)/(2*(cos(x0-x1)*cos(x0-x1)/2-1))-x3*x3*sin(x0-x1)/2+2*sin(x0)+4*u0", "(x2*x2*sin(x0-x1)-cos(x0-x1)*(2*sin(x0)-x3*x3*sin(x0-x1)/2+4*u0)+2*sin(x1)+8*u1)/(cos(x0-x1)*cos(x0-x1)/2-1)"],
+        "control_stepsize": 0.02
+    },
+    "neural_network": "controller_double_pendulum_less_robust_POLAR"
+}

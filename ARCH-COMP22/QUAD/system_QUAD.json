@@ -1,0 +1,9 @@
+{
+    "dynamics": {
+        "state_name_list": ["x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "t"],
+        "control_name_list": ["u0", "u1", "u2"],
+        "ode_list": ["cos(x8)*cos(x9)*x4 + (sin(x7)*sin(x8)*cos(x9) - cos(x7)*sin(x9))*x5 + (cos(x7)*sin(x8)*cos(x9) + sin(x7)*sin(x9))*x6", "cos(x8)*sin(x9)*x4 + (sin(x7)*sin(x8)*sin(x9) + cos(x7)*cos(x9))*x5 + (cos(x7)*sin(x8)*sin(x9) - sin(x7)*cos(x9))*x6", "sin(x8)*x4 - sin(x7)*cos(x8)*x5 - cos(x7)*cos(x8)*x6", "x12*x5 - x11*x6 - 9.81*sin(x8)", "x10*x6 - x12*x4 + 9.81*cos(x8)*sin(x7)", "x11*x4 - x10*x5 + 9.81*cos(x8)*cos(x7) - 9.81 - u0 / 1.4", "x10 + (sin(x7)*(sin(x8)/cos(x8)))*x11 + (cos(x7)*(sin(x8)/cos(x8)))*x12", "cos(x7)*x11 - sin(x7)*x12", "(sin(x7)/cos(x8))*x11 + (cos(x7)/cos(x8))*x12", "-0.92592592592593*x11*x12 + 18.51851851851852*u1", "0.92592592592593*x10*x12 + 18.51851851851852*u2", "0", "1"],
+        "control_stepsize": 0.1
+    },
+    "neural_network": "controller_5_20"
+}
