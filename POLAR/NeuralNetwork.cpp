@@ -305,9 +305,9 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
                 
                 Berns_poly[j] = up;
 
-				double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
+				Real error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
 
-				Interval rem(-error, error);
+				Interval rem(Real(0), error);
 				Berns_rem[j] = rem;
 			}
 		}

@@ -37,7 +37,9 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
         ode_rhs[var_id_list[i]] = temp_deriv;
     }
 */
+//    cout << "1" << endl;
     ODE<Real> dynamics(s.ode_list, vars);
+    
     
     // Flow* setting
     Computational_Setting setting(vars);
@@ -59,7 +61,7 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
 
     int steps = spec.time_steps;
     
-    
+//    cout << "2" << endl;
     vector<Interval> init;
     init = spec.init;
     for (int i = 0; i < s.num_of_control; i++)
@@ -83,7 +85,7 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
 //        cout << "222" << endl;
         safeSet.push_back(cons_temp);
     }
-    
+//    cout << "3" << endl;
     // result of the reachability computation
     Result_of_Reachability result;
     
@@ -117,7 +119,9 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
         else
         {
             // using symbolic remainder
+            cout << "1" << endl;
             nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, ps, setting);
+            cout << "2" << endl;
         }
         
 //        Matrix<Interval> rm1(1, 1);
@@ -154,7 +158,7 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
 //    string reach_result;
 //    reach_result = result.status;
 //    result.fp_end_of_time.intEval(end_box, ps.get_taylor_order(), setting.tm_setting.cutoff_threshold);
-
+//    cout << "4" << endl;
     time(&end_timer);
     seconds = difftime(start_timer, end_timer);
     
@@ -175,5 +179,5 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
     
     cout << running_time << endl;
     
-    plot_setting.plot_2D_octagon_GNUPLOT("../outputs/", ps.get_output_filename(), result.tmv_flowpipes);
+    plot_setting.plot_2D_octagon_GNUPLOT("../outputs/", ps.get_output_filename(), result.tmv_flowpipes, setting);
 }

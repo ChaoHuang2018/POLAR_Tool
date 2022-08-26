@@ -13,6 +13,6 @@
     },
     "output_setting": {
         "output_dimension": ["x1", "x4"],
-        "output_filename": "AttitudeControl"
+        "output_filename": "ACC"
     }
 }
