@@ -6,12 +6,12 @@ using namespace flowstar;
 
 int main(int argc, char *argv[])
 {
-	string net_name = argv[6];
+	string net_name = "";
 	string benchmark_name = "reachnn_benchmark_6_" + net_name;
 	// Declaration of the state variables.
 	unsigned int numVars = 5;
 
-	intervalNumPrecision = 600;
+//	intervalNumPrecision = 800;
 
 	Variables vars;
 
@@ -24,34 +24,22 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
-	Expression<Real> deriv_x0("x1", vars); // theta_r = 0
-	Expression<Real> deriv_x1("-x0+0.1*sin(x2)", vars);
-	Expression<Real> deriv_x2("x3", vars);
-	Expression<Real> deriv_x3("u", vars);
-	Expression<Real> deriv_u("0", vars);
 
-	vector<Expression<Real> > ode_rhs(numVars);
-	ode_rhs[x0_id] = deriv_x0;
-	ode_rhs[x1_id] = deriv_x1;
-	ode_rhs[x2_id] = deriv_x2;
-	ode_rhs[x3_id] = deriv_x3;
-	ode_rhs[u_id] = deriv_u;
-
-	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
+    ODE<Real> dynamics({"x1","-x0+0.1*sin(x2)","x3","u","0"}, vars);
 
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
-	unsigned int order = stoi(argv[4]);
+	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(stod(argv[7]), order);
+	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.5);
+//	setting.setTime(1);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-10);
+	setting.setCutoffThreshold(1e-8);
 
 	// print out the steps
 	setting.printOff();
@@ -63,15 +51,14 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
-
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	double w = stod(argv[1]);
-	int steps = stoi(argv[2]);
-	Interval init_x0(-0.76 - w, -0.76 + w), init_x1(-0.44 - w, -0.44 + w), init_x2(0.52 - w, 0.52 + w), init_x3(-0.29 - w, -0.29 + w), init_u(0); //w=0.01
+	double w = 0.01;
+	int steps = 15;
+//	Interval init_x0(-0.76 - w, -0.76 + w), init_x1(-0.44 - w, -0.44 + w), init_x2(0.52 - w, 0.53 + w), init_x3(-0.29 - w, -0.29 + w), init_u(0); //w=0.01
+    Interval init_x0(0.68, 0.7), init_x1(-0.7, -0.68), init_x2(-0.4, -0.38), init_x3(0.58, 0.6), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -85,22 +72,23 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 1000);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
 
 	// define the neural network controller
-	string nn_name = "nn_6_"+net_name;
+	string nn_name = "controllerTora_POLAR";
+//    string nn_name = "nn_6_relu";
 	NeuralNetwork nn(nn_name);
 
 	// the order in use
 	// unsigned int order = 5;
 	Interval cutoff_threshold(-1e-10, 1e-10);
-	unsigned int bernstein_order = stoi(argv[3]);
-	unsigned int partition_num = 4000;
+	unsigned int bernstein_order = 4;
+	unsigned int partition_num = 100;
 
-	unsigned int if_symbo = stoi(argv[5]);
+	unsigned int if_symbo = 0;
 
 	double err_max = 0;
 	time_t start_timer;
@@ -153,7 +141,8 @@ int main(int argc, char *argv[])
 		Matrix<Interval> rm1(1, 1);
 		tmv_output.Remainder(rm1);
 		cout << "Neural network taylor remainder: " << rm1 << endl;
-
+//        tmv_output.tms[0].output(cout, vars);
+        cout << endl;
 
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
 
@@ -166,7 +155,7 @@ int main(int argc, char *argv[])
 		// }
 
 		// Always using symbolic remainder
-		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        dynamics.reach(result, initial_set, 1, setting, safeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -231,7 +220,7 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }

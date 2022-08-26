@@ -5,5 +5,5 @@
         "ode_list": ["x1", "-x0+0.1*sin(x2)", "x3", "u"],
         "control_stepsize": 1
     },
-    "neural_network": "controller_5_20"
+    "neural_network": "controllerTora_POLAR"
 }

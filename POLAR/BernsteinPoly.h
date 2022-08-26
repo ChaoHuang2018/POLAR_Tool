@@ -7,24 +7,24 @@ Real factorial(int n);
 
 Real combo(int n, int m);
 
-double relu(double x);
+Real relu(Real x);
 
-double sigmoid(double x);
+Real sigmoid(Real x);
 
-double tanh(double x);
+Real tanh(Real x);
 
-double relu_lips(Interval &intv);
+Real relu_lips(Interval &intv);
 
-double sigmoid_de(double x);
+Real sigmoid_de(Real x);
 
-double sigmoid_lips(Interval &intv);
+Real sigmoid_lips(Interval &intv);
 
-double tanh_de(double x);
+Real tanh_de(Real x);
 
-double tanh_lips(Interval &intv);
+Real tanh_lips(Interval &intv);
 
 void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval intv, int d);
 
 double gen_bern_err(string act, Interval intv, int degree);
 
-double gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Interval intv, int partition);
+Real gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Interval intv, int partition);
