@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 	int x2_id = vars.declareVar("x2");
     int x3_id = vars.declareVar("x3");
 	int u0_id = vars.declareVar("u0");
-    int u0_id = vars.declareVar("u1");
+    int u1_id = vars.declareVar("u1");
 
 	int domainDim = numVars + 1;
 
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     ode_list.push_back("0");
     ode_list.push_back("0");
 
-    ODE<Real> dynamics(s.ode_list, vars);
+    ODE<Real> dynamics(ode_list, vars);
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
@@ -41,13 +41,13 @@ int main(int argc, char *argv[])
 	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.05, order);
+	setting.setFixedStepsize(0.02, order);
 
 	// time horizon for a single control step
 //	setting.setTime(0.2);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-6);
+	setting.setCutoffThreshold(1e-8);
 
 	// print out the steps
 	setting.printOff();
@@ -59,20 +59,22 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
+//	setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	double w = stod(argv[1]);
-	int steps = stoi(argv[2]);
-	Interval init_x0(9.505 - w, 9.545 + w), init_x1(-4.495 - w, -4.455 + w), init_x2(2.105 - w, 2.105 + w), init_u0(0), init_u1(0); //w=0.005
+	double w = 0.005;
+	int steps = 50;
+	Interval init_x0(9.505 - w, 9.545 + w), init_x1(-4.495 - w, -4.455 + w), init_x2(2.105 - w, 2.105 + w), init_x3(1.505 - w, 1.505 + w), init_u0(0), init_u1(0); //w=0.005
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
 	X0.push_back(init_x2);
-	X0.push_back(init_u);
+    X0.push_back(init_x3);
+	X0.push_back(init_u0);
+    X0.push_back(init_u1);
 
 	// translate the initial set to a flowpipe
 	Flowpipe initial_set(X0);
@@ -92,10 +94,10 @@ int main(int argc, char *argv[])
 	// the order in use
 	// unsigned int order = 5;
 	Interval cutoff_threshold(-1e-10, 1e-10);
-	unsigned int bernstein_order = stoi(argv[3]);
-	unsigned int partition_num = 4000;
+	unsigned int bernstein_order = order;
+	unsigned int partition_num = 100;
 
-	unsigned int if_symbo = stoi(argv[5]);
+	unsigned int if_symbo = 1;
 
 	double err_max = 0;
 	time_t start_timer;
@@ -123,6 +125,7 @@ int main(int argc, char *argv[])
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[2]);
+        tmv_input.tms.push_back(initial_set.tmvPre.tms[3]);
 
 		// TaylorModelVec<Real> tmv_temp;
 		// initial_set.compose(tmv_temp, order, cutoff_threshold);
@@ -133,6 +136,8 @@ int main(int argc, char *argv[])
 		// taylor propagation
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
 		TaylorModelVec<Real> tmv_output;
+        
+//        cout << "111" << endl;
 
 		if(if_symbo == 0){
 			// not using symbolic remainder
@@ -144,14 +149,15 @@ int main(int argc, char *argv[])
 		}
 
 
-		Matrix<Interval> rm1(1, 1);
-		tmv_output.Remainder(rm1);
-		cout << "Neural network taylor remainder: " << rm1 << endl;
+//		Matrix<Interval> rm1(1, 1);
+//		tmv_output.Remainder(rm1);
+//		cout << "Neural network taylor remainder: " << rm1 << endl;
         
         // the normalization of the nn output will be done by adding an offset of the txt file
         // need to be double checked
-        tmv_output.tms[1].remainder = tmv_output.tms[1].remainder + Interval(-0.0001,0.0001);
-
+//        cout << "222" << endl;
+        tmv_output.tms[0].remainder = tmv_output.tms[0].remainder + Interval(-0.0001,0.0001);
+//        cout << "333" << endl;
 
 		initial_set.tmvPre.tms[u0_id] = tmv_output.tms[0];
         initial_set.tmvPre.tms[u1_id] = tmv_output.tms[1];
@@ -238,7 +244,10 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_x0_x1", result.tmv_flowpipes, setting);
+    
+    plot_setting.setOutputDims("x2", "x3");
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_x2_x3", result.tmv_flowpipes, setting);
 
 	return 0;
 }
