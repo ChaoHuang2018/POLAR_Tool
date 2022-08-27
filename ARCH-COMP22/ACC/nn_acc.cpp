@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     int domainDim = numVars + 1;
 	
 
-    ODE<Real> dynamics({"0","0","x4","x5","x6","x7","2 * u0 - 2 * x6 - 0.0001 * x4 * x4","2 * u0 - 2 * x7 - 0.0001 * x5 * x5","1","0"}, vars);
+    ODE<Real> dynamics({"0","0","x4","x5","x6","x7","-2 * 2 - 2 * x6 - 0.0001 * x4 * x4","2 * u0 - 2 * x7 - 0.0001 * x5 * x5","1","0"}, vars);
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
@@ -106,8 +106,9 @@ int main(int argc, char *argv[])
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
 	double w = 0; // 0.5
-	int steps = 40; // should be 50
+	int steps = 30; // should be 50
     Interval init_x0(30), init_x1(1.4),  init_x2(90, 110), init_x3(10, 11), init_x4(32,32.2), init_x5(30, 30.2), init_x6(0), init_x7(0), init_t(0);
+//    Interval init_x0(30), init_x1(1.4),  init_x2(100), init_x3(10), init_x4(32), init_x5(30), init_x6(0), init_x7(0), init_t(0);
 	// Interval init_x0(-0.25 - w, -0.25 + w), init_x1(-0.25 - w, -0.25 + w), init_x2(0.35 - w, 0.35 + w), init_x3(-0.35 - w, -0.35 + w), init_x4(0.45 - w, 0.45 + w), init_x5(-0.35 - w, -0.35 + w);
 	Interval init_u0(0);
     vector<Interval> X0;

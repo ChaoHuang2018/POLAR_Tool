@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	// unsigned int order = 5;
 	Interval cutoff_threshold(-1e-10, 1e-10);
 	unsigned int bernstein_order = order;
-	unsigned int partition_num = 1000;
+	unsigned int partition_num = 10;
 
 	unsigned int if_symbo = 1;
 
