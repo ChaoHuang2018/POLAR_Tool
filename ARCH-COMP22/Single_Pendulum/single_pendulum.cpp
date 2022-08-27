@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 	string net_name = "controller_single_pendulum_POLAR";
 	string benchmark_name = "Single_Pendulum";
 	// Declaration of the state variables.
-	unsigned int numVars = 3;
+	unsigned int numVars = 4;
 
 //	intervalNumPrecision = 600;
 
@@ -17,12 +17,13 @@ int main(int argc, char *argv[])
 
 	int x0_id = vars.declareVar("x0");
 	int x1_id = vars.declareVar("x1");
+    int t_id = vars.declareVar("t");
 	int u_id = vars.declareVar("u0");
 
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
-    ODE<Real> dynamics({"x1","2*sin(x0)+8*u0","0"}, vars);
+    ODE<Real> dynamics({"x1","2*sin(x0)+8*u0","1","0"}, vars);
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
 	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.05, order);
+	setting.setFixedStepsize(0.01, order);
 
 	// time horizon for a single control step
 //	setting.setTime(0.5);
@@ -54,14 +55,13 @@ int main(int argc, char *argv[])
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	double w = 0.01;
-	int steps = 10;
-	Interval init_x0(-0.76 - w, -0.76 + w), init_x1(-0.44 - w, -0.44 + w), init_x2(0.52 - w, 0.52 + w), init_x3(-0.29 - w, -0.29 + w), init_u(0); //w=0.01
+	double w = 0;
+	int steps = 20;
+	Interval init_x0(1, 1.2), init_x1(0, 0.2), init_t(0), init_u(0); //w=0.01
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
-	X0.push_back(init_x2);
-	X0.push_back(init_x3);
+	X0.push_back(init_t);
 	X0.push_back(init_u);
 
 	// translate the initial set to a flowpipe
@@ -112,8 +112,6 @@ int main(int argc, char *argv[])
 
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
-		tmv_input.tms.push_back(initial_set.tmvPre.tms[2]);
-		tmv_input.tms.push_back(initial_set.tmvPre.tms[3]);
 
 		// TaylorModelVec<Real> tmv_temp;
 		// initial_set.compose(tmv_temp, order, cutoff_threshold);
@@ -151,12 +149,12 @@ int main(int argc, char *argv[])
 		// }
 
 		// Always using symbolic remainder
-		dynamics.reach(result, initial_set, 0.5, setting, safeSet, symbolic_remainder);
+		dynamics.reach(result, initial_set, 0.05, setting, safeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
 			initial_set = result.fp_end_of_time;
-			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
+//			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
 		}
 		else
 		{
@@ -197,7 +195,7 @@ int main(int argc, char *argv[])
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting(vars);
-	plot_setting.setOutputDims("x0", "x1");
+	plot_setting.setOutputDims("t", "x0");
 
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if (mkres < 0 && errno != EEXIST)
