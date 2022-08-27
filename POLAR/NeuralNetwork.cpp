@@ -283,32 +283,52 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 	    tmv_layer_input.intEval(input_range, domain);
 
-/*
-	    if(k > 0)
-	    {
-		    for(int i=0; i<tmv_layer_input.tms.size(); ++i)
-		    {
-		    	tmv_layer_input.tms[i].remainder = latest_J[i][0];
-		    }
-	    }
-*/
+
 		// obtaining the vector of Bernstein overapproximations for the activation functions in the k-th layer
 		vector<UnivariatePolynomial<Real> > Berns_poly(input_range.size());
 		vector<Interval> Berns_rem(input_range.size());
 
 		if(layers[k].activation != "Affine")
 		{
-			for(int j=0; j<input_range.size(); ++j)
+			if(layers[k].activation == "ReLU")
 			{
-                UnivariatePolynomial<Real> up;
-                gen_bern_poly(up, layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
-                
-                Berns_poly[j] = up;
+				for(int j=0; j<input_range.size(); ++j)
+				{
+	                UnivariatePolynomial<Real> up;
+	                gen_bern_poly(up, layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
 
-				Real error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
+	                Berns_poly[j] = up;
 
-				Interval rem(Real(0), error);
-				Berns_rem[j] = rem;
+	                Real error;
+	                up.evaluate(error, Real(0));
+
+	                Interval rem;
+
+	                if(up.coefficients.size() > 2)
+	                {
+	                	Interval I(-0.5*error, 0.5*error, 1);
+	                 	rem = I;
+	                 	up.coefficients[0] -= 0.5*error;
+	  //               	cout << I << endl;
+	                }
+
+	                Berns_rem[j] = rem;
+				}
+			}
+			else
+			{
+				for(int j=0; j<input_range.size(); ++j)
+				{
+	                UnivariatePolynomial<Real> up;
+	                gen_bern_poly(up, layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
+
+	                Berns_poly[j] = up;
+
+					Real error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
+
+					Interval rem(Real(0), error);
+					Berns_rem[j] = rem;
+				}
 			}
 		}
 
@@ -323,7 +343,14 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 		{
 			for(int j=0; j<Berns_poly.size(); ++j)
 			{
-				Q_i[j][j] = Berns_poly[j].coefficients[1];
+				if(Berns_poly[j].coefficients.size() > 1)
+				{
+					Q_i[j][j] = Berns_poly[j].coefficients[1];
+				}
+				else
+				{
+					Q_i[j][j] = 0;
+				}
 			}
 		}
 
@@ -416,7 +443,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		interval_utm_setting.order = polar_setting.get_bernstein_order();
 
-		if(layers[k].activation != "Affine")
+		if(layers[k].activation != "Affine" && layers[k].activation != "ReLU")
 		{
 			if(layers[k].activation == "sigmoid")
 			{
@@ -461,7 +488,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 
 
-		if(layers[k].activation != "Affine")
+		if(layers[k].activation != "Affine" && layers[k].activation != "ReLU")
 		{
 			for(int j=0; j<utm_activation.size(); ++j)
 			{
@@ -476,7 +503,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		order = polar_setting.get_taylor_order();
 
-		if(layers[k].activation != "Affine")
+		if(layers[k].activation != "Affine" && layers[k].activation != "ReLU")
 		{
 			for(int j=0; j<utm_activation.size(); ++j)
 			{
