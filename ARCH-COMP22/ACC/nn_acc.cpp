@@ -8,7 +8,7 @@ using namespace flowstar;
 
 int main(int argc, char *argv[])
 {
-	intervalNumPrecision = 600;
+//	intervalNumPrecision = 600;
 	
 	/*
 	// Declaration of the state variables.
@@ -49,22 +49,24 @@ int main(int argc, char *argv[])
 	
 	// Check 'ARCH-COMP20_Category_Report_Artificial_Intelligence_and_Neural_Network_Control_Systems_-AINNCS-_for_Continuous_and_Hybrid_Systems_Plants.pdf'
 	// Declaration of the state variables.
-	unsigned int numVars = 8;
-	Variables vars;
-	// intput format (\omega_1, \psi_1, \omega_2, \psi_2, \omega_3, \psi_3)
-	int x1_id = vars.declareVar("x1");	// x_lead
-	int x2_id = vars.declareVar("x2");	// v_lead
-	int x3_id = vars.declareVar("x3");	// interval_lead
-	int x4_id = vars.declareVar("x4");  // x_ego
-	int x5_id = vars.declareVar("x5");	// v_ego
-	int x6_id = vars.declareVar("x6");	// interval_ego
+    unsigned int numVars = 10;
+    Variables vars;
+    // intput format (\omega_1, \psi_1, \omega_2, \psi_2, \omega_3, \psi_3)
+    int x0_id = vars.declareVar("x0"); // v_set
+    int x1_id = vars.declareVar("x1");    // T_gap
+    int x2_id = vars.declareVar("x2");    // x_lead
+    int x3_id = vars.declareVar("x3");    // x_ego
+    int x4_id = vars.declareVar("x4"); // v_lead
+    int x5_id = vars.declareVar("x5");    // v_ego
+    int x6_id = vars.declareVar("x6");    // gamma_lead
+    int x7_id = vars.declareVar("x7");    // gamma_ego
     int t_id = vars.declareVar("t");    // time t
-	int u0_id = vars.declareVar("u0");	// a_ego
+    int u0_id = vars.declareVar("u0");    // a_ego
 	
     int domainDim = numVars + 1;
 	
 
-    ODE<Real> dynamics({"x2","x3","-2 * 2 - 2 * x3 - 0.0001 * x2 * x2","x5","x6","2 * u0 - 2 * x6 - 0.0001 * x5 * x5","1","0"}, vars);
+    ODE<Real> dynamics({"0","0","x4","x5","x6","x7","2 * u0 - 2 * x6 - 0.0001 * x4 * x4","2 * u0 - 2 * x7 - 0.0001 * x5 * x5","1","0"}, vars);
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
@@ -104,17 +106,19 @@ int main(int argc, char *argv[])
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
 	double w = 0; // 0.5
-	int steps = 50;
-	Interval init_x1(90, 110), init_x2(32, 32.2), init_x3(0), init_x4(10, 11), init_x5(30, 30.2), init_x6(0), init_t(0);
+	int steps = 40; // should be 50
+    Interval init_x0(30), init_x1(1.4),  init_x2(90, 110), init_x3(10, 11), init_x4(32,32.2), init_x5(30, 30.2), init_x6(0), init_x7(0), init_t(0);
 	// Interval init_x0(-0.25 - w, -0.25 + w), init_x1(-0.25 - w, -0.25 + w), init_x2(0.35 - w, 0.35 + w), init_x3(-0.35 - w, -0.35 + w), init_x4(0.45 - w, 0.45 + w), init_x5(-0.35 - w, -0.35 + w);
 	Interval init_u0(0);
     vector<Interval> X0;
+    X0.push_back(init_x0);
 	X0.push_back(init_x1);
 	X0.push_back(init_x2);
 	X0.push_back(init_x3);
 	X0.push_back(init_x4);
 	X0.push_back(init_x5);
 	X0.push_back(init_x6);
+    X0.push_back(init_x7);
 	X0.push_back(init_t);
 	X0.push_back(init_u0);
 
@@ -154,13 +158,16 @@ int main(int argc, char *argv[])
 	time(&start_timer);
 
 	vector<string> state_vars;
+    state_vars.push_back("x0");
 	state_vars.push_back("x1");
 	state_vars.push_back("x2");
 	state_vars.push_back("x3");
 	state_vars.push_back("x4");
 	state_vars.push_back("x5");
 	state_vars.push_back("x6");
+    state_vars.push_back("x7");
 	state_vars.push_back("t");
+    state_vars.push_back("u0");
 	
 	if (if_symbo == 0)
 	{
@@ -224,9 +231,9 @@ int main(int argc, char *argv[])
         }
 
 		
-		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
-		tmv_output.Remainder(rm1);
-		cout << "Neural network taylor remainder: " << rm1 << endl;
+//		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
+//		tmv_output.Remainder(rm1);
+//		cout << "Neural network taylor remainder: " << rm1 << endl;
 
 		// taylor
 		// NNTaylor nn_taylor1(nn);
@@ -239,7 +246,7 @@ int main(int argc, char *argv[])
 		// 	box_state.push_back(box[i]);
 		// }
 		// nn_taylor1.set_taylor_linear(state_vars, box_state);
-		// cout << "11111" << endl;
+//		 cout << "11111" << endl;
 		// vector<double> jcb = nn_taylor1.get_jacobian();
 		// vector<Real> jcb_real;
 		// for (int i = 0; i < jcb.size(); i++)
@@ -286,7 +293,7 @@ int main(int argc, char *argv[])
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting(vars);
-	plot_setting.setOutputDims("t", "x1-x4");
+	plot_setting.setOutputDims("t", "x2-x3");
 
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if (mkres < 0 && errno != EEXIST)
