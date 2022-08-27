@@ -6,7 +6,7 @@ using namespace flowstar;
 int main(int argc, char *argv[])
 {
 
-    string comb = argv[6];
+    string comb = "Mix";
 
     intervalNumPrecision = 300;
 
@@ -36,53 +36,53 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
-	Expression<Real> deriv_x1("cos(x8)*cos(x9)*x4 + (sin(x7)*sin(x8)*cos(x9) - cos(x7)*sin(x9))*x5 + (cos(x7)*sin(x8)*cos(x9) + sin(x7)*sin(x9))*x6", vars); // theta_r = 0
-	Expression<Real> deriv_x2("cos(x8)*sin(x9)*x4 + (sin(x7)*sin(x8)*sin(x9) + cos(x7)*cos(x9))*x5 + (cos(x7)*sin(x8)*sin(x9) - sin(x7)*cos(x9))*x6", vars);
-	Expression<Real> deriv_x3("sin(x8)*x4 - sin(x7)*cos(x8)*x5 - cos(x7)*cos(x8)*x6", vars);
-	Expression<Real> deriv_x4("x12*x5 - x11*x6 - 9.81*sin(x8)", vars);
-	Expression<Real> deriv_x5("x10*x6 - x12*x4 + 9.81*cos(x8)*sin(x7)", vars);
-	Expression<Real> deriv_x6("x11*x4 - x10*x5 + 9.81*cos(x8)*cos(x7) - 9.81 - u0 / 1.4", vars);
-	Expression<Real> deriv_x7("x10 + (sin(x7)*(sin(x8)/cos(x8)))*x11 + (cos(x7)*(sin(x8)/cos(x8)))*x12", vars);
-	Expression<Real> deriv_x8("cos(x7)*x11 - sin(x7)*x12", vars);
-	Expression<Real> deriv_x9("(sin(x7)/cos(x8))*x11 + (cos(x7)/cos(x8))*x12", vars);
-	Expression<Real> deriv_x10("-0.92592592592593*x11*x12 + 18.51851851851852*u1", vars);
-	Expression<Real> deriv_x11("0.92592592592593*x10*x12 + 18.51851851851852*u2", vars);
-	Expression<Real> deriv_x12("0", vars);
-    Expression<Real> deriv_t("1", vars);
-	Expression<Real> deriv_u0("0", vars);
-	Expression<Real> deriv_u1("0", vars);
-	Expression<Real> deriv_u2("0", vars);
+	string deriv_x1 = "cos(x8)*cos(x9)*x4 + (sin(x7)*sin(x8)*cos(x9) - cos(x7)*sin(x9))*x5 + (cos(x7)*sin(x8)*cos(x9) + sin(x7)*sin(x9))*x6"; // theta_r = 0
+	string deriv_x2 = "cos(x8)*sin(x9)*x4 + (sin(x7)*sin(x8)*sin(x9) + cos(x7)*cos(x9))*x5 + (cos(x7)*sin(x8)*sin(x9) - sin(x7)*cos(x9))*x6";
+    string deriv_x3 = "sin(x8)*x4 - sin(x7)*cos(x8)*x5 - cos(x7)*cos(x8)*x6";
+    string deriv_x4 = "x12*x5 - x11*x6 - 9.81*sin(x8)";
+    string deriv_x5 = "x10*x6 - x12*x4 + 9.81*cos(x8)*sin(x7)";
+    string deriv_x6 = "x11*x4 - x10*x5 + 9.81*cos(x8)*cos(x7) - 9.81 - u0 / 1.4";
+    string deriv_x7 = "x10 + (sin(x7)*(sin(x8)/cos(x8)))*x11 + (cos(x7)*(sin(x8)/cos(x8)))*x12";
+    string deriv_x8 = "cos(x7)*x11 - sin(x7)*x12";
+    string deriv_x9 = "(sin(x7)/cos(x8))*x11 + (cos(x7)/cos(x8))*x12";
+    string deriv_x10 = "-0.92592592592593*x11*x12 + 18.51851851851852*u1";
+    string deriv_x11 = "0.92592592592593*x10*x12 + 18.51851851851852*u2";
+    string deriv_x12 = "0";
+    string deriv_t = "1";
+    string deriv_u0 = "0";
+    string deriv_u1 = "0";
+    string deriv_u2 = "0";
+    
+    vector<string> ode_list;
+    ode_list.push_back(deriv_x1);
+    ode_list.push_back(deriv_x2);
+    ode_list.push_back(deriv_x3);
+    ode_list.push_back(deriv_x4);
+    ode_list.push_back(deriv_x5);
+    ode_list.push_back(deriv_x6);
+    ode_list.push_back(deriv_x7);
+    ode_list.push_back(deriv_x8);
+    ode_list.push_back(deriv_x9);
+    ode_list.push_back(deriv_x10);
+    ode_list.push_back(deriv_x11);
+    ode_list.push_back(deriv_x12);
+    ode_list.push_back(deriv_t);
+    ode_list.push_back(deriv_u0);
+    ode_list.push_back(deriv_u1);
+    ode_list.push_back(deriv_u2);
 
-	vector<Expression<Real>> ode_rhs(numVars);
-	ode_rhs[x1_id] = deriv_x1;
-	ode_rhs[x2_id] = deriv_x2;
-	ode_rhs[x3_id] = deriv_x3;
-	ode_rhs[x4_id] = deriv_x4;
-	ode_rhs[x5_id] = deriv_x5;
-	ode_rhs[x6_id] = deriv_x6;
-	ode_rhs[x7_id] = deriv_x7;
-	ode_rhs[x8_id] = deriv_x8;
-	ode_rhs[x9_id] = deriv_x9;
-	ode_rhs[x10_id] = deriv_x10;
-	ode_rhs[x11_id] = deriv_x11;
-	ode_rhs[x12_id] = deriv_x12;
-    ode_rhs[t_id] = deriv_t;
-	ode_rhs[u0_id] = deriv_u0;
-	ode_rhs[u1_id] = deriv_u1;
-	ode_rhs[u2_id] = deriv_u2;
-
-	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
+    ODE<Real> dynamics(ode_list, vars);
 
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
-	unsigned int order = stoi(argv[4]);
+	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.1);
+//	setting.setTime(0.1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-7);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
+//	setting.prepare();
     //setting.g_setting.prepareForReachability(15);
   //  cout << "--------" << setting.g_setting.factorial_rec.size() << ", " << setting.g_setting.power_4.size() << ", " << setting.g_setting.double_factorial.size() << endl;
 
@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	double w = stod(argv[1]);
-	int steps = stoi(argv[2]);
+	double w = 0.4;
+	int steps = 50;
 	Interval
         init_x1(0 - w, 0 + w),
         init_x2(0 - w, 0 + w),
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
     Symbolic_Remainder symbolic_remainder(initial_set, 2000);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -159,10 +159,10 @@ int main(int argc, char *argv[])
 	// the order in use
 	// unsigned int order = 5;
 	Interval cutoff_threshold(-1e-7, 1e-7);
-	unsigned int bernstein_order = stoi(argv[3]);
+	unsigned int bernstein_order = order;
 	unsigned int partition_num = 4000;
 
-	unsigned int if_symbo = stoi(argv[5]);
+	unsigned int if_symbo = 1;
 
 	double err_max = 0;
 	time_t start_timer;
@@ -223,19 +223,19 @@ int main(int argc, char *argv[])
 	    nn_seconds += difftime(nn_start_timer, nn_end_timer);
 
         // tmv_output.output(cout, vars);
-		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
-		tmv_output.Remainder(rm1);
-		cout << "Neural network taylor remainder: " << rm1 << endl;
+//		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
+//		tmv_output.Remainder(rm1);
+//		cout << "Neural network taylor remainder: " << rm1 << endl;
 
 
         initial_set.tmvPre.tms[u0_id] = tmv_output.tms[0];
         initial_set.tmvPre.tms[u1_id] = tmv_output.tms[1];
         initial_set.tmvPre.tms[u2_id] = tmv_output.tms[2];
-        cout << "TM -- Propagation" << endl;
+//        cout << "TM -- Propagation" << endl;
 
         time(&flowstar_start_timer);
         // dynamics.reach(result, setting, initial_set, unsafeSet);
-        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
         time(&flowstar_end_timer);
 
         flowstar_seconds += difftime(flowstar_start_timer, flowstar_end_timer);
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("t", "x3");
-    plot_setting.plot_2D_octagon_MATLAB("./outputs/" + benchmark_name, "_" + to_string(if_symbo), result);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/" + benchmark_name, "_" + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }
