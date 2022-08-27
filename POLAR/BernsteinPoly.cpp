@@ -469,7 +469,7 @@ Real gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Inter
             sample_diff = temp_diff;
         }
     }
-    cout << "Sample error: " << sample_diff << endl;
+//    cout << "Sample error: " << sample_diff << endl;
 
     double total_berns_time = 0.0;
     double total_act_time = 0.0;
@@ -488,8 +488,8 @@ Real gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Inter
     time(&end_timer);
     seconds = -difftime(start_timer0, end_timer);
     // cout << "Berns err time: " << seconds << " seconds" << endl;
-    cout << "Interval: " << intv << endl;
-    cout << "Approximation error: " << overhead + sample_diff << endl;
+//    cout << "Interval: " << intv << endl;
+//    cout << "Approximation error: " << overhead + sample_diff << endl;
     
     return overhead + sample_diff;
 }

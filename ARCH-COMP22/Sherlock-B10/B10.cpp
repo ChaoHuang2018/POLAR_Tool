@@ -6,12 +6,12 @@ using namespace flowstar;
 
 int main(int argc, char *argv[])
 {
-	string net_name = argv[6];
+	string net_name = "controllerB_POLAR";
 	string benchmark_name = "B10_" + net_name;
 	// Declaration of the state variables.
 	unsigned int numVars = 6;
 
-	intervalNumPrecision = 600;
+//	intervalNumPrecision = 600;
 
 	Variables vars;
 
@@ -30,22 +30,24 @@ int main(int argc, char *argv[])
     ode_list.push_back("x3*sin(x2)");
     ode_list.push_back("u1");
     ode_list.push_back("u0");
+    ode_list.push_back("0");
+    ode_list.push_back("0");
 
     ODE<Real> dynamics(s.ode_list, vars);
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
 
-	unsigned int order = stoi(argv[4]);
+	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(stod(argv[7]), order);
+	setting.setFixedStepsize(0.05, order);
 
 	// time horizon for a single control step
 //	setting.setTime(0.2);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-10);
+	setting.setCutoffThreshold(1e-6);
 
 	// print out the steps
 	setting.printOff();
@@ -84,7 +86,7 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// define the neural network controller
-	string nn_name = "B10_"+net_name;
+	string nn_name = "controllerB_POLAR";
 	NeuralNetwork nn(nn_name);
 
 	// the order in use
