@@ -1,5 +1,4 @@
 #include "../../POLAR/NeuralNetwork.h"
-#include "../../flowstar/Discrete.h"
 //#include "../flowstar-toolbox/Constraint.h"
 
 using namespace std;
@@ -7,68 +6,62 @@ using namespace flowstar;
 
 int main(int argc, char *argv[])
 {
-	string net_name = argv[1];
-	string benchmark_name = "VCAS_" + net_name;
+	string net_name = "controller_single_pendulum_POLAR";
+	string benchmark_name = "Single_Pendulum";
 	// Declaration of the state variables.
 	unsigned int numVars = 3;
 
-	intervalNumPrecision = 600;
+//	intervalNumPrecision = 600;
 
 	Variables vars;
 
 	int x0_id = vars.declareVar("x0");
 	int x1_id = vars.declareVar("x1");
-	int u_id = vars.declareVar("u");
+	int u_id = vars.declareVar("u0");
 
 	int domainDim = numVars + 1;
 
-	// Define the discrete dynamics.
-    // x0 is the position of the mountain car, x1 is the speed of the mountain car.
-	Expression<Interval> deriv_x0("x0 + x1", vars); // Discrete: Next_x0 = x0 + x1
-	Expression<Interval> deriv_x1("x1 + 0.0015 * u - 0.0025 * cos(3 * x0)", vars); // Discrete: Next_x1 = x1 + 0.0015 * u - 0.0025 * cos(3 * x0)
-	Expression<Interval> deriv_u("u", vars);
-
-	vector<Expression<Interval> > dde_rhs(numVars);
-	dde_rhs[x0_id] = deriv_x0;
-	dde_rhs[x1_id] = deriv_x1;
-	dde_rhs[u_id] = deriv_u;
-
-
-	Nonlinear_Discrete_Dynamics dynamics(dde_rhs);
+	// Define the continuous dynamics.
+    ODE<Real> dynamics({"x1","2*sin(x0)+8*u0","0"}, vars);
 
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
-	unsigned int order = stoi(argv[4]);
+	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.01, order); // the stepsize will be ignored
+	setting.setFixedStepsize(0.05, order);
+
+	// time horizon for a single control step
+//	setting.setTime(0.5);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-10);
+	setting.setCutoffThreshold(1e-6);
 
 	// print out the steps
 	setting.printOff();
 
-/*	// DDE does not require a remainder estimation
+	// remainder estimation
 	Interval I(-0.01, 0.01);
 	vector<Interval> remainder_estimation(numVars, I);
 	setting.setRemainderEstimation(remainder_estimation);
-*/
+
 	//setting.printOn();
 
-	setting.prepare();
+//	setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	double w = stod(argv[1]);
-	int steps = stoi(argv[2]);
-	Interval init_x0(-0.515 - w, -0.515 + w), init_x1(0), init_u(0); // w=0.05
+	double w = 0.01;
+	int steps = 10;
+	Interval init_x0(-0.76 - w, -0.76 + w), init_x1(-0.44 - w, -0.44 + w), init_x2(0.52 - w, 0.52 + w), init_x3(-0.29 - w, -0.29 + w), init_u(0); //w=0.01
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
+	X0.push_back(init_x2);
+	X0.push_back(init_x3);
 	X0.push_back(init_u);
 
 	// translate the initial set to a flowpipe
@@ -77,32 +70,28 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 1000);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
 
 	// define the neural network controller
-	string nn_name = "nn_"+net_name;
+	string nn_name = net_name;
 	NeuralNetwork nn(nn_name);
 
 	// the order in use
 	// unsigned int order = 5;
-	Interval cutoff_threshold(-1e-12, 1e-12);
-	unsigned int bernstein_order = stoi(argv[3]);
-	unsigned int partition_num = 4000;
+	Interval cutoff_threshold(-1e-10, 1e-10);
+	unsigned int bernstein_order = order;
+	unsigned int partition_num = 1000;
 
-	unsigned int if_symbo = stoi(argv[5]);
+	unsigned int if_symbo = 1;
 
 	double err_max = 0;
 	time_t start_timer;
 	time_t end_timer;
 	double seconds;
 	time(&start_timer);
-
-	vector<string> state_vars;
-	state_vars.push_back("x0");
-	state_vars.push_back("x1");
 
 	if (if_symbo == 0)
 	{
@@ -123,6 +112,13 @@ int main(int argc, char *argv[])
 
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[2]);
+		tmv_input.tms.push_back(initial_set.tmvPre.tms[3]);
+
+		// TaylorModelVec<Real> tmv_temp;
+		// initial_set.compose(tmv_temp, order, cutoff_threshold);
+		// tmv_input.tms.push_back(tmv_temp.tms[0]);
+		// tmv_input.tms.push_back(tmv_temp.tms[1]);
 
 
 		// taylor propagation
@@ -139,13 +135,13 @@ int main(int argc, char *argv[])
 		}
 
 
-		Matrix<Interval> rm1(1, 1);
-		tmv_output.Remainder(rm1);
-		cout << "Neural network taylor remainder: " << rm1 << endl;
-
+//		Matrix<Interval> rm1(1, 1);
+//		tmv_output.Remainder(rm1);
+//		cout << "Neural network taylor remainder: " << rm1 << endl;
 
 
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
+
 
 		// if(if_symbo == 0){
 		// 	dynamics.reach(result, setting, initial_set, unsafeSet);
@@ -155,10 +151,7 @@ int main(int argc, char *argv[])
 		// }
 
 		// Always using symbolic remainder
-		dynamics.reach_sr(result, setting, initial_set, 1, symbolic_remainder, unsafeSet);
-
-		// not using a symbolic remainder
-		// dynamics.reach(result, setting, initial_set, 1, unsafeSet);
+		dynamics.reach(result, initial_set, 0.5, setting, safeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -174,16 +167,18 @@ int main(int argc, char *argv[])
 
 
 	vector<Constraint> targetSet;
-	Constraint c1("-x0 + 0.45", vars);		// x0 >= 0.2
-	Constraint c2("-x1 + 0.0", vars);		// x0 >= 0.0
+	Constraint c1("x0 - 0.2", vars);		// x0 <= 0.2
+	Constraint c2("-x0 - 0.1", vars);		// x0 >= -0.1
+	Constraint c3("x1 + 0.6", vars);		// x1 <= -0.6
+	Constraint c4("-x1 - 0.9", vars);		// x1 >= -0.9
 
 	targetSet.push_back(c1);
 	targetSet.push_back(c2);
-
-	string reach_result;
+	targetSet.push_back(c3);
+	targetSet.push_back(c4);
 
 	bool b = result.fp_end_of_time.isInTarget(targetSet, setting);
-
+	string reach_result;
 
 	if(b)
 	{
@@ -221,7 +216,7 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }

@@ -39,6 +39,8 @@ end
 % Doing the input transformation
 g = zeros(no_of_inputs,1);
 g = x;
+size(g)
+size(weight_matrix)
 g = weight_matrix * g;
 g = g + bias_matrix(:);
 g = do_thresholding_tanh(g);

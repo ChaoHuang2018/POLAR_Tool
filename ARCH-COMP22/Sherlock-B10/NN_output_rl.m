@@ -56,9 +56,10 @@ for i = 1:(no_of_hidden_layers)
     % Doing the transformation
     g = weight_matrix * g;
     g = g + bias_matrix(:);
-    if i < no_of_hidden_layers
-        g = do_thresholding_relu(g);
-    end
+    g = do_thresholding_relu(g);
+%     if i < no_of_hidden_layers
+%         g = do_thresholding_relu(g);
+%     end
 
 end
 
