@@ -1,0 +1,6 @@
+Verification result: 3
+Running Time: 77.000000 seconds
+NN propagation time: 3
+flowstar time: 74
+Remainder range: [ -7.676290668290454e-04 , 7.845493140570946e-04 ]
+Remainder size: 1.552178380886140e-03
