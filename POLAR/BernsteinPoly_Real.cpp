@@ -3,22 +3,22 @@
 using namespace flowstar;
 using namespace std;
 
-long factorial(int n)
+Real factorial(int n)
 {
-    long fc = 1;
+    Real fc = 1;
     for (int i = 1; i <= n; ++i)
         fc *= i;
     // cout << "fc: " << fc << endl;
     return fc;
 }
 
-long combo(int n, int m)
+Real combo(int n, int m)
 {
-    long com = factorial(n) / (factorial(m) * factorial(n - m));
+    Real com = factorial(n) / (factorial(m) * factorial(n - m));
     return com;
 }
 
-double relu(double x)
+Real relu(Real x)
 {
     if (x >= 0)
     {
@@ -30,100 +30,158 @@ double relu(double x)
     }
 }
 
-double sigmoid(double x)
+Real sigmoid(Real x)
 {
-    double result = 1.0 - 1.0 / (1.0 + exp(x));
+//    double result = 1.0 - 1.0 / (1.0 + exp(x));
+    Real result;
+    x.exp_RNDU(result);
+    result.add_assign_RNDU(Real(1));
+    result.rec_assign();
+    result.mul_assign_RNDU(Real(-1));
+    result.add_assign_RNDU(Real(1));
     return result;
 }
 
-double tanh(double x)
+Real tanh(Real x)
 {
-    double result = (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+//    double result = (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+    Real temp1;
+    Real temp2;
+    
+    Real result;
+    x.exp_RNDU(temp1);
+    
+    x.mul_RNDU(temp2, Real(-1));
+    temp2.exp_assign_RNDU();
+    
+    Real temp3;
+    Real temp4;
+    
+    temp1.add_RNDU(temp3, temp2);
+    temp1.sub_RNDU(temp4, temp2);
+    
+    temp4.div_RNDU(result, temp3);
     return result;
 }
 
-double relu_lips(Interval &intv)
+Real relu_lips(Interval &intv)
 {
-    double a = intv.inf();
-    double b = intv.sup();
+    Real a;
+    intv.inf(a);
+    Real b;
+    intv.sup(b);
     if (b <= 0)
     {
-        return 0;
+        return Real(0);
     }
     else
     {
-        return 1;
+        return Real(1);
     }
 }
 
-double sigmoid_de(double x)
+Real sigmoid_de(Real x)
 {
-    double temp1 = sigmoid(x);
+    Real temp1(sigmoid(x));
 
-    double result = temp1 * (1.0 - temp1);
-
+//    double result = temp1 * (1.0 - temp1);
+    Real result;
+    temp1.mul_RNDU(result, Real(-1));
+    result.add_assign_RNDU(Real(1));
+    result.mul_assign_RNDU(temp1);
     return result;
 }
 
-double sigmoid_lips(Interval &intv)
+Real sigmoid_lips(Interval &intv)
 {
-    double a = intv.inf();
-    double b = intv.sup();
+    Real a;
+    intv.inf(a);
+    Real b;
+    intv.sup(b);
 
-    vector<double> check_list;
+    vector<Real> check_list;
     check_list.push_back(a);
     check_list.push_back(b);
 
     if ((a <= 0) && (b >= 0))
     {
-        check_list.push_back(0);
+        check_list.push_back(Real(0));
     }
 
-    double de_bound = sigmoid_de(check_list[0]);
+    Real de_bound = sigmoid_de(check_list[0]);
     for (int i = 0; i < check_list.size(); i++)
     {
         //cout << sigmoid_de(check_list[i]) << endl;
-        if (abs(sigmoid_de(check_list[i])) >= abs(de_bound))
+        Real temp1;
+        Real temp2;
+        
+        check_list[i].abs(temp1);
+        de_bound.abs(temp2);
+        if (temp1 >= temp2)
         {
-            de_bound = sigmoid_de(check_list[i]);
+            de_bound = temp1;
         }
     }
-    double lips = abs(de_bound);
+    Real lips;
+    de_bound.abs(lips);
     return lips;
 }
 
-double tanh_de(double x)
+Real tanh_de(Real x)
 {
-    double result = 1.0 - pow(tanh(x), 2.0);
+//    double result = 1.0 - pow(tanh(x), 2.0);
+    Real temp1(tanh(x));
+
+//    double result = temp1 * (1.0 - temp1);
+    Real result(temp1);
+    result.pow_assign(2);
+    result.mul_assign_RNDU(Real(-1));
+    result.add_assign_RNDU(Real(1));
+    
     return result;
 }
 
-double tanh_lips(Interval &intv)
+Real tanh_lips(Interval &intv)
 {
-    double a = intv.inf();
-    double b = intv.sup();
-    vector<double> check_list;
+    Real a;
+    intv.inf(a);
+    Real b;
+    intv.sup(b);
+    
+    vector<Real> check_list;
     check_list.push_back(a);
     check_list.push_back(b);
 
     if ((a <= 0) && (b >= 0))
     {
-        check_list.push_back(0);
+        check_list.push_back(Real(0));
     }
 
-    double de_bound = tanh_de(check_list[0]);
+    Real de_bound = tanh_de(check_list[0]);
     for (int i = 0; i < check_list.size(); i++)
     {
-        if (abs(tanh_de(check_list[i])) >= abs(de_bound))
+//        if (abs(tanh_de(check_list[i])) >= abs(de_bound))
+//        {
+//            de_bound = tanh_de(check_list[i]);
+//        }
+        Real temp1;
+        Real temp2;
+        
+        check_list[i].abs(temp1);
+        de_bound.abs(temp2);
+        if (temp1 >= temp2)
         {
-            de_bound = tanh_de(check_list[i]);
+            de_bound = temp1;
         }
     }
-    double lips = abs(de_bound);
+//    double lips = abs(de_bound);
+    
+    Real lips;
+    de_bound.abs(lips);
     return lips;
 }
 
-void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &intv, int d)
+void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval intv, int d)
 {
     time_t start_timer;
     time_t end_timer;
@@ -132,15 +190,18 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
 
     // cout << "Interval of activation abstraction: " << intv << endl;
 
-    double a = intv.inf();
-    double b = intv.sup();
-    double width = intv.width();
+//    double a = intv.inf();
+//    double b = intv.sup();
+    Real a;
+    intv.inf(a);
+    Real b;
+    intv.sup(b);
 
     vector<Real> coe_bern_poly;
-    coe_bern_poly.push_back(0);
+    coe_bern_poly.push_back(Real(0));
     UnivariatePolynomial<Real> bern_poly(coe_bern_poly);
 
-    double (*fun_act)(double);
+    Real (*fun_act)(Real);
     if (act == "ReLU")
     {
         fun_act = relu;
@@ -154,6 +215,13 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
         fun_act = tanh;
     }
 
+//    if ((b - a <= 1e-10) || (fun_act(b) - fun_act(a) <= 1e-10))
+//    {
+//        result = bern_poly + fun_act((a + b) / 2);
+//    }
+    
+    // discuss special situations
+    // situation 1: point rather than interval
     if (a == b)
     {
         result = fun_act(a);
@@ -162,7 +230,7 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
     // situation 2: relu and interval does not contain 0.
     if (act == "ReLU")
     {
-        if (a >= 0)
+        if (a >= Real(0))
         {
             vector<Real> coe_temp;
             coe_temp.push_back(Real(0));
@@ -171,7 +239,7 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
             result = u_temp;
             return;
         }
-        if (b <= 0)
+        if (b <= Real(0))
         {
             vector<Real> coe_temp;
             coe_temp.push_back(Real(0));
@@ -180,22 +248,41 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
             return;
         }
     }
-    
-    if ((width <= 1e-10) || (fun_act(b) - fun_act(a) <= 1e-10))
-    {
-        bern_poly = bern_poly + fun_act((a + b) / 2);
-        return;
-    }
+
+//    int d_max = 8;
+//    int d_p = int(floor(d_max / log10(1.0 / (b - a))));
+//    if (d_p > 0)
+//    {
+//        d = min(d_p, d);
+//    }
 
     vector<Real> coe_1;
-    coe_1.push_back(Real(-1.0 * a / width));
-    coe_1.push_back(Real(1.0 / width));
+    Real temp1;
+    b.sub_RNDU(temp1, a);
+    temp1.rec_assign();
+    
+    Real temp2;
+    temp1.mul_RNDU(temp2, a);
+    temp2.mul_assign_RNDU(Real(-1));
+   
+//    coe_1.push_back(Real(-1.0 * a / (b - a)));
+//    coe_1.push_back(Real(1.0 / (b - a)));
+    coe_1.push_back(temp2);
+    coe_1.push_back(temp1);
     UnivariatePolynomial<Real> m(coe_1);
     // cout << "m: " << m << endl;
 
     vector<Real> coe_2;
-    coe_2.push_back(Real(1.0 * b / width));
-    coe_2.push_back(Real(-1.0 * 1 / width));
+    Real temp3;
+    temp1.mul_RNDU(temp3, b);
+    
+    Real temp4;
+    temp1.mul_RNDU(temp4, Real(-1));
+    
+//    coe_2.push_back(Real(1.0 * b / (b - a)));
+//    coe_2.push_back(Real(-1.0 * 1 / (b - a)));
+    coe_2.push_back(temp3);
+    coe_2.push_back(temp4);
     UnivariatePolynomial<Real> n(coe_2);
     // cout << "n: " << n << endl;
 
@@ -205,9 +292,11 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
         Real c = combo(d, v);
 
         // sample value
-        double point = a + 1.0 * width / d * v;
+//        double point = a + 1.0 * (b - a) / d * v;
+        Real point = a + Real(1.0) * (b - a) / Real(d) * Real(v);
+        
         // cout << "point: " << point << endl;
-        double f_value;
+        Real f_value;
         if (act == "ReLU")
         {
             f_value = relu(point);
@@ -242,7 +331,7 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
         // cout << mon_value << endl
         //      << endl
         //      << endl;
-        bern_poly += mono_1 * mono_2 * c * Real(f_value);
+        bern_poly += mono_1 * mono_2 * c * f_value;
     }
     if (bern_poly.coefficients.size() == 0)
     {
@@ -261,7 +350,7 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
 
 double gen_bern_err(string act, Interval intv, int degree)
 {
-    double lips;
+    Real lips;
     if (act == "ReLU")
     {
         lips = relu_lips(intv);
@@ -276,10 +365,11 @@ double gen_bern_err(string act, Interval intv, int degree)
     }
     // use the default one, for all the Lipschitz continuous activation function
     // cout << lips << endl;
-    return 1.0 / (2 * sqrt(degree)) * lips * intv.width();
+//    return 1.0 / (2 * sqrt(degree)) * lips * intv.width();
+    return 1.0;
 }
 
-double gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Interval &intv, int partition)
+Real gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Interval intv, int partition)
 {
     time_t start_timer0;
     time_t start_timer;
@@ -292,11 +382,12 @@ double gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Int
 
     time(&start_timer0);
 
-    double a = intv.inf();
-    double b = intv.sup();
-    double width = intv.width();
+    Real a;
+    intv.inf(a);
+    Real b;
+    intv.sup(b);
 
-    double lips;
+    Real lips;
     if (act == "ReLU")
     {
         lips = relu_lips(intv);
@@ -310,7 +401,7 @@ double gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Int
         lips = tanh_lips(intv);
     }
 
-    double (*fun_act)(double);
+    Real (*fun_act)(Real);
     if (act == "ReLU")
     {
         fun_act = relu;
@@ -324,50 +415,61 @@ double gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Int
         fun_act = tanh;
     }
 
+//    if (b - a <= 1e-12)
+//    {
+//        cout << max(fun_act((a + b) / 2) - fun_act(a), fun_act(b) - fun_act((a + b) / 2)) << endl;
+//        return max(fun_act((a + b) / 2) - fun_act(a), fun_act(b) - fun_act((a + b) / 2));
+//        return 1e-12 * 0.25;
+//        return 0;
+//    }
+    
     // discuss special situations
     // situation 1: point rather than interval
     if (a == b)
     {
-        return 0;
+        return Real(0);
     }
     
     // situation 2: relu and interval does not contain 0.
     if (act == "ReLU")
     {
-        if (a >= 0)
+        if (a >= Real(0))
         {
-            return 0;
+            return Real(0);
         }
-        if (b <= 0)
+        if (b <= Real(0))
         {
-            return 0;
+            return Real(0);
         }
     }
 
     // for all the Lipschitz continuous activation function
-    double sample_diff = 0;
+    Real sample_diff = 0;
     for (int i = 0; i < partition; i++)
     {
-        double point = a + 1.0 * width / partition * (i + 0.5);
+//        double point = a + 1.0 * (b - a) / partition * (i + 0.5);
+        Real point = a + Real(1.0) * (b - a) / Real(partition) * (Real(i) + Real(0.5));
 
         Real berns_value;
         time(&start_timer);
-        berns.evaluate(berns_value, Real(point));
+        berns.evaluate(berns_value, point);
         time(&end_timer1);
         seconds = -difftime(start_timer, end_timer1);
         berns_time.push_back(seconds);
-        double fun_value = fun_act(point);
+        Real fun_value = fun_act(point);
         time(&end_timer2);
         seconds = -difftime(end_timer1, end_timer2);
         act_time.push_back(seconds);
 
-        double temp_diff = abs(fun_act(point) - berns_value.toDouble());
+        Real temp_diff = fun_act(point) - berns_value;
+        temp_diff.abs_assign();
 
         if (temp_diff > sample_diff)
         {
             sample_diff = temp_diff;
         }
     }
+//    cout << "Sample error: " << sample_diff << endl;
 
     double total_berns_time = 0.0;
     double total_act_time = 0.0;
@@ -379,12 +481,16 @@ double gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Int
     // cout << "average berns evaluation time: " << total_berns_time / (partition * 1.0) << " seconds" << endl;
     // cout << "average activation evaluation time: " << total_act_time / (partition * 1.0) << " seconds" << endl;
 
-    double overhead = 1.0 * lips * width / partition;
+    Real width;
+    intv.width(width);
+    Real overhead = Real(1.0) * lips * width / Real(partition);
 
     time(&end_timer);
     seconds = -difftime(start_timer0, end_timer);
     // cout << "Berns err time: " << seconds << " seconds" << endl;
-//     cout << "Approximation error: " << overhead + sample_diff << endl;
-
+//    cout << "Interval: " << intv << endl;
+//    cout << "Approximation error: " << overhead + sample_diff << endl;
+    
     return overhead + sample_diff;
 }
+

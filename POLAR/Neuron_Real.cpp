@@ -52,9 +52,9 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
     
     gen_bern_poly(up, "sigmoid", tmRange, bernstein_order);
 
-	double error = gen_bern_err_by_sample(up, "sigmoid", tmRange, partition_num);
+	Real error = gen_bern_err_by_sample(up, "sigmoid", tmRange, partition_num);
 
-	Interval rem(-error, error);
+	Interval rem(Real(0), error);
 
 //	cout << "up: " << up << endl;
 	TaylorModel<Real> tmTemp(up.coefficients[up.coefficients.size() - 1], domain.size());
@@ -160,9 +160,9 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     UnivariatePolynomial<Real> up;
     gen_bern_poly(up, "tanh", tmRange, bernstein_order);
 
-    double error = gen_bern_err_by_sample(up, "tanh", tmRange, partition_num);
+    Real error = gen_bern_err_by_sample(up, "tanh", tmRange, partition_num);
 
-    Interval rem(-error, error);
+    Interval rem(Real(0), error);
 
     TaylorModel<Real> tmTemp(up.coefficients[up.coefficients.size() - 1], domain.size());
 
@@ -244,9 +244,9 @@ void Neuron::relu_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     UnivariatePolynomial<Real> up;
     gen_bern_poly(up, "ReLU", tmRange, bernstein_order);
 
-    double error = gen_bern_err_by_sample(up, "ReLU", tmRange, partition_num);
+    Real error = gen_bern_err_by_sample(up, "ReLU", tmRange, partition_num);
 
-    Interval rem(-0.5*error, 0.5*error);
+    Interval rem(-0.5*error, 0.5*error, 1);
     up.coefficients[0] -= 0.5*error;
 
     TaylorModel<Real> tmTemp(up.coefficients[up.coefficients.size() - 1], domain.size());

@@ -177,16 +177,17 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
         TaylorModelVec<Real> tmvTemp_pre;
         layer.pre_activate(tmvTemp_pre, tmv_all_layer[s], domain);
 //        cout << "pre: " << tmvTemp_pre.tms[0].remainder << endl;
-        
+//        cout << "size: " << tmvTemp_pre.tms.size() << endl;
         
         TaylorModelVec<Real> tmvTemp_post;
         layer.post_activate(tmvTemp_post, tmvTemp_pre, domain, polar_setting, setting);
 //        cout << "post: " << tmvTemp_post.tms[0].remainder << endl;
+//        cout << "size: " << tmvTemp_post.tms.size() << endl;
 
         tmv_all_layer.push_back(tmvTemp_post);
     }
 
-    // cout << "size: " << tmv_all_layer.size() << endl;
+//    cout << "size: " << tmv_all_layer.size() << endl;
     result = tmv_all_layer.back();
 //    cout << "result: " << result.tms[0].remainder << endl;
 
@@ -233,8 +234,9 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
     {
         scalar[i][i] = scale_factor;
     }
-    // cout << "scalar: " << scalar << endl;
+//    cout << "scalar: " << scalar << endl;
     result = scalar * result;
+//    cout << "222" << endl;
 
     tmv_all_layer.push_back(result);
 
@@ -309,7 +311,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 	                	Interval I(-0.5*error, 0.5*error, 1);
 	                 	rem = I;
 	                 	up.coefficients[0] -= 0.5*error;
-//	                 	cout << I << endl;
+	  //               	cout << I << endl;
 	                }
 
 	                Berns_rem[j] = rem;
@@ -324,11 +326,9 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 	                Berns_poly[j] = up;
 
-					double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
+					Real error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
 
-					cout << error << endl;
-
-					Interval rem(-error, error);
+					Interval rem(Real(0), error);
 					Berns_rem[j] = rem;
 				}
 			}

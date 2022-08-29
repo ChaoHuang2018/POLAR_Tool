@@ -81,6 +81,8 @@ int main(int argc, char *argv[])
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.005, order);
 
+	// time horizon for a single control step
+//	setting.setTime(0.1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-7);
@@ -89,7 +91,7 @@ int main(int argc, char *argv[])
 	setting.printOff();
 
 	// remainder estimation
-	Interval I(-0.1, 0.1);
+	Interval I(-0.01, 0.01);
 	vector<Interval> remainder_estimation(numVars, I);
 	setting.setRemainderEstimation(remainder_estimation);
 
@@ -156,13 +158,23 @@ int main(int argc, char *argv[])
 
 	// the order in use
 	// unsigned int order = 5;
-	unsigned int bernstein_order = 4;
+	Interval cutoff_threshold(-1e-7, 1e-7);
+	unsigned int bernstein_order = order;
 	unsigned int partition_num = 4000;
 
 	unsigned int if_symbo = 1;
 
-	clock_t begin, end;
-	begin = clock();
+	double err_max = 0;
+	time_t start_timer;
+	time_t end_timer;
+	double seconds;
+    time_t flowstar_start_timer;
+    time_t nn_start_timer;
+    time_t flowstar_end_timer;
+    time_t nn_end_timer;
+    double flowstar_seconds = 0;
+    double nn_seconds = 0;
+	time(&start_timer);
 
 	if (if_symbo == 0)
 	{
@@ -194,6 +206,7 @@ int main(int argc, char *argv[])
         PolarSetting polar_setting(order, bernstein_order, partition_num, comb, "Concrete");
         TaylorModelVec<Real> tmv_output;
 
+	    time(&nn_start_timer);
 
         if (if_symbo == 0)
         {
@@ -206,6 +219,8 @@ int main(int argc, char *argv[])
             nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
         }
 
+	    time(&nn_end_timer);
+	    nn_seconds += difftime(nn_start_timer, nn_end_timer);
 
         // tmv_output.output(cout, vars);
 //		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
@@ -218,10 +233,12 @@ int main(int argc, char *argv[])
         initial_set.tmvPre.tms[u2_id] = tmv_output.tms[2];
 //        cout << "TM -- Propagation" << endl;
 
-
+        time(&flowstar_start_timer);
         // dynamics.reach(result, setting, initial_set, unsafeSet);
         dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
+        time(&flowstar_end_timer);
 
+        flowstar_seconds += difftime(flowstar_start_timer, flowstar_end_timer);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -235,19 +252,49 @@ int main(int argc, char *argv[])
         run_step = iter;
 	}
 
-	end = clock();
-	printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
+	vector<Interval> end_box;
+	string reach_result;
+	reach_result = "Verification result: " + to_string(run_step);
+	result.fp_end_of_time.intEval(end_box, order, setting.tm_setting.cutoff_threshold);
+
+    TaylorModelVec<Real> tm_;
+    result.fp_end_of_time.compose(tm_, order, setting.tm_setting.cutoff_threshold);
+    Interval tmRange;
+    tm_.tms[0].intEval(tmRange, result.fp_end_of_time.domain);
+
+	time(&end_timer);
+	seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting(vars);
 
+    string benchmark_name = "quad_w" + to_string(int(stod(argv[1]) * 1000)) + "_order" + to_string(stoi(argv[4])) + "_" + comb;
+	int mkres = mkdir("./outputs/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+	if (mkres < 0 && errno != EEXIST)
+	{
+		printf("Can not create the directory for images.\n");
+		exit(1);
+	}
 
+	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
+
+
+	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");
+	if (result_output.is_open())
+	{
+		result_output << reach_result << endl;
+		result_output << running_time << endl;
+        result_output << "NN propagation time: " << -nn_seconds << endl;
+        result_output << "flowstar time: " << -flowstar_seconds << endl;
+        result_output << "Remainder range: " << tm_.tms[x3_id].remainder << endl;
+        result_output << "Remainder size: " << tm_.tms[x3_id].remainder.sup() - tm_.tms[x3_id].remainder.inf() << endl;
+	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("t", "x3");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "quad20", result.tmv_flowpipes, setting);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/" + benchmark_name, "_" + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }

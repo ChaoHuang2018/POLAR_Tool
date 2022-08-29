@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 	unsigned int order = 5;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.02, order);
+	setting.setFixedStepsize(0.05, order);
 
 	// time horizon for a single control step
 //	setting.setTime(0.5);
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	 */
 	int steps = 40;
 //	Interval init_x0(70, 106), init_x1(70, 106), init_x2(-0.28, 0.28), init_x3(-0.28, 0.28), init_u0(0), init_u1(0); //w=0.01
-    Interval init_x0(87, 89), init_x1(87, 89), init_x2(-0.1, 0.1), init_x3(-0.1, 0.1), init_u0(0), init_u1(0);
+    Interval init_x0(89, 89), init_x1(89, 89), init_x2(-0.01, 0.01), init_x3(-0.01, 0.01), init_u0(0), init_u1(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
