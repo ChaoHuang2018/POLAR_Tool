@@ -38,8 +38,7 @@ void Layer::post_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &in
     
     for (unsigned int i = 0; i < input.tms.size(); ++i)
     {
-//        cout << "------"
-//             << "Neuron " << i << " -------" << endl;
+//        cout << "------" << "Neuron - " << i << " -------" << endl;
         TaylorModel<Real> tmTemp;
 //        cout << "Input remainder: " << input.tms[i].remainder << endl;
         neuron_list[i].taylor_model_approx(tmTemp, input.tms[i], domain, polar_setting, setting);
@@ -283,6 +282,8 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 	    tmv_layer_input.intEval(input_range, domain);
 
+	    TaylorModelVec<Real> tmv_layer_input_precond = tmv_layer_input;
+
 
 		// obtaining the vector of Bernstein overapproximations for the activation functions in the k-th layer
 		vector<UnivariatePolynomial<Real> > Berns_poly(input_range.size());
@@ -326,7 +327,10 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 					double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
 
-					cout << error << endl;
+//					cout << error << endl;
+
+//					if(error > 1e-5)
+//						cout << error << endl;
 
 					Interval rem(-error, error);
 					Berns_rem[j] = rem;
@@ -441,8 +445,6 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		vector<UnivariateTaylorModel<Real> > utm_activation(input_range.size());
 
-		TaylorModelVec<Real> tmv_layer_input_precond = tmv_layer_input;
-
 		interval_utm_setting.order = polar_setting.get_bernstein_order();
 
 		if(layers[k].activation != "Affine" && layers[k].activation != "ReLU")
@@ -460,6 +462,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 					utm_x.expansion.coefficients.push_back(1);
 
 					Interval x_range = input_range[j] - const_part;
+
 					interval_utm_setting.val = x_range;
 
 					utm_x.sigmoid_taylor(utm_activation[j], x_range,  polar_setting.get_bernstein_order(), setting.g_setting);
@@ -478,6 +481,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 					utm_x.expansion.coefficients.push_back(1);
 
 					Interval x_range = input_range[j] - const_part;
+
 					interval_utm_setting.val = x_range;
 
 					utm_x.tanh_taylor(utm_activation[j], x_range, polar_setting.get_bernstein_order(), setting.g_setting);
@@ -571,6 +575,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 				}
 			}
 		}
+
 
 
 

@@ -38,16 +38,16 @@ int main(int argc, char *argv[])
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
 
-	unsigned int order = 4;
+	unsigned int order = 3;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.02, order);
+	setting.setFixedStepsize(0.05, order);
 
 	// time horizon for a single control step
 //	setting.setTime(0.2);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-8);
+	setting.setCutoffThreshold(1e-6);
 
 	// print out the steps
 	setting.printOff();
@@ -91,19 +91,13 @@ int main(int argc, char *argv[])
 	string nn_name = "controllerB_POLAR";
 	NeuralNetwork nn(nn_name);
 
-	// the order in use
-	// unsigned int order = 5;
-	Interval cutoff_threshold(-1e-10, 1e-10);
-	unsigned int bernstein_order = order;
-	unsigned int partition_num = 100;
+	unsigned int bernstein_order = 2;
+	unsigned int partition_num = 10;
 
 	unsigned int if_symbo = 1;
 
 	double err_max = 0;
-	time_t start_timer;
-	time_t end_timer;
-	double seconds;
-	time(&start_timer);
+
 
 	if (if_symbo == 0)
 	{
@@ -114,7 +108,9 @@ int main(int argc, char *argv[])
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
 
-	// perform 35 control steps
+	clock_t begin, end;
+	begin = clock();
+
 	for (int iter = 0; iter < steps; ++iter)
 	{
 		cout << "Step " << iter << " starts.      " << endl;
@@ -187,13 +183,13 @@ int main(int argc, char *argv[])
 
 
 	vector<Constraint> targetSet;
-	Constraint c1("x0 - 0.6", vars);		// x0 <= -0.15
-	Constraint c2("-x0 - 0.6", vars);		// x0 >= -0.43
-	Constraint c3("x1 - 0.2", vars);		// x1 <= 0.22
-	Constraint c4("-x1 - 0.2", vars);		// x1 >= 0.05
-    Constraint c5("x2 - 0.06", vars);        // x1 <= 0.22
+	Constraint c1("x0 - 0.6", vars);
+	Constraint c2("-x0 - 0.6", vars);
+	Constraint c3("x1 - 0.2", vars);
+	Constraint c4("-x1 - 0.2", vars);
+    Constraint c5("x2 - 0.06", vars);
     Constraint c6("-x2 - 0.06", vars);
-    Constraint c7("x3 - 0.3", vars);        // x1 <= 0.22
+    Constraint c7("x3 - 0.3", vars);
     Constraint c8("-x3 - 0.3", vars);
 
 	targetSet.push_back(c1);
@@ -210,16 +206,16 @@ int main(int argc, char *argv[])
 
 	if(b)
 	{
-		reach_result = "Verification result: Yes(" + to_string(steps) + ")";
+		printf("The target set is reachable.\n");
 	}
 	else
 	{
-		reach_result = "Verification result: No(" + to_string(steps) + ")";
+		printf("The target set is NOT reachable.\n");
 	}
 
+	end = clock();
+	printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -234,14 +230,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
-
-	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");
-	if (result_output.is_open())
-	{
-		result_output << reach_result << endl;
-		result_output << running_time << endl;
-	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
 	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_x0_x1", result.tmv_flowpipes, setting);

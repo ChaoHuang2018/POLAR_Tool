@@ -157,15 +157,23 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     Interval tmRange;
     input.intEval(tmRange, domain);
     
+//    cout << "tmRange: " << tmRange << endl;
     UnivariatePolynomial<Real> up;
     gen_bern_poly(up, "tanh", tmRange, bernstein_order);
+    
+//    cout << "Bernstein Polynomial: " << up << endl;
 
     double error = gen_bern_err_by_sample(up, "tanh", tmRange, partition_num);
+//    cout << error << endl;
 
     Interval rem(-error, error);
+//    cout << "up.coefficients.size(): " << up.coefficients.size() << endl;
 
     TaylorModel<Real> tmTemp(up.coefficients[up.coefficients.size() - 1], domain.size());
-
+    
+//    cout << "Bernstein Polynomial: " << up << endl;
+//    cout << "111" << endl;
+//    cout << "up.coefficients.size(): " << up.coefficients.size() << endl;
     for (int i = up.coefficients.size() - 2; i >= 0; --i)
     {
         tmTemp.mul_ctrunc_assign(input, domain, taylor_order, setting.tm_setting.cutoff_threshold);
@@ -173,16 +181,19 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
         TaylorModel<Real> tmTemp2(up.coefficients[i], domain.size());
         tmTemp += tmTemp2;
     }
+//    cout << "222" << endl;
 
     TaylorModel<Real> result_berns;
     result_berns = tmTemp;
     result_berns.remainder += rem;
+    
+    
 
     TaylorModel<Real> result_taylor;
     TaylorModel<Real> tmTemp1 = (input) * (2);
     TaylorModel<Real> tmTemp2;
     tmTemp1.exp_taylor(tmTemp2, domain, taylor_order, setting.tm_setting.cutoff_threshold, setting.g_setting);
-    // cout << "11111111" << endl;
+//    cout << "11111111" << endl;
     if (tmTemp2.expansion.terms.size() == 0)
     {
         Polynomial<Real> tmp_poly(1, domain.size());
@@ -204,6 +215,7 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     {
         tmTemp4 += 1;
     }
+//    cout << "33333" << endl;
 
     result_taylor = tmTemp4;
 

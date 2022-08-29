@@ -1,6 +1,6 @@
 function [y] =  NN_output_POLAR(x)
 
-file = fopen('model_POLAR_mat_test','r');
+file = fopen('controller_airplane_POLAR_mat_test','r');
 file_data = fscanf(file,'%f');
 no_of_inputs = file_data(1);
 no_of_outputs = file_data(2);
@@ -34,7 +34,7 @@ size(g);
 size(weight_matrix);
 g = weight_matrix * g;
 g = g + bias_matrix(:);
-
+g = do_thresholding_relu(g);
 
 for i = 1:(no_of_hidden_layers)
     
@@ -54,13 +54,12 @@ for i = 1:(no_of_hidden_layers)
     % Doing the transformation
     g = weight_matrix * g;
     g = g + bias_matrix(:);
-    if i == 3
-        g = do_thresholding_tanh(g);
+    if i < no_of_hidden_layers
+        g = do_thresholding_relu(g);
     end
-
 end
 
-y = g
+y = g;
 fclose(file);
 
 end

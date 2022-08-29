@@ -16,10 +16,9 @@ for i = 1:(num_of_layers)
     g = w_mat * g;
     g = g + b_mat;
     
-    if i == 3
+    if i == 2 || i == 3 || i == 5
         g = do_thresholding_tanh(g);
     end
-    g
 end
 
 y = g;

@@ -6,7 +6,7 @@ using namespace flowstar;
 int main(int argc, char *argv[])
 {
 
-    string comb = "Mix";
+    string comb = "Taylor";
 
     intervalNumPrecision = 300;
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-7);
+	setting.setCutoffThreshold(1e-6);
 
 	// print out the steps
 	setting.printOff();
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 	// the order in use
 	// unsigned int order = 5;
 	unsigned int bernstein_order = 4;
-	unsigned int partition_num = 4000;
+	unsigned int partition_num = 2000;
 
 	unsigned int if_symbo = 1;
 

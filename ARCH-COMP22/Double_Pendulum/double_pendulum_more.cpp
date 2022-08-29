@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.002, order);
+	setting.setFixedStepsize(0.01, order);
 
 	// time horizon for a single control step
 //	setting.setTime(0.5);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	 */
 	double w = 0;
 	int steps = 5;
-	Interval init_x0(1, 1.01), init_x1(1, 1.01), init_x2(1, 1.01), init_x3(1, 1.01), init_t(0), init_u0(0), init_u1(0); //w=0.01
+	Interval init_x0(1.3, 1.3), init_x1(1.3, 1.3), init_x2(1.3, 1.3), init_x3(1.3, 1.3), init_t(0), init_u0(0), init_u1(0); //w=0.01
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -73,11 +73,13 @@ int main(int argc, char *argv[])
 	// translate the initial set to a flowpipe
 	Flowpipe initial_set(X0);
 
-	Symbolic_Remainder symbolic_remainder(initial_set, 1000);
+	Symbolic_Remainder symbolic_remainder(initial_set, 100);
 
 	// no unsafe set
     // safe set: when t>=0.4, all the veriables [-0.5, 1.5]
-	vector<Constraint> safeSet;
+	vector<Constraint> safeSet = {Constraint("x0 - 1.5", vars), Constraint("x1 - 1.5", vars), Constraint("x2 - 1.5", vars),
+			Constraint("x3 - 1.5", vars), Constraint("-x0 - 0.5", vars), Constraint("-x1 - 0.5", vars), Constraint("-x2 - 0.5", vars),
+			Constraint("-x3 - 0.5", vars)};
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -88,8 +90,7 @@ int main(int argc, char *argv[])
 
 	// the order in use
 	// unsigned int order = 5;
-	Interval cutoff_threshold(-1e-10, 1e-10);
-	unsigned int bernstein_order = order;
+	unsigned int bernstein_order = 2;
 	unsigned int partition_num = 100;
 
 	unsigned int if_symbo = 1;
@@ -108,6 +109,9 @@ int main(int argc, char *argv[])
 	{
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
+
+	clock_t begin, end;
+	begin = clock();
 
 	// perform 35 control steps
 	for (int iter = 0; iter < steps; ++iter)
@@ -160,7 +164,13 @@ int main(int argc, char *argv[])
 		// Always using symbolic remainder
 		dynamics.reach(result, initial_set, 0.02, setting, safeSet, symbolic_remainder);
 
-		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
+		if(result.status == COMPLETED_UNSAFE)
+		{
+			printf("The system is unsafe.\n");
+			break;
+		}
+
+		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNKNOWN)
 		{
 			initial_set = result.fp_end_of_time;
 //			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
@@ -173,32 +183,8 @@ int main(int argc, char *argv[])
 	}
 
 
-	vector<Constraint> targetSet;
-	Constraint c1("x0 - 0.2", vars);		// x0 <= 0.2
-	Constraint c2("-x0 - 0.1", vars);		// x0 >= -0.1
-	Constraint c3("x1 + 0.6", vars);		// x1 <= -0.6
-	Constraint c4("-x1 - 0.9", vars);		// x1 >= -0.9
-
-	targetSet.push_back(c1);
-	targetSet.push_back(c2);
-	targetSet.push_back(c3);
-	targetSet.push_back(c4);
-
-	bool b = result.fp_end_of_time.isInTarget(targetSet, setting);
-	string reach_result;
-
-	if(b)
-	{
-		reach_result = "Verification result: Yes(" + to_string(steps) + ")";
-	}
-	else
-	{
-		reach_result = "Verification result: No(" + to_string(steps) + ")";
-	}
-
-
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
+	end = clock();
+	printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -206,21 +192,7 @@ int main(int argc, char *argv[])
 	Plot_Setting plot_setting(vars);
 	plot_setting.setOutputDims("x2", "x3");
 
-	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-	if (mkres < 0 && errno != EEXIST)
-	{
-		printf("Can not create the directory for images.\n");
-		exit(1);
-	}
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
-
-	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");
-	if (result_output.is_open())
-	{
-		result_output << reach_result << endl;
-		result_output << running_time << endl;
-	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
 	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result.tmv_flowpipes, setting);

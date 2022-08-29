@@ -6,12 +6,11 @@ using namespace flowstar;
 
 int main(int argc, char *argv[])
 {
-	string net_name = argv[1];
+	string net_name = "nn_6_relu_tanh";
 	string benchmark_name = "Tora_Hetero_" + net_name;
 	// Declaration of the state variables.
 	unsigned int numVars = 5;
 
-//	intervalNumPrecision = 600;
 
 	Variables vars;
 
@@ -32,7 +31,7 @@ int main(int argc, char *argv[])
 	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.05, order);
+	setting.setFixedStepsize(0.1, order);
 
 	// time horizon for a single control step
 //	setting.setTime(0.5);
@@ -83,8 +82,7 @@ int main(int argc, char *argv[])
 
 	// the order in use
 	// unsigned int order = 5;
-	Interval cutoff_threshold(-1e-10, 1e-10);
-	unsigned int bernstein_order = order;
+	unsigned int bernstein_order = 2;
 	unsigned int partition_num = 10;
 
 	unsigned int if_symbo = 1;
@@ -104,7 +102,9 @@ int main(int argc, char *argv[])
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
 
-	// perform 35 control steps
+	clock_t begin, end;
+	begin = clock();
+
 	for (int iter = 0; iter < steps; ++iter)
 	{
 		cout << "Step " << iter << " starts.      " << endl;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
 			initial_set = result.fp_end_of_time;
-			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
+//			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
 		}
 		else
 		{
@@ -184,16 +184,16 @@ int main(int argc, char *argv[])
 
 	if(b)
 	{
-		reach_result = "Verification result: Yes(" + to_string(steps) + ")";
+		printf("The target is reachable.\n");
 	}
 	else
 	{
-		reach_result = "Verification result: No(" + to_string(steps) + ")";
+		printf("The target is NOT reachable.\n");
 	}
 
+	end = clock();
+	printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -208,14 +208,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
 
-	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");
-	if (result_output.is_open())
-	{
-		result_output << reach_result << endl;
-		result_output << running_time << endl;
-	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
 	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result.tmv_flowpipes, setting);

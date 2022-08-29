@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 
     string comb = "Mix";
 
-    intervalNumPrecision = 300;
+ //   intervalNumPrecision = 300;
 
 	// Declaration of the state variables.
 	unsigned int numVars = 19;
@@ -39,7 +39,14 @@ int main(int argc, char *argv[])
 
 	int domainDim = numVars + 1;
 
-    ODE<Real> dynamics({"x6*(sin(x7)*sin(x9) + cos(x7)*cos(x9)*sin(x8)) - x5*(cos(x7)*sin(x9) - cos(x9)*sin(x7)*sin(x8)) + x4*cos(x8)*cos(x9)", "x5*(cos(x7)*cos(x9) + sin(x7)*sin(x8)*sin(x9)) - x6*(cos(x9)*sin(x7) - cos(x7)*sin(x8)*sin(x9)) + x4*cos(x8)*sin(x9)", "x6*cos(x7)*cos(x8) - x4*sin(x8) + x5*cos(x8)*sin(x7)", "u1 - sin(x8) + x5*x10 - x6*x12", "u2 + cos(x8)*sin(x7) - x4*x10 + x6*x11", "u3 + cos(x7)*cos(x8) + x4*x12 - x5*x11", "x11 + (x10*cos(x7)*sin(x8))/cos(x8) + (x12*sin(x7)*sin(x8))/cos(x8)", "x12*cos(x7) - x10*sin(x7)", "(x10*cos(x7))/cos(x8) + (x12*sin(x7))/cos(x8)", "u6", "u4", "u5", "1"}, vars);
+    ODE<Real> dynamics({"x6*(sin(x7)*sin(x9) + cos(x7)*cos(x9)*sin(x8)) - x5*(cos(x7)*sin(x9) - cos(x9)*sin(x7)*sin(x8)) + x4*cos(x8)*cos(x9)",
+    	"x5*(cos(x7)*cos(x9) + sin(x7)*sin(x8)*sin(x9)) - x6*(cos(x9)*sin(x7) - cos(x7)*sin(x8)*sin(x9)) + x4*cos(x8)*sin(x9)",
+		"x6*cos(x7)*cos(x8) - x4*sin(x8) + x5*cos(x8)*sin(x7)", "u1 - sin(x8) + x5*x10 - x6*x12",
+		"u2 + cos(x8)*sin(x7) - x4*x10 + x6*x11",
+		"u3 + cos(x7)*cos(x8) + x4*x12 - x5*x11",
+		"x11 + (x10*cos(x7)*sin(x8))/cos(x8) + (x12*sin(x7)*sin(x8))/cos(x8)",
+		"x12*cos(x7) - x10*sin(x7)",
+		"(x10*cos(x7))/cos(x8) + (x12*sin(x7))/cos(x8)", "u6", "u4", "u5", "1"}, vars);
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
@@ -47,7 +54,7 @@ int main(int argc, char *argv[])
 	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.002, order);
+	setting.setFixedStepsize(0.05, order);
 
 	// time horizon for a single control step
 //	setting.setTime(0.1);
@@ -74,22 +81,23 @@ int main(int argc, char *argv[])
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
 	
-	int steps = 4;
+	int steps = 10;
 	Interval
         init_x1(0),
         init_x2(0),
         init_x3(0),
-        init_x4(0.99, 1),
-        init_x5(0.99, 1),
-        init_x6(0.99, 1),
-        init_x7(0.99, 1),
-        init_x8(0.99, 1),
-        init_x9(0.99, 1),
+        init_x4(1, 1),
+        init_x5(1, 1),
+        init_x6(1, 1),
+        init_x7(1, 1),
+        init_x8(1, 1),
+        init_x9(1, 1),
         init_x10(0),
         init_x11(0),
         init_x12(0),
         init_t(0);
-	// Interval init_x0(-0.25 - w, -0.25 + w), init_x1(-0.25 - w, -0.25 + w), init_x2(0.35 - w, 0.35 + w), init_x3(-0.35 - w, -0.35 + w), init_x4(0.45 - w, 0.45 + w), init_x5(-0.35 - w, -0.35 + w);
+
+
 	Interval init_u1(0), init_u2(0), init_u3(0), init_u4(0), init_u5(0), init_u6(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x1);
@@ -115,10 +123,14 @@ int main(int argc, char *argv[])
 	// translate the initial set to a flowpipe
 	Flowpipe initial_set(X0);
 
-    Symbolic_Remainder symbolic_remainder(initial_set, 2000);
+    Symbolic_Remainder symbolic_remainder(initial_set, 100);
 
 	// no unsafe set
-	vector<Constraint> safeSet;
+	vector<Constraint> safeSet = {Constraint("-x1 - 0.5", vars), Constraint("x1 - 0.5", vars),
+			Constraint("-x6 - 1", vars), Constraint("x6 - 1", vars),
+			Constraint("-x7 - 1", vars), Constraint("x7 - 1", vars),
+			Constraint("-x8 - 1", vars), Constraint("x8 - 1", vars)
+			};
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -129,23 +141,12 @@ int main(int argc, char *argv[])
 
 	// the order in use
 	// unsigned int order = 5;
-	Interval cutoff_threshold(-1e-7, 1e-7);
 	unsigned int bernstein_order = 2;
 	unsigned int partition_num = 100;
 
 	unsigned int if_symbo = 1;
 
-	double err_max = 0;
-	time_t start_timer;
-	time_t end_timer;
-	double seconds;
-    time_t flowstar_start_timer;
-    time_t nn_start_timer;
-    time_t flowstar_end_timer;
-    time_t nn_end_timer;
-    double flowstar_seconds = 0;
-    double nn_seconds = 0;
-	time(&start_timer);
+
 
 	if (if_symbo == 0)
 	{
@@ -156,9 +157,10 @@ int main(int argc, char *argv[])
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
 
-    int run_step = 0;
 
-	// perform 35 control steps
+	clock_t begin, end;
+	begin = clock();
+
 	for (int iter = 0; iter < steps; ++iter)
 	{
 		cout << "Step " << iter << " starts.      " << endl;
@@ -177,7 +179,6 @@ int main(int argc, char *argv[])
         PolarSetting polar_setting(order, bernstein_order, partition_num, comb, "Concrete");
         TaylorModelVec<Real> tmv_output;
 
-	    time(&nn_start_timer);
 
         if (if_symbo == 0)
         {
@@ -189,9 +190,6 @@ int main(int argc, char *argv[])
             // using symbolic remainder
             nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
         }
-
-	    time(&nn_end_timer);
-	    nn_seconds += difftime(nn_start_timer, nn_end_timer);
 
         // tmv_output.output(cout, vars);
 //		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
@@ -207,14 +205,16 @@ int main(int argc, char *argv[])
         initial_set.tmvPre.tms[u6_id] = tmv_output.tms[5];
 //        cout << "TM -- Propagation" << endl;
 
-        time(&flowstar_start_timer);
+
         // dynamics.reach(result, setting, initial_set, unsafeSet);
         dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
-        time(&flowstar_end_timer);
 
-        flowstar_seconds += difftime(flowstar_start_timer, flowstar_end_timer);
+        if(result.status == COMPLETED_UNSAFE)
+        {
+        	break;
+        }
 
-		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
+		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNKNOWN)
 		{
 			initial_set = result.fp_end_of_time;
 		}
@@ -223,58 +223,47 @@ int main(int argc, char *argv[])
 			printf("Terminated due to too large overestimation.\n");
 			break;
 		}
-        run_step = iter;
+
 	}
 
-	vector<Interval> end_box;
-	string reach_result;
-	reach_result = "Verification result: " + to_string(run_step);
-	result.fp_end_of_time.intEval(end_box, order, setting.tm_setting.cutoff_threshold);
 
-    TaylorModelVec<Real> tm_;
-    result.fp_end_of_time.compose(tm_, order, setting.tm_setting.cutoff_threshold);
-    Interval tmRange;
-    tm_.tms[0].intEval(tmRange, result.fp_end_of_time.domain);
+	if(result.isUnsafe())
+	{
+		printf("The system is unsafe.\n");
+	}
+	else if(result.isSafe())
+	{
+		printf("The system is safe.\n");
+	}
+	else
+	{
+		printf("The safety is unknown.\n");
+	}
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
+	end = clock();
+	printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
+
+
+
+
+
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting(vars);
 
-    string benchmark_name = "airplane";
-	int mkres = mkdir("./outputs/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-	if (mkres < 0 && errno != EEXIST)
-	{
-		printf("Can not create the directory for images.\n");
-		exit(1);
-	}
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
-
-
-	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");
-	if (result_output.is_open())
-	{
-		result_output << reach_result << endl;
-		result_output << running_time << endl;
-        result_output << "NN propagation time: " << -nn_seconds << endl;
-        result_output << "flowstar time: " << -flowstar_seconds << endl;
-        result_output << "Remainder range: " << tm_.tms[x3_id].remainder << endl;
-        result_output << "Remainder size: " << tm_.tms[x3_id].remainder.sup() - tm_.tms[x3_id].remainder.inf() << endl;
-	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-    plot_setting.setOutputDims("t", "x7");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/" + benchmark_name, "_x7", result.tmv_flowpipes, setting);
+    plot_setting.setOutputDims("x1", "x6");
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "airplane_x1_x6", result.tmv_flowpipes, setting);
     
-    plot_setting.setOutputDims("t", "x8");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/" + benchmark_name, "_x8", result.tmv_flowpipes, setting);
+    plot_setting.setOutputDims("x1", "x4");
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "airplane_x1_x4", result.tmv_flowpipes, setting);
     
-    plot_setting.setOutputDims("t", "x9");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/" + benchmark_name, "_x9", result.tmv_flowpipes, setting);
+//    plot_setting.setOutputDims("t", "x9");
+//    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "airplane_", result.tmv_flowpipes, setting);
 
 	return 0;
 }

@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	// the order in use
 	// unsigned int order = 5;
 	unsigned int bernstein_order = 2;
-	unsigned int partition_num = 1000;
+	unsigned int partition_num = 10;
 
 	unsigned int if_symbo = 1;
 

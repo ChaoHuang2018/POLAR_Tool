@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
 	// Declaration of the state variables.
 	unsigned int numVars = 6;
 
-//	intervalNumPrecision = 600;
 
 	Variables vars;
 
@@ -25,12 +24,12 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
-    ODE<Real> dynamics({"x2","x3","0.002054*x3 + 0.00000316418*x0 + u0/12","-0.002054*x2 + u1/12","0","0"}, vars);
+    ODE<Real> dynamics({"x2","x3","0.002054*x3 + 0.000003164187*x0 + 0.083333333333333*u0","-0.002054*x2 + 0.083333333333333*u1","0","0"}, vars);
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
 
-	unsigned int order = 5;
+	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.05, order);
@@ -39,13 +38,13 @@ int main(int argc, char *argv[])
 //	setting.setTime(0.5);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-9);
+	setting.setCutoffThreshold(1e-8);
 
 	// print out the steps
 	setting.printOff();
 
 	// remainder estimation
-	Interval I(-0.01, 0.01);
+	Interval I(-0.1, 0.1);
 	vector<Interval> remainder_estimation(numVars, I);
 	setting.setRemainderEstimation(remainder_estimation);
 
@@ -58,8 +57,8 @@ int main(int argc, char *argv[])
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
 	int steps = 40;
-//	Interval init_x0(70, 106), init_x1(70, 106), init_x2(-0.28, 0.28), init_x3(-0.28, 0.28), init_u0(0), init_u1(0); //w=0.01
-    Interval init_x0(89, 89), init_x1(89, 89), init_x2(-0.01, 0.01), init_x3(-0.01, 0.01), init_u0(0), init_u1(0);
+//	Interval init_x0(70, 70), init_x1(70, 70), init_x2(0.28, 0.28), init_x3(0.28, 0.28), init_u0(0), init_u1(0); //w=0.01
+    Interval init_x0(87, 89), init_x1(87, 89), init_x2(-0.01, 0.01), init_x3(-0.01, 0.01), init_u0(0), init_u1(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -74,7 +73,7 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 1000);
 
 	// no unsafe set
-	vector<Constraint> safeSet;
+	vector<Constraint> safeSet;// = {Constraint("sqrt(x2^2 + x3^2) - 0.2 - 0.002054 * sqrt(x0^2 + x1^2)", vars)};
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -85,17 +84,10 @@ int main(int argc, char *argv[])
 
 	// the order in use
 	// unsigned int order = 5;
-	Interval cutoff_threshold(-1e-10, 1e-10);
 	unsigned int bernstein_order = 2;
-	unsigned int partition_num = 1000;
+	unsigned int partition_num = 4000;
 
 	unsigned int if_symbo = 1;
-
-	double err_max = 0;
-	time_t start_timer;
-	time_t end_timer;
-	double seconds;
-	time(&start_timer);
 
 	if (if_symbo == 0)
 	{
@@ -106,7 +98,9 @@ int main(int argc, char *argv[])
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
 
-	// perform 35 control steps
+	clock_t begin, end;
+	begin = clock();
+
 	for (int iter = 0; iter < steps; ++iter)
 	{
 		cout << "Step " << iter << " starts.      " << endl;
@@ -158,7 +152,12 @@ int main(int argc, char *argv[])
 		// Always using symbolic remainder
 		dynamics.reach(result, initial_set, 1, setting, safeSet, symbolic_remainder);
 
-		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
+        if(result.status == COMPLETED_UNSAFE)
+        {
+        	break;
+        }
+
+		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNKNOWN)
 		{
 			initial_set = result.fp_end_of_time;
 //			cout << "Flowpipe taylor remainder: " << initial_set.tmv.tms[0].remainder << "     " << initial_set.tmv.tms[1].remainder << endl;
@@ -170,62 +169,37 @@ int main(int argc, char *argv[])
 		}
 	}
 
-
-	vector<Constraint> targetSet;
-	Constraint c1("x0 - 0.2", vars);		// x0 <= 0.2
-	Constraint c2("-x0 - 0.1", vars);		// x0 >= -0.1
-	Constraint c3("x1 + 0.6", vars);		// x1 <= -0.6
-	Constraint c4("-x1 - 0.9", vars);		// x1 >= -0.9
-
-	targetSet.push_back(c1);
-	targetSet.push_back(c2);
-	targetSet.push_back(c3);
-	targetSet.push_back(c4);
-
-	bool b = result.fp_end_of_time.isInTarget(targetSet, setting);
-	string reach_result;
-
-	if(b)
+	if(result.isUnsafe())
 	{
-		reach_result = "Verification result: Yes(" + to_string(steps) + ")";
+		printf("The system is unsafe.\n");
+	}
+	else if(result.isSafe())
+	{
+		printf("The system is safe.\n");
 	}
 	else
 	{
-		reach_result = "Verification result: No(" + to_string(steps) + ")";
+		printf("The safety is unknown.\n");
 	}
 
+	end = clock();
+	printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting(vars);
-//	plot_setting.setOutputDims("(x2^2+x3^2)^0.5", "(x0^2+x1^2)^0.5");
+//	plot_setting.setOutputDims("sqrt(x2^2+x3^2)", "sqrt(x0^2+x1^2)");
     
 
-	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-	if (mkres < 0 && errno != EEXIST)
-	{
-		printf("Can not create the directory for images.\n");
-		exit(1);
-	}
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
-
-	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");
-	if (result_output.is_open())
-	{
-		result_output << reach_result << endl;
-		result_output << running_time << endl;
-	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x1");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_x0_x1", result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "docking_x0_x1", result.tmv_flowpipes, setting);
     plot_setting.setOutputDims("x2", "x3");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_x2_x3", result.tmv_flowpipes, setting);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "docking_x2_x3", result.tmv_flowpipes, setting);
 
 	return 0;
 }

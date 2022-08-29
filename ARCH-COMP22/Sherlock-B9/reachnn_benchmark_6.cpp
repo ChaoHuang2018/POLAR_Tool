@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
 	// subdividing the initial set to smaller boxes 3 x 3 x 2 x 2
 	list<Interval> subdiv_x0;
-	init_x0.split(subdiv_x0, 4);
+	init_x0.split(subdiv_x0, 3);
 
 	list<Interval> subdiv_x1;
 	init_x1.split(subdiv_x1, 3);
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 	// the order in use
 	// unsigned int order = 5;
 //	Interval cutoff_threshold(-1e-10, 1e-10);
-	unsigned int bernstein_order = 3;
+	unsigned int bernstein_order = 2;
 	unsigned int partition_num = 1000;
 
 	unsigned int if_symbo = 1;

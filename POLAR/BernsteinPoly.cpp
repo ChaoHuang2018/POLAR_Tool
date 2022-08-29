@@ -180,10 +180,11 @@ void gen_bern_poly(UnivariatePolynomial<Real> &result, string act, Interval &int
             return;
         }
     }
-    
+
     if ((width <= 1e-10) || (fun_act(b) - fun_act(a) <= 1e-10))
     {
-        bern_poly = bern_poly + fun_act((a + b) / 2);
+        bern_poly = bern_poly + (fun_act(b) + fun_act(a)) * 0.5;
+        result = bern_poly;
         return;
     }
 
@@ -342,6 +343,11 @@ double gen_bern_err_by_sample(UnivariatePolynomial<Real> &berns, string act, Int
         {
             return 0;
         }
+    }
+    
+    if ((width <= 1e-10) || (fun_act(b) - fun_act(a) <= 1e-10))
+    {
+        return (fun_act(b) - fun_act(a)) * 0.5;
     }
 
     // for all the Lipschitz continuous activation function

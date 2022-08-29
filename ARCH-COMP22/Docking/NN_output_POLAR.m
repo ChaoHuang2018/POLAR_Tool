@@ -35,8 +35,6 @@ size(weight_matrix);
 g = weight_matrix * g;
 g = g + bias_matrix(:);
 
-g
-
 for i = 1:(no_of_hidden_layers)
     
     weight_matrix = zeros(network_structure(i+1), network_structure(i));
@@ -55,10 +53,9 @@ for i = 1:(no_of_hidden_layers)
     % Doing the transformation
     g = weight_matrix * g;
     g = g + bias_matrix(:);
-    if i == 2
+    if i == 1 || i == 2 || i == 4
         g = do_thresholding_tanh(g);
     end
-    g
 end
 
 y = g;
