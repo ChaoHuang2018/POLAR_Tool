@@ -1,4 +1,4 @@
-#include "../flowstar/Continuous.h"
+#include "../flowstar/flowstar-toolbox/Continuous.h"
 #include <fstream>
 #include "../nlohmann/json.hpp"
 #include "NeuralNetwork.h"
