@@ -273,9 +273,9 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
+/*
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[1]);
 
@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.1);
+	//setting.setTime(0.1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-8);
@@ -298,12 +298,13 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
-
+	//setting.prepare();
+*/
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
+/*
 	// double w = stod(argv[1]);
 	int steps = 1;
 	Interval init_x0(stod(argv[2]), stod(argv[3])), init_x1(stod(argv[4]), stod(argv[5])), init_x2(stod(argv[6]), stod(argv[7])), init_x3(stod(argv[8]), stod(argv[9])), init_x4(stod(argv[10]), stod(argv[11])), init_x5(stod(argv[12]), stod(argv[13])), init_u0(stod(argv[14]), stod(argv[15])), init_u1(stod(argv[16]), stod(argv[17])), init_u2(stod(argv[18]), stod(argv[19])); // w=0.05
@@ -325,13 +326,15 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 500);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
+	//vector<Constraint> unsafeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
 
 	// Always using symbolic remainder
-	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+	dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
+	//dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 	if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 	{
@@ -378,13 +381,17 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x3");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/x0_x3_" + to_string(stoi(argv[20])), result);
+	plot_setting.plot_2D_octagon_MATLAB(c, "/x0_x3_" + to_string(stoi(argv[20])), result.tmv_flowpipes, setting);
+    //plot_setting.plot_2D_octagon_MATLAB(c, "/x0_x3_" + to_string(stoi(argv[20])), result);
     plot_setting.setOutputDims("x1", "x4");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/x1_x4_" + to_string(stoi(argv[20])), result);
+	plot_setting.plot_2D_octagon_MATLAB(c, "/x1_x4_" + to_string(stoi(argv[20])), result.tmv_flowpipes, setting);
+    //plot_setting.plot_2D_octagon_MATLAB(c, "/x1_x4_" + to_string(stoi(argv[20])), result);
     plot_setting.setOutputDims("x2", "x5");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/x2_x5_" + to_string(stoi(argv[20])), result);
+	plot_setting.plot_2D_octagon_MATLAB(c, "/x2_x5_" + to_string(stoi(argv[20])), result.tmv_flowpipes, setting);
+    //plot_setting.plot_2D_octagon_MATLAB(c, "/x2_x5_" + to_string(stoi(argv[20])), result);
 
 
 
 	return 0;
 }
+*/
