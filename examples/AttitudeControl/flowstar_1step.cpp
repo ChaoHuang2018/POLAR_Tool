@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
 
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
+	//Computational_Setting setting;
 
 	unsigned int order = stoi(argv[4]);
 
