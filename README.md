@@ -23,7 +23,7 @@ git clone https://github.com/chenxin415/flowstar.git
 
 - Compile Flow*
 ```
-cd flowstar
+cd flowstar/flowstar-toolbox
 make
 ```
 
@@ -44,17 +44,19 @@ Partial code of the benchmark 1 dynamics ([*reachnn_benchmark_1.cpp* file](/exam
 
 ```C++
 // Declaration of the state and input variables.
-unsigned int numVars = 3;
+unsigned int numVars = 4;
 Variables vars;
 
 int x0_id = vars.declareVar("x0");
 int x1_id = vars.declareVar("x1");
+int t_id = vars.declareVar("t");
 int u_id = vars.declareVar("u");
 
 // Define the continuous dynamics.
-Expression<Real> deriv_x0("x1", vars); 
-Expression<Real> deriv_x1("u*x1^2-x0", vars);
-Expression<Real> deriv_u("0", vars);
+ODE<Real> dynamics({"x1",
+                    "u*x1^2-x0",
+                    "1",
+                    "0"}, vars);
 ...
 // Define initial state set.
 double w = stod(argv[1]);
