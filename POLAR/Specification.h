@@ -1,4 +1,4 @@
-#include "../flowstar/Continuous.h"
+#include "../flowstar/flowstar-toolbox/Continuous.h"
 #include "../nlohmann/json.hpp"
 
 using json = nlohmann::json;
