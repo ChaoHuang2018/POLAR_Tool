@@ -200,13 +200,16 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x1");
-    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x0_x1_" + to_string(if_symbo), result.tmv_flowpipes);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x0_x1_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+    //plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x0_x1_" + to_string(if_symbo), result.tmv_flowpipes);
 
 	plot_setting.setOutputDims("x2", "x3");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x2_x3_" + to_string(if_symbo), result.tmv_flowpipes);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x2_x3_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	//plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x2_x3_" + to_string(if_symbo), result.tmv_flowpipes);
 
 	plot_setting.setOutputDims("x4", "x5");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x4_x5_" + to_string(if_symbo), result.tmv_flowpipes);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x4_x5_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	//plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nn_ac_sigmoid_x4_x5_" + to_string(if_symbo), result.tmv_flowpipes);
 
 	return 0;
 }
