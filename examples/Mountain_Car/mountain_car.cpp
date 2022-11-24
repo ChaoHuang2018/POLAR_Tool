@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
 	int u_id = vars.declareVar("u");
 
 	int domainDim = numVars + 1;
-
-	/*
+	
+	/* Old inteface
 	// Define the discrete dynamics.
     // x0 is the position of the mountain car, x1 is the speed of the mountain car.
 	Expression<Interval> deriv_x0("x0 + x1", vars); // Discrete: Next_x0 = x0 + x1
