@@ -19,3 +19,13 @@
 * The python script will generate two files: a `.m` file including all the flowpipes and an `.eps` file that only plots the input intervals of the neural networks. 
 * For [*acc*](./acc/), the `.m` file will be in the `POLAR_Tool/examples/outputs/abcrown_flowstar_acc_tanh20x20x20_crown_flowstar` directory
 * For benchmark 1/2/.../6, the `.m` file will be in `POLAR_Tool/examples/outputs/abcrown_flowstar_benchmark$NUM_$NEURALNETWORK_crown_flowstar` where $NUM is the index of the benchmark and $NEURALNETWORK is the name of the neural network file, e.g., nn_1_relu, nn_1_sigmoid_crown.
+
+
+# Instruction on using the onnx converter
+### Requirement
+
+* Install python onnx library `pip install onnx`
+
+### Usage
+* Copy the `onnx_converger` file to the same directory of the C++ source file.
+* In C++ source file, use command `system("python onnx_converter $ONNX_FILE_PATH");` to generatge POLAR input neural network file. The generated file has the same name as the onnx file except for the `.onnx` suffix.
