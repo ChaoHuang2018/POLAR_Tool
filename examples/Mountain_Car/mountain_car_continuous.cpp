@@ -18,10 +18,11 @@ int main(int argc, char *argv[])
 
 	int x0_id = vars.declareVar("x0");
 	int x1_id = vars.declareVar("x1");
+	int t_id = vars.declareVar("t");
 	int u_id = vars.declareVar("u");
 
 	int domainDim = numVars + 1;
-
+	/*
 	// Define the continuous dynamics.
     // x0 is the position of the mountain car, x1 is the speed of the mountain car.
 	Expression<Real> deriv_x0("x1", vars); // Discrete: Next_x0 = x0 + x1
