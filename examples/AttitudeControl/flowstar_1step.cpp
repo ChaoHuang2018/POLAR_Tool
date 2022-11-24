@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
 
 	int domainDim = numVars + 1;
-
+	/*
 	// Define the continuous dynamics.
 	Expression<Real> deriv_x0("0.25*(u0 + x1*x2)", vars); // theta_r = 0
 	Expression<Real> deriv_x1("0.5*(u1 - 3*x0*x2)", vars);
@@ -80,9 +80,16 @@ int main(int argc, char *argv[])
 	ode_rhs[u2_id] = deriv_u2;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
-
+	*/
+	ODE<Real> dynamics({"0.25*(u0 + x1*x2)",
+						"0.5*(u1 - 3*x0*x2)",
+						"u2 + 2*x0*x1",
+						"0.5*x1*(x3^2 + x4^2 + x5^2 - x5) + 0.5*x2*(x3^2 + x4^2 + x4 + x5^2) + 0.5*x0*(x3^2 + x4^2 + x5^2 + 1)", 
+						"0.5*x0*(x3^2 + x4^2 + x5^2 + x5) + 0.5*x2*(x3^2 - x3 + x4^2 + x5^2) + 0.5*x1*(x3^2 + x4^2 + x5^2 + 1)", 
+						"0.5*x0*(x3^2 + x4^2 - x4 + x5^2) + 0.5*x1*(x3^2 + x3 + x4^2 + x5^2) + 0.5*x2*(x3^2 + x4^2 + x5^2 + 1)"},
+						 vars);
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[1]);
 
@@ -90,7 +97,7 @@ int main(int argc, char *argv[])
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.1);
+	//setting.setTime(0.1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-8);
@@ -105,7 +112,7 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
+	//setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -132,13 +139,13 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 500);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
 
 	// Always using symbolic remainder
-	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+	dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
 
 	if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 	{
@@ -185,11 +192,11 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x3");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/x0_x3_" + to_string(stoi(argv[20])), result);
+    plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x0_x3_" + to_string(steps) + "_"  + to_string(1), result.tmv_flowpipes, setting);
     plot_setting.setOutputDims("x1", "x4");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/x1_x4_" + to_string(stoi(argv[20])), result);
+    plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x1_x4_" + to_string(steps) + "_"  + to_string(1), result.tmv_flowpipes, setting);
     plot_setting.setOutputDims("x2", "x5");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/x2_x5_" + to_string(stoi(argv[20])), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nn_ac_sigmoid_x2_x5_" + to_string(steps) + "_"  + to_string(1), result.tmv_flowpipes, setting);
 
 
 

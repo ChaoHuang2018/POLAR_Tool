@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 	
 	// Check 'ARCH-COMP20_Category_Report_Artificial_Intelligence_and_Neural_Network_Control_Systems_-AINNCS-_for_Continuous_and_Hybrid_Systems_Plants.pdf'
 	// Declaration of the state variables.
-	unsigned int numVars = 10;
+	unsigned int numVars = 11;
 	Variables vars;
 	// intput format (\omega_1, \psi_1, \omega_2, \psi_2, \omega_3, \psi_3)
 	int x1_id = vars.declareVar("x1"); // x_pos
@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
 	//int x8_id = vars.declareVar("x8");	// norm_y_pos
 	//int x9_id = vars.declareVar("x9");	// norm_x_vel
 	//int x10_id = vars.declareVar("x10");	// norm_y_vel
+	int t_id = vars.declareVar("t");    // time t
  
 
 	int u1_id = vars.declareVar("u1");	// fx_mean
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
 	int u3_id = vars.declareVar("u3");	// fy_mean
 	int u4_id = vars.declareVar("u4");	// fy_std
  
-	 
+	/*
 	// Define the continuous dynamics.
 	Expression<Real> deriv_x1("x3", vars); //  
 	Expression<Real> deriv_x2("x4", vars); //   
@@ -110,9 +111,16 @@ int main(int argc, char *argv[])
 	ode_rhs[u4_id] = deriv_u4;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
-
+	*/
+	ODE<Real> dynamics({"x3",
+						"x4",
+						"2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.",
+						"-2.0 * 0.001027 * x3 + u3 / 12.",
+						"((2.0 * 0.001027 * x4 + 3 * 0.001027 * 0.001027 * x1 + u1 / 12.) * x3 + (-2.0 * 0.001027 * x3 + u3 / 12.) * x4) / x5",
+						"2.0 * 0.001027 * (x1 * x3 + x2 * x4) / sqrt(x1 * x1 + x2 * x2)",
+						"1","0","0","0","0"}, vars);
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[4]);
 
@@ -121,7 +129,7 @@ int main(int argc, char *argv[])
 	//setting.setFixedStepsize(0.005, order); // order = 4/5
 
 	// time horizon for a single control step
-	setting.setTime(1);
+	//setting.setTime(1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10); //core dumped
@@ -142,7 +150,7 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
+	//setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -182,6 +190,9 @@ int main(int argc, char *argv[])
 		init_x5(init_x3.pow(2) + init_x4.pow(2));
 		init_x5.abs_assign();
 		init_x5.sqrt_assign();	
+
+	Interval 
+		init_t(0);
 	
 	Interval 
 		init_u1(0),
@@ -197,7 +208,8 @@ int main(int argc, char *argv[])
 	X0.push_back(init_x4);
 	X0.push_back(init_x5);
 	X0.push_back(init_x6);
- 
+ 	X0.push_back(init_t);
+	
 	X0.push_back(init_u1);
 	X0.push_back(init_u2);
 	X0.push_back(init_u3);
@@ -207,7 +219,7 @@ int main(int argc, char *argv[])
 	Flowpipe initial_set(X0);
 	Symbolic_Remainder symbolic_remainder(initial_set, 500);
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -352,7 +364,7 @@ int main(int argc, char *argv[])
 			
 		cout << "TM -- Propagation" << endl;
 
-		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+		dynamics.reach(result, initial_set, 1, setting, safeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -400,9 +412,11 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
 	plot_setting.setOutputDims("x1", "x2");
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v1_", nn_name + "_x1x2_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", nn_name + "_x1x2_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	//plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v1_", nn_name + "_x1x2_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
 	plot_setting.setOutputDims("x5", "x6");
-	plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v1_", nn_name + "_x5x6_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", nn_name + "_x5x6_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	//plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v1_", nn_name + "_x5x6_Steps" + to_string(steps) + "_"  + to_string(if_symbo), result);
 
  
 

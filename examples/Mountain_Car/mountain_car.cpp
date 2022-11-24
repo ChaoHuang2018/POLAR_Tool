@@ -1,5 +1,5 @@
 #include "../../POLAR/NeuralNetwork.h"
-#include "../../flowstar/Discrete.h"
+#include "../../flowstar/flowstar-toolbox/Discrete.h"
 //#include "../flowstar-toolbox/Constraint.h"
 
 using namespace std;
@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 
 	int domainDim = numVars + 1;
 
+	/*
 	// Define the discrete dynamics.
     // x0 is the position of the mountain car, x1 is the speed of the mountain car.
 	Expression<Interval> deriv_x0("x0 + x1", vars); // Discrete: Next_x0 = x0 + x1
@@ -35,9 +36,10 @@ int main(int argc, char *argv[])
 
 
 	Nonlinear_Discrete_Dynamics dynamics(dde_rhs);
-
+	*/
+	DDE<Real> dynamics({"x0 + x1","x1 + 0.0015 * u - 0.0025 * cos(3 * x0)","0"}, vars);
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[4]);
 
@@ -57,7 +59,7 @@ int main(int argc, char *argv[])
 */
 	//setting.printOn();
 
-	setting.prepare();
+	//setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -65,7 +67,8 @@ int main(int argc, char *argv[])
 	 */
 	double w = stod(argv[1]);
 	int steps = stoi(argv[2]);
-	Interval init_x0(-0.515 - w, -0.515 + w), init_x1(0), init_u(0); // w=0.05
+	Interval init_x0(-0.515 - w, -0.515 + w), init_x1(0);
+	Interval init_u(0); // w=0.05
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -77,7 +80,7 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 1000);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -155,7 +158,8 @@ int main(int argc, char *argv[])
 		// }
 
 		// Always using symbolic remainder
-		dynamics.reach_sr(result, setting, initial_set, 1, symbolic_remainder, unsafeSet);
+		dynamics.reach(result, setting, initial_set, 1, safeSet, symbolic_remainder);
+		//dynamics.reach_sr(result, setting, initial_set, 1, symbolic_remainder, unsafeSet);
 
 		// not using a symbolic remainder
 		// dynamics.reach(result, setting, initial_set, 1, unsafeSet);
@@ -221,7 +225,7 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }

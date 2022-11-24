@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 	string net_name = argv[6];
 	string benchmark_name = "reachnn_benchmark_6_" + net_name;
 	// Declaration of the state variables.
-	unsigned int numVars = 5;
+	unsigned int numVars = 6;
 
 	intervalNumPrecision = 600;
 
@@ -19,10 +19,12 @@ int main(int argc, char *argv[])
 	int x1_id = vars.declareVar("x1");
 	int x2_id = vars.declareVar("x2");
 	int x3_id = vars.declareVar("x3");
+	int t_id = vars.declareVar("t");    // time t
 	int u_id = vars.declareVar("u");
 
 	int domainDim = numVars + 1;
 
+	/*
 	// Define the continuous dynamics.
 	Expression<Real> deriv_x0("x1", vars); // theta_r = 0
 	Expression<Real> deriv_x1("-x0+0.1*sin(x2)", vars);
@@ -38,9 +40,10 @@ int main(int argc, char *argv[])
 	ode_rhs[u_id] = deriv_u;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
-
+	*/
+	ODE<Real> dynamics({"x1","-x0+0.1*sin(x2)","x3","u","1","0"}, vars);
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[4]);
 
@@ -48,7 +51,7 @@ int main(int argc, char *argv[])
 	setting.setFixedStepsize(stod(argv[7]), order);
 
 	// time horizon for a single control step
-	setting.setTime(0.5);
+	//setting.setTime(0.5);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10);
@@ -63,7 +66,7 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
+	//setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -71,12 +74,14 @@ int main(int argc, char *argv[])
 	 */
 	double w = stod(argv[1]);
 	int steps = stoi(argv[2]);
-	Interval init_x0(-0.76 - w, -0.76 + w), init_x1(-0.44 - w, -0.44 + w), init_x2(0.52 - w, 0.52 + w), init_x3(-0.29 - w, -0.29 + w), init_u(0); //w=0.01
+	Interval init_x0(-0.76 - w, -0.76 + w), init_x1(-0.44 - w, -0.44 + w), init_x2(0.52 - w, 0.52 + w), init_x3(-0.29 - w, -0.29 + w), init_t(0);
+	Interval init_u(0); //w=0.01
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
 	X0.push_back(init_x2);
 	X0.push_back(init_x3);
+	X0.push_back(init_t);
 	X0.push_back(init_u);
 
 	// translate the initial set to a flowpipe
@@ -85,7 +90,7 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 1000);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -166,7 +171,7 @@ int main(int argc, char *argv[])
 		// }
 
 		// Always using symbolic remainder
-		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+		dynamics.reach(result, initial_set, 0.5, setting, safeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -231,7 +236,7 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }

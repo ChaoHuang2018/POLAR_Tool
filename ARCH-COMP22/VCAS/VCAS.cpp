@@ -1,5 +1,5 @@
 #include "../../POLAR/NeuralNetwork.h"
-#include "../../flowstar/Discrete.h"
+#include "../../flowstar/flowstar-toolbox/Discrete.h"
 //#include "../flowstar-toolbox/Constraint.h"
 
 using namespace std;

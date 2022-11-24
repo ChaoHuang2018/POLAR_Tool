@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	string net_name = argv[13];
 	string benchmark_name = "reachnn_benchmark_6_" + net_name;
 	// Declaration of the state variables.
-	unsigned int numVars = 5;
+	unsigned int numVars = 6;
 	
     intervalNumPrecision = 600;
 
@@ -38,10 +38,12 @@ int main(int argc, char *argv[])
 	int x1_id = vars.declareVar("x1");
     int x2_id = vars.declareVar("x2");
     int x3_id = vars.declareVar("x3");
+	int t_id = vars.declareVar("t");    // time t
 	int u_id = vars.declareVar("u");
 
 	int domainDim = numVars + 1;
 
+	/*
 	// Define the continuous dynamics.
 	Expression<Real> deriv_x0("x1", vars); // theta_r = 0
 	Expression<Real> deriv_x1("-x0+0.1*sin(x2)", vars);
@@ -57,9 +59,10 @@ int main(int argc, char *argv[])
 	ode_rhs[u_id] = deriv_u;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
-
+	*/
+	ODE<Real> dynamics({"x1","-x0+0.1*sin(x2)","x3","u","1","0"}, vars);
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[1]);
 
@@ -67,7 +70,7 @@ int main(int argc, char *argv[])
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.5);
+	//setting.setTime(0.5);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-8);
@@ -82,7 +85,7 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
+	//setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -104,13 +107,13 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 500);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
 
 	// Always using symbolic remainder
-	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+	dynamics.reach(result, initial_set, 0.2, setting, safeSet, symbolic_remainder);
 
 	if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 	{
@@ -151,7 +154,7 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x1");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/step_" + to_string(stoi(argv[12])), result);
+    plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(1), result.tmv_flowpipes, setting);
 
 
 

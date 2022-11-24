@@ -1,5 +1,5 @@
 
-#include "../flowstar/UnivariatePolynomial.h"
+#include "../flowstar/flowstar-toolbox/UnivariatePolynomial.h"
 
 using namespace flowstar;
 using namespace std;

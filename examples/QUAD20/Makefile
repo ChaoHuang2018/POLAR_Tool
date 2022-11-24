@@ -1,13 +1,13 @@
 CXX = g++-8
 HOME= /usr/local/include
 POLAR_HOME = ../../POLAR
-FLOWSTAR_HOME = ../../flowstar
+FLOWSTAR_HOME = ../../flowstar/flowstar-toolbox
 LIBS = -lpolar -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk
 CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: quad20 quad20_network
+all: quad20 quad20_network quad20_network_feedback
 
 quad20: quad20.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
@@ -15,6 +15,8 @@ quad20: quad20.o
 quad20_network: quad20_network.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+quad20_network_feedback: quad20_network_feedback.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 %.o: %.cc
 	$(CXX) -O3 -c $(CFLAGS) -o $@ $<
@@ -25,5 +27,5 @@ quad20_network: quad20_network.o
 
 
 clean:
-	rm -f *.o quad20 quad20_network
+	rm -f *.o quad20 quad20_network quad20_network_feedback
 

@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
 
 	int domainDim = numVars + 1;
 
+	/*
 	// Define the continuous dynamics.
 	Expression<Real> deriv_x1("cos(x8)*cos(x9)*x4 + (sin(x7)*sin(x8)*cos(x9) - cos(x7)*sin(x9))*x5 + (cos(x7)*sin(x8)*cos(x9) + sin(x7)*sin(x9))*x6", vars); // theta_r = 0
 	Expression<Real> deriv_x2("cos(x8)*sin(x9)*x4 + (sin(x7)*sin(x8)*sin(x9) + cos(x7)*cos(x9))*x5 + (cos(x7)*sin(x8)*sin(x9) - sin(x7)*cos(x9))*x6", vars);
@@ -72,9 +73,22 @@ int main(int argc, char *argv[])
 	ode_rhs[u2_id] = deriv_u2;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
-
+	*/
+	ODE<Real> dynamics({"cos(x8)*cos(x9)*x4 + (sin(x7)*sin(x8)*cos(x9) - cos(x7)*sin(x9))*x5 + (cos(x7)*sin(x8)*cos(x9) + sin(x7)*sin(x9))*x6",
+						"cos(x8)*sin(x9)*x4 + (sin(x7)*sin(x8)*sin(x9) + cos(x7)*cos(x9))*x5 + (cos(x7)*sin(x8)*sin(x9) - sin(x7)*cos(x9))*x6",
+						"sin(x8)*x4 - sin(x7)*cos(x8)*x5 - cos(x7)*cos(x8)*x6",
+						"x12*x5 - x11*x6 - 9.81*sin(x8)",
+						"x10*x6 - x12*x4 + 9.81*cos(x8)*sin(x7)",
+						"x11*x4 - x10*x5 + 9.81*cos(x8)*cos(x7) - 9.81 - u0 / 1.4",
+						"x10 + (sin(x7)*(sin(x8)/cos(x8)))*x11 + (cos(x7)*(sin(x8)/cos(x8)))*x12",
+						"cos(x7)*x11 - sin(x7)*x12",
+						"(sin(x7)/cos(x8))*x11 + (cos(x7)/cos(x8))*x12",
+						"-0.92592592592593*x11*x12 + 18.51851851851852*u1",
+						"0.92592592592593*x10*x12 + 18.51851851851852*u2",
+						"0"
+						"1","0","0","0"}, vars);
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[4]);
 
@@ -82,7 +96,7 @@ int main(int argc, char *argv[])
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.1);
+	//setting.setTime(0.1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-7);
@@ -97,7 +111,7 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
+	//setting.prepare();
     //setting.g_setting.prepareForReachability(15);
   //  cout << "--------" << setting.g_setting.factorial_rec.size() << ", " << setting.g_setting.power_4.size() << ", " << setting.g_setting.double_factorial.size() << endl;
 
@@ -147,7 +161,7 @@ int main(int argc, char *argv[])
     Symbolic_Remainder symbolic_remainder(initial_set, 2000);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -235,7 +249,7 @@ int main(int argc, char *argv[])
 
         time(&flowstar_start_timer);
         // dynamics.reach(result, setting, initial_set, unsafeSet);
-        dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+        dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
         time(&flowstar_end_timer);
 
         flowstar_seconds += difftime(flowstar_start_timer, flowstar_end_timer);
@@ -294,7 +308,8 @@ int main(int argc, char *argv[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("t", "x3");
-    plot_setting.plot_2D_octagon_MATLAB("./outputs/" + benchmark_name, "_" + to_string(if_symbo), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", benchmark_name + "_" + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+    //plot_setting.plot_2D_octagon_MATLAB("./outputs/" + benchmark_name, "_" + to_string(if_symbo), result);
 
 	return 0;
 }

@@ -1,18 +1,21 @@
 CXX = g++
 HOME= /usr/local/include
 POLAR_HOME = ../../POLAR
-FLOWSTAR_HOME = ../../flowstar
+FLOWSTAR_HOME = ../../flowstar/flowstar-toolbox
 LIBS = -lpolar -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk
 CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: nn_attitude_control_sigmoid flowstar_1step
+all: nn_attitude_control_sigmoid flowstar_1step testoldexample
 
 nn_attitude_control_sigmoid: nn_attitude_control_sigmoid.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 flowstar_1step: flowstar_1step.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+testoldexample: testoldexample.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 %.o: %.cc

@@ -24,10 +24,13 @@ int main(int argc, char *argv[])
 	int domainDim = numVars + 1;
 
 	// Define the continuous dynamics.
-    ODE<Real> dynamics({"0.25*(u0 + x1*x2)", "0.5*(u1 - 3*x0*x2)", "u2 + 2*x0*x1",
-    	"0.5*x1*(x3^2 + x4^2 + x5^2 - x5) + 0.5*x2*(x3^2 + x4^2 + x4 + x5^2) + 0.5*x0*(x3^2 + x4^2 + x5^2 + 1)",
-		"0.5*x0*(x3^2 + x4^2 + x5^2 + x5) + 0.5*x2*(x3^2 - x3 + x4^2 + x5^2) + 0.5*x1*(x3^2 + x4^2 + x5^2 + 1)",
-		"0.5*x0*(x3^2 + x4^2 - x4 + x5^2) + 0.5*x1*(x3^2 + x3 + x4^2 + x5^2) + 0.5*x2*(x3^2 + x4^2 + x5^2 + 1)"}, vars);
+    ODE<Real> dynamics({"0.25*(u0 + x1*x2)", 
+						"0.5*(u1 - 3*x0*x2)", 
+						"u2 + 2*x0*x1",
+    					"0.5*x1*(x3^2 + x4^2 + x5^2 - x5) + 0.5*x2*(x3^2 + x4^2 + x4 + x5^2) + 0.5*x0*(x3^2 + x4^2 + x5^2 + 1)",
+						"0.5*x0*(x3^2 + x4^2 + x5^2 + x5) + 0.5*x2*(x3^2 - x3 + x4^2 + x5^2) + 0.5*x1*(x3^2 + x4^2 + x5^2 + 1)",
+						"0.5*x0*(x3^2 + x4^2 - x4 + x5^2) + 0.5*x1*(x3^2 + x3 + x4^2 + x5^2) + 0.5*x2*(x3^2 + x4^2 + x5^2 + 1)",
+						"0","0","0"}, vars);
     
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);

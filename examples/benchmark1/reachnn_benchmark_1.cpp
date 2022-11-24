@@ -1,5 +1,5 @@
 #include "../../POLAR/NeuralNetwork.h"
-//#include "../flowstar-toolbox/Constraint.h"
+//#include "../../flowstar/flowstar-toolbox/Constraint.h"
 
 using namespace std;
 using namespace flowstar;
@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 	string net_name = argv[6];
 	string benchmark_name = "reachnn_benchmark_1_" + net_name;
 	// Declaration of the state variables.
-	unsigned int numVars = 3;
+	unsigned int numVars = 4;
 	
     intervalNumPrecision = 600;
 
@@ -17,10 +17,12 @@ int main(int argc, char *argv[])
 
 	int x0_id = vars.declareVar("x0");
 	int x1_id = vars.declareVar("x1");
+	int t_id = vars.declareVar("t");    // time t
 	int u_id = vars.declareVar("u");
 
 	int domainDim = numVars + 1;
 
+	/*
 	// Define the continuous dynamics.
 	Expression<Real> deriv_x0("x1", vars); // theta_r = 0
 	Expression<Real> deriv_x1("u*x1^2-x0", vars);
@@ -30,11 +32,12 @@ int main(int argc, char *argv[])
 	ode_rhs[x0_id] = deriv_x0;
 	ode_rhs[x1_id] = deriv_x1;
 	ode_rhs[u_id] = deriv_u;
+	*/
 
-	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
+	ODE<Real> dynamics({"x1","u * x1^2 - x0","1","0"}, vars);
 
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[4]);
 
@@ -42,7 +45,9 @@ int main(int argc, char *argv[])
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.2);
+	/*
+	 * setting.setTime(0.2);
+	*/
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-8);
@@ -57,7 +62,9 @@ int main(int argc, char *argv[])
 
 	//setting.printOn();
 
-	setting.prepare();
+	/*
+	 * setting.prepare();
+	*/
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -65,10 +72,12 @@ int main(int argc, char *argv[])
 	 */
 	double w = stod(argv[1]);
 	int steps = stoi(argv[2]);
-	Interval init_x0(0.85 - w, 0.85 + w), init_x1(0.55 - w, 0.55 + w), init_u(0); // w=0.05
+	Interval init_x0(0.85 - w, 0.85 + w), init_x1(0.55 - w, 0.55 + w), init_t(0); // w=0.05
+	Interval init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
+	X0.push_back(init_t);
 	X0.push_back(init_u);
 
 	// translate the initial set to a flowpipe
@@ -77,7 +86,7 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 500);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -100,6 +109,8 @@ int main(int argc, char *argv[])
 	double seconds;
 	time(&start_timer);
 
+	//no state vars in this benchmark
+
 	if (if_symbo == 0)
 	{
 		cout << "High order abstraction starts." << endl;
@@ -118,12 +129,12 @@ int main(int argc, char *argv[])
 		TaylorModelVec<Real> tmv_input;
 
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[0]);
-        initial_set.tmvPre.tms[0].output(cout, vars);
+        //initial_set.tmvPre.tms[0].output(cout, vars); //Segmentation fault
         cout << endl;
 		tmv_input.tms.push_back(initial_set.tmvPre.tms[1]);
-        initial_set.tmvPre.tms[1].output(cout, vars);
+        //initial_set.tmvPre.tms[1].output(cout, vars); //Segmentation fault
         cout << endl;
-        initial_set.tmvPre.tms[2].output(cout, vars);
+        //initial_set.tmvPre.tms[2].output(cout, vars); //Segmentation fault
 
 		// TaylorModelVec<Real> tmv_temp;
 		// initial_set.compose(tmv_temp, order, cutoff_threshold);
@@ -152,18 +163,16 @@ int main(int argc, char *argv[])
 
 
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
-        initial_set.tmvPre.tms[u_id].output(cout, vars);
-        cout << endl;
-
-		// if(if_symbo == 0){
-		// 	dynamics.reach(result, setting, initial_set, unsafeSet);
-		// }
-		// else{
-		// 	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
-		// }
+        //initial_set.tmvPre.tms[u_id].output(cout, vars);
+        //cout << endl;
 
 		// Always using symbolic remainder
-		dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+		/*
+		 * dynamics.reach_sr(iresult, setting, initial_set, unsafeSet, symbolic_remainder);
+		*/
+
+		dynamics.reach(result, initial_set, 0.2, setting, safeSet, symbolic_remainder);//setTime(0.2)
+		
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -228,7 +237,10 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
+	
+	/* plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
+	 */
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }
