@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
 	string benchmark_name = "mountain_car_continous_" + net_name;
 	// Declaration of the state variables.
 	unsigned int numVars = 4;
+	//unsigned int numVars = 3;
 
 	intervalNumPrecision = 600;
 
@@ -17,12 +18,10 @@ int main(int argc, char *argv[])
 
 	int x0_id = vars.declareVar("x0");
 	int x1_id = vars.declareVar("x1");
-	int t_id = vars.declareVar("t");    // time t
 	int u_id = vars.declareVar("u");
 
 	int domainDim = numVars + 1;
 
-	/*
 	// Define the continuous dynamics.
     // x0 is the position of the mountain car, x1 is the speed of the mountain car.
 	Expression<Real> deriv_x0("x1", vars); // Discrete: Next_x0 = x0 + x1
@@ -37,9 +36,14 @@ int main(int argc, char *argv[])
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
 	*/
-	ODE<Real> dynamics({"x0 + x1","x1 + 0.0015 * u - 0.0025 * cos(3 * x0)","1","0"}, vars);
+	// Define the continuous dynamics.
+	ODE<Real> dynamics({"x0 + x1",
+			    "x1 + 0.0015 * u - 0.0025 * cos(3 * x0)",
+			    "1",
+			    "0"}, vars);
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
+	//Computational_Setting setting;
 
 	unsigned int order = stoi(argv[4]);
 
@@ -70,7 +74,8 @@ int main(int argc, char *argv[])
 	 */
 	double w = stod(argv[1]);
 	int steps = stoi(argv[2]);
-	Interval init_x0(-0.515 - w, -0.515 + w), init_x1(0), init_t(0);
+	Interval init_x0(-0.515 - w, -0.515 + w), init_x1(0);
+	Interval init_t(0);
 	Interval init_u(0); // w=0.05
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
@@ -85,6 +90,7 @@ int main(int argc, char *argv[])
 
 	// no unsafe set
 	vector<Constraint> safeSet;
+	//vector<Constraint> unsafeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -168,6 +174,7 @@ int main(int argc, char *argv[])
 
 		// Always using symbolic remainder
 		dynamics.reach(result, initial_set, 1, setting, safeSet, symbolic_remainder);
+		//dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -228,6 +235,8 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result.tmv_flowpipes, setting);
+	//plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
+
 	return 0;
 }

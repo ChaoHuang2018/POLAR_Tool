@@ -37,9 +37,13 @@ int main(int argc, char *argv[])
 
 	Nonlinear_Discrete_Dynamics dynamics(dde_rhs);
 	*/
-	DDE<Real> dynamics({"x0 + x1","x1 + 0.0015 * u - 0.0025 * cos(3 * x0)","0"}, vars);
+	// Define the discrete dynamics.
+	DDE<Real> dynamics({"x0 + x1",
+			    "x1 + 0.0015 * u - 0.0025 * cos(3 * x0)",
+			    "0"}, vars);
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
+	//Computational_Setting setting;
 
 	unsigned int order = stoi(argv[4]);
 
@@ -81,6 +85,7 @@ int main(int argc, char *argv[])
 
 	// no unsafe set
 	vector<Constraint> safeSet;
+	//vector<Constraint> unsafeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -225,7 +230,8 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result.tmv_flowpipes, setting);
+	//plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
 
 	return 0;
 }
