@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	int u2_id = vars.declareVar("u2");
 
 	int domainDim = numVars + 1;
-
+	//Delete old interface
 	// Define the continuous dynamics.
     ODE<Real> dynamics({"0.25*(u0 + x1*x2)",
 						"0.5*(u1 - 3*x0*x2)",
