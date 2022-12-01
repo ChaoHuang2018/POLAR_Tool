@@ -63,7 +63,7 @@ int main(int argc, char *argvs[])
 	// Define the continuous dynamics.
 	ODE<Real> dynamics({"x1","u * x1^2 - x0","1","0"}, vars);
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[1]);
 
@@ -169,7 +169,7 @@ int main(int argc, char *argvs[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x1");
-    plot_setting.plot_2D_octagon_MATLAB("./outputs/", "step_"  + to_string(stoi(argv[3])) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+    plot_setting.plot_2D_octagon_MATLAB("./outputs/", "step_"  + to_string(stoi(argv[3])) + "_"  + to_string(1), result.tmv_flowpipes, setting);
     //plot_setting.plot_2D_octagon_MATLAB(c, "/step" + to_string(stoi(argv[3])), result);
     
 
