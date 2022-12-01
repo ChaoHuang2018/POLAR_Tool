@@ -47,7 +47,7 @@ int main(int argc, char *argvs[])
 	int u_id = vars.declareVar("u");
 
 	int domainDim = numVars + 1;
-
+	/*
 	// Define the continuous dynamics.
 	Expression<Real> deriv_x0("x1", vars); // theta_r = 0
 	Expression<Real> deriv_x1("u*x1^2-x0", vars);
@@ -59,7 +59,9 @@ int main(int argc, char *argvs[])
 	ode_rhs[u_id] = deriv_u;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
-
+	*/
+	// Define the continuous dynamics.
+	ODE<Real> dynamics({"x1","u * x1^2 - x0","1","0"}, vars);
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting;
 
@@ -69,7 +71,7 @@ int main(int argc, char *argvs[])
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.2);
+	//setting.setTime(0.2);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-8);
@@ -84,7 +86,7 @@ int main(int argc, char *argvs[])
 
 	//setting.printOn();
 
-	setting.prepare();
+	//setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -109,13 +111,14 @@ int main(int argc, char *argvs[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 500);
 
 	// no unsafe set
-	vector<Constraint> unsafeSet;
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
 
 	// Always using symbolic remainder
-	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+	dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
+	//dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
 
 	if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 	{
@@ -166,7 +169,9 @@ int main(int argc, char *argvs[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x1");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/step" + to_string(stoi(argv[3])), result);
+    plot_setting.plot_2D_octagon_MATLAB("./outputs/", "step_"  + to_string(stoi(argv[3])) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+    //plot_setting.plot_2D_octagon_MATLAB(c, "/step" + to_string(stoi(argv[3])), result);
+    
 
 
 
