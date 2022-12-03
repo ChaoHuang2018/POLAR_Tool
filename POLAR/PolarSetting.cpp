@@ -118,7 +118,7 @@ PolarSetting::PolarSetting(string filename)
         getline(input, line);
         remainder_type = line;
     }
-    
+
     if (remainder_type == "Concrete") 
     {
         this->symb_rem = false;
@@ -192,7 +192,7 @@ void PolarSetting::set_neuron_approx_type(string neuron_approx_type) {
     }
 }
 
-string PolarSetting::get_neuron_approx_type() {
+unsigned int PolarSetting::get_neuron_approx_type() {
     //return this->neuron_approx_type;
     return this->neuron_approx;
 }
@@ -213,7 +213,7 @@ void PolarSetting::set_remainder_type(string remainder_type) {
 
 }
 
-string PolarSetting::get_remainder_type() {
+unsigned int PolarSetting::get_remainder_type() {
     //return this->remainder_type;
     return this->symb_rem? 1 : 0;
 }
