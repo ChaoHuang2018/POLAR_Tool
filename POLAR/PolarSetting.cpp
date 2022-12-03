@@ -23,6 +23,36 @@ PolarSetting::PolarSetting(const unsigned int taylor_order, const unsigned int b
     this->partition_num = partition_num;
     this->neuron_approx_type = neuron_approx_type;
     this->remainder_type = remainder_type;
+
+    if (remainder_type == "Concrete") 
+    {
+        this->symb_rem = false;
+    } 
+    else if (remainder_type == "Symbolic")
+    {
+        this->symb_rem = true;
+    }
+    else{
+        this->symb_rem = false;
+    }
+
+   
+    if (this->neuron_approx_type ==  "Berns") 
+    {
+        this->neuron_approx = 1; 
+    }
+    else if (this->neuron_approx_type == "Taylor")
+    {
+        this->neuron_approx = 2;
+    }
+    else if (this->neuron_approx_type == "Mix") 
+    {
+        this->neuron_approx = 3;
+    }
+    else {
+        this->neuron_approx = 0;
+    }
+
     
     if (validate() == 0) {
         cout << "Wrong neuron approximation type or wrong Taylor model remainder type!" << endl;
@@ -88,6 +118,35 @@ PolarSetting::PolarSetting(string filename)
         getline(input, line);
         remainder_type = line;
     }
+    
+    if (remainder_type == "Concrete") 
+    {
+        this->symb_rem = false;
+    } 
+    else if (remainder_type == "Symbolic")
+    {
+        this->symb_rem = true;
+    }
+    else{
+        this->symb_rem = false;
+    }
+
+   
+    if (this->neuron_approx_type ==  "Berns") 
+    {
+        this->neuron_approx = 1; 
+    }
+    else if (this->neuron_approx_type == "Taylor")
+    {
+        this->neuron_approx = 2;
+    }
+    else if (this->neuron_approx_type == "Mix") 
+    {
+        this->neuron_approx = 3;
+    }
+    else {
+        this->neuron_approx = 0;
+    }
 }
 
 void PolarSetting::set_taylor_order(unsigned int taylor_order) {
@@ -116,18 +175,47 @@ unsigned int PolarSetting::get_partition_num() {
 
 void PolarSetting::set_neuron_approx_type(string neuron_approx_type) {
     this->neuron_approx_type = neuron_approx_type;
+    if (this->neuron_approx_type ==  "Berns") 
+    {
+        this->neuron_approx = 1; 
+    }
+    else if (this->neuron_approx_type == "Taylor")
+    {
+        this->neuron_approx = 2;
+    }
+    else if (this->neuron_approx_type == "Mix") 
+    {
+        this->neuron_approx = 3;
+    }
+    else {
+        this->neuron_approx = 0;
+    }
 }
 
 string PolarSetting::get_neuron_approx_type() {
-    return this->neuron_approx_type;
+    //return this->neuron_approx_type;
+    return this->neuron_approx;
 }
 
 void PolarSetting::set_remainder_type(string remainder_type) {
     this->remainder_type = remainder_type;
+    if (remainder_type == "Concrete") 
+    {
+        this->symb_rem = false;
+    } 
+    else if (remainder_type == "Symbolic")
+    {
+        this->symb_rem = true;
+    }
+    else{
+        this->symb_rem = false;
+    }
+
 }
 
 string PolarSetting::get_remainder_type() {
-    return this->remainder_type;
+    //return this->remainder_type;
+    return this->symb_rem? 1 : 0;
 }
 
 void PolarSetting::set_cutoff_threshold(double cutoff_threshold)

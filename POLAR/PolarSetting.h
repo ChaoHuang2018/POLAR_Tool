@@ -15,9 +15,11 @@ protected:
     
     // Berns, Taylor, Mix
     string neuron_approx_type;
+    unsigned int neuron_approx;
     
     // Concrete, Symbolic
     string remainder_type;
+    bool symb_rem;
     
     //polar setting
     double cutoff_threshold;
@@ -51,11 +53,11 @@ public:
         
     void set_neuron_approx_type(string neuron_approx_type);
 
-    string get_neuron_approx_type();
+    unsigned int get_neuron_approx_type();
         
     void set_remainder_type(string remainder_type);
 
-    string get_remainder_type();
+    unsigned int get_remainder_type();
     
     void set_cutoff_threshold(double cutoff_threshold);
     

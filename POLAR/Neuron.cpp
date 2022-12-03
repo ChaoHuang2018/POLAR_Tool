@@ -41,8 +41,8 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
     unsigned int taylor_order = polar_setting.get_taylor_order();
     unsigned int bernstein_order = polar_setting.get_bernstein_order();
     unsigned int partition_num = polar_setting.get_partition_num();
-    string neuron_approx_type = polar_setting.get_neuron_approx_type();
-    string remainder_type = polar_setting.get_remainder_type();
+    unsigned int neuron_approx_type = polar_setting.get_neuron_approx_type();
+    unsigned int remainder_type = polar_setting.get_remainder_type();
     
     Interval tmRange;
     input.intEval(tmRange, domain);
@@ -114,7 +114,7 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
     // exit(0);
 	// cout << "Taylor time: " << seconds << " seconds" << endl;
 
-	if (neuron_approx_type == "Berns")
+	if (neuron_approx_type == 1)//"Berns")
 	{
 		result = result_berns;
         if (verbose == "on")
@@ -123,7 +123,7 @@ void Neuron::sigmoid_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input,
             cout << "TM remainder after compose by BP: " << result_berns.remainder << endl;
         }
 	}
-	else if (neuron_approx_type == "Taylor")
+	else if (neuron_approx_type == 2)//"Taylor")
 	{
 		result = result_taylor;
         if (verbose == "on")
@@ -151,8 +151,8 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     unsigned int taylor_order = polar_setting.get_taylor_order();
     unsigned int bernstein_order = polar_setting.get_bernstein_order();
     unsigned int partition_num = polar_setting.get_partition_num();
-    string neuron_approx_type = polar_setting.get_neuron_approx_type();
-    string remainder_type = polar_setting.get_remainder_type();
+    unsigned int neuron_approx_type = polar_setting.get_neuron_approx_type();
+    unsigned int remainder_type = polar_setting.get_remainder_type();
     
     Interval tmRange;
     input.intEval(tmRange, domain);
@@ -219,11 +219,11 @@ void Neuron::tanh_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
 
     result_taylor = tmTemp4;
 
-    if (neuron_approx_type == "Berns")
+    if (neuron_approx_type == 1)//"Berns")
     {
         result = result_berns;
     }
-    else if (neuron_approx_type == "Taylor")
+    else if (neuron_approx_type == 2)//"Taylor")
     {
         result = result_taylor;
     }
@@ -247,7 +247,7 @@ void Neuron::relu_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     unsigned int taylor_order = polar_setting.get_taylor_order();
     unsigned int bernstein_order = polar_setting.get_bernstein_order();
     unsigned int partition_num = polar_setting.get_partition_num();
-    string neuron_approx_type = polar_setting.get_neuron_approx_type();
+    unsigned int neuron_approx_type = polar_setting.get_neuron_approx_type();
     string remainder_type = polar_setting.get_remainder_type();
     
     Interval tmRange;
