@@ -111,7 +111,7 @@ void nncs_reachability(System s, Specification spec, PolarSetting ps)
         }
         
         TaylorModelVec<Real> tmv_output;
-        if (ps.get_remainder_type() == "Concrete")
+        if (ps.get_remainder_type() == 0) //"Concrete")
         {
             // not using symbolic remainder
             nn.get_output_tmv(tmv_output, tmv_input, initial_set.domain, ps, setting);
