@@ -248,7 +248,7 @@ void Neuron::relu_taylor(TaylorModel<Real> &result, TaylorModel<Real> &input, co
     unsigned int bernstein_order = polar_setting.get_bernstein_order();
     unsigned int partition_num = polar_setting.get_partition_num();
     unsigned int neuron_approx_type = polar_setting.get_neuron_approx_type();
-    string remainder_type = polar_setting.get_remainder_type();
+    unsigned int remainder_type = polar_setting.get_remainder_type();
     
     Interval tmRange;
     input.intEval(tmRange, domain);
