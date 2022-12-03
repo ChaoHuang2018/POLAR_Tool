@@ -159,6 +159,116 @@ NeuralNetwork::NeuralNetwork(string filename)
 
 }
 
+NeuralNetwork::NeuralNetwork(string filename, string PYTHONPATH)
+{
+    system((PYTHONPATH + " " + "onnx_converter" + " " + filename).c_str());
+	std::ifstream input(filename);
+    std::string line;
+
+    // Parse the structure of neural networks
+    if (getline(input, line))
+    {
+    }
+    else
+    {
+        cout << "failed to read file: Neural Network." << endl;
+    }
+    try
+    {
+        num_of_inputs = stoi(line);
+    }
+    catch (std::invalid_argument &e)
+    {
+        cout << "Problem during string/integer conversion!" << endl;
+        cout << line << endl;
+    }
+    getline(input, line);
+    num_of_outputs = stoi(line);
+    getline(input, line);
+//    try
+//    {
+//        input >> num_of_hidden_layers;
+//    }
+//    catch (...)
+//    {
+//        cout << "aaa" << endl;
+//    }
+     num_of_hidden_layers = stoi(line);
+
+//    cout << "num_of_inputs" << num_of_inputs << ", " << num_of_outputs << ", " << num_of_hidden_layers << endl;
+//
+//    exit(0);
+
+    std::vector<int> network_structure(num_of_hidden_layers + 1, 0);
+    for (int idx = 0; idx < num_of_hidden_layers; idx++)
+    {
+        getline(input, line);
+        network_structure[idx] = stoi(line);
+    }
+    network_structure[network_structure.size() - 1] = num_of_outputs;
+
+    // parse the activation function
+    std::vector<std::string> activation;
+    for (int idx = 0; idx < num_of_hidden_layers + 1; idx++)
+    {
+        getline(input, line);
+        activation.push_back(line);
+    }
+
+    // Parse the input text file and store weights and bias
+
+    // a question here. need to confirm on 10/20/2020 afternoon.
+    // compute parameters of the input layer
+    Matrix<Real> weight0(network_structure[0], num_of_inputs);
+    Matrix<Real> bias0(network_structure[0], 1);
+    for (int i = 0; i < network_structure[0]; i++)
+    {
+        for (int j = 0; j < num_of_inputs; j++)
+        {
+            getline(input, line);
+            weight0[i][j] = stod(line);
+        }
+        getline(input, line);
+        bias0[i][0] = stod(line);
+    }
+    Layer input_layer(activation[0], weight0, bias0);
+    // cout << "weight0: " << weight0 << endl;
+    // cout << "bias0: " << bias0 << endl;
+    layers.push_back(input_layer);
+
+    // compute the parameters of hidden layers
+    for (int layer_idx = 0; layer_idx < num_of_hidden_layers; layer_idx++)
+    {
+        Matrix<Real> weight(network_structure[layer_idx + 1], network_structure[layer_idx]);
+        Matrix<Real> bias(network_structure[layer_idx + 1], 1);
+
+        for (int i = 0; i < network_structure[layer_idx + 1]; i++)
+        {
+            for (int j = 0; j < network_structure[layer_idx]; j++)
+            {
+                getline(input, line);
+                weight[i][j] = stod(line);
+            }
+            getline(input, line);
+            bias[i][0] = stod(line);
+        }
+
+        // cout << "weight_" + to_string(layer_idx + 1) + ":" << weight << endl;
+        // cout << "bias_" + to_string(layer_idx + 1) + ":" << bias << endl;
+        Layer hidden_layer(activation[layer_idx + 1], weight, bias);
+        layers.push_back(hidden_layer);
+    }
+    // Affine mapping of the output
+    getline(input, line);
+    offset = stod(line);
+    
+    getline(input, line);
+    scale_factor = stod(line);
+    
+//    cout << "number of hidden layers: " << layers.size() << endl;
+
+}
+
 void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
 {
     time_t start_timer;
