@@ -58,7 +58,7 @@ protected:
 public:
     NeuralNetwork();
     NeuralNetwork(string filename);
-
+    NeuralNetwork(string filename, string PYTHONPATH);
     int get_num_of_inputs()
     {
         return this->num_of_inputs;
