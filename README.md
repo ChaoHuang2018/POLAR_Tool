@@ -4,7 +4,7 @@ POLAR [1] is a reachability analysis framework for neural-network controlled sys
 Experiment results across a suite of benchmarks show that POLAR significantly outperforms the state-of-the-art techniques on both efficiency and tightness of reachable set estimation.
 
 ## Tight Bounds for Bernstein Polynomial Approximation of ReLU
-The following special treatment for Bernstein polynomial (BP) interpolation on ReLU units was also implemented in the submission to the AINNCS category in ARCH-COMP 2022.
+The following special treatment for Bernstein polynomial (BP) interpolation on ReLU units was also implemented in the submission to the AINNCS category in ARCH-COMP 2022 in addition to the techniques described in [1].
  
 Thanks to the characteristic of the ReLU activation function, we can directly obtain tight bounds for the BP interpolation as shown in the following [figure](/tests/bp_relu.png) where the dashes lines represent upper and lower bounds of the BP approximation. 
 <p align="center">
