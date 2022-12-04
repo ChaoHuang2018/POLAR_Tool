@@ -32,6 +32,14 @@ make
 cd POLAR
 make
 ```
+## New Technique for Handling ReLU Units
+The following special treatment for Bernstein polynomial (BP) interpolation on ReLU units was also implemented in the submission to the AINNCS category in ARCH-COMP 2022.
+ 
+Thanks to the characteristic of the ReLU activation function, we can directly obtain tight bounds on the BP interpolation as shown in the following [figure](/tests/bp_relu.png). 
+
+![alt text](/tests/bp_relu.png)
+
+The Taylor model (TM) overapproximation $p(x)+I$ of ReLU is given by $p(x) = BP(x) - \frac{BP(0)}{2}$ and $I = [-\frac{BP(0)}{2}, \frac{BP(0)}{2}])$ where $BP(0)$ is the Bernstein polynomial evaluated at $x=0$. It can be shown that for $x \in [a, b]$ such that $a < 0 < b$, the bounds of the interval remainder I are tight for any order-k BP approximation of ReLU(x) with $k \geq 1$.
 
 ## Example Usage
 *Example 1.* Consider the following nolinear control system ([benchmark 1](/examples/benchmark1)):
@@ -156,4 +164,4 @@ SYSTEM_0.m # plotted reachable sets. Run the command in MATLAB.
 
 ## References
 [1] C.Huang, J.Fan, W.Li, X.Chen, and Q.Zhu.
-[POLAR: A Polynomial Arithmetic Framework for Verifying Neural-Network Controlled Systems](https://arxiv.org/pdf/2106.13867.pdf)
+[POLAR: A Polynomial Arithmetic Framework for Verifying Neural-Network Controlled Systems](https://arxiv.org/pdf/2106.13867.pdf), Proceedings of the 20th International Symposium on Automated Technology for Verification and Analysis (ATVA 2022).
