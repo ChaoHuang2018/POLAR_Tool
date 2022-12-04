@@ -3,6 +3,18 @@ POLAR [1] is a reachability analysis framework for neural-network controlled sys
 
 Experiment results across a suite of benchmarks show that POLAR significantly outperforms the state-of-the-art techniques on both efficiency and tightness of reachable set estimation.
 
+## New Technique for Handling ReLU Units
+The following special treatment for Bernstein polynomial (BP) interpolation on ReLU units was also implemented in the submission to the AINNCS category in ARCH-COMP 2022.
+ 
+Thanks to the characteristic of the ReLU activation function, we can directly obtain tight bounds on the BP interpolation as shown in the following [figure](/tests/bp_relu.png). 
+<p align="center">
+  <img src="/tests/bp_relu.png" />
+</p>
+ 
+
+The Taylor model (TM) overapproximation $p(x)+I$ of ReLU is given by $p(x) = BP(x) - \frac{BP(0)}{2}$ and $I = [-\frac{BP(0)}{2}, \frac{BP(0)}{2}])$ where $BP(0)$ is the Bernstein polynomial evaluated at $x=0$. It can be shown that for $x \in [a, b]$ such that $a < 0 < b$, the bounds of the interval remainder I are tight for any order-k BP approximation of ReLU(x) with $k \geq 1$.
+
+
 ## Installation
 
 #### System Requirements
@@ -32,14 +44,6 @@ make
 cd POLAR
 make
 ```
-## New Technique for Handling ReLU Units
-The following special treatment for Bernstein polynomial (BP) interpolation on ReLU units was also implemented in the submission to the AINNCS category in ARCH-COMP 2022.
- 
-Thanks to the characteristic of the ReLU activation function, we can directly obtain tight bounds on the BP interpolation as shown in the following [figure](/tests/bp_relu.png). 
-
-![alt text](/tests/bp_relu.png)
-
-The Taylor model (TM) overapproximation $p(x)+I$ of ReLU is given by $p(x) = BP(x) - \frac{BP(0)}{2}$ and $I = [-\frac{BP(0)}{2}, \frac{BP(0)}{2}])$ where $BP(0)$ is the Bernstein polynomial evaluated at $x=0$. It can be shown that for $x \in [a, b]$ such that $a < 0 < b$, the bounds of the interval remainder I are tight for any order-k BP approximation of ReLU(x) with $k \geq 1$.
 
 ## Example Usage
 *Example 1.* Consider the following nolinear control system ([benchmark 1](/examples/benchmark1)):
