@@ -1,13 +1,17 @@
 CXX = g++
 HOME= /usr/local/include
-LIB_HOME = ../flowstar-toolbox
-LIBS = -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk -lflowstar
+POLAR_HOME = ../POLAR
+FLOWSTAR_HOME = ../flowstar-toolbox
+LIBS = -lpolar -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk -fopenmp 
 CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
-LINK_FLAGS = -g -L$(LIB_HOME) -L/usr/local/lib
+LINK_FLAGS = -g -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
-all: laubloomis
+all: laubloomis bp_relu
 
 laubloomis: laubloomis.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+bp_relu: bp_relu.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 
@@ -21,4 +25,4 @@ laubloomis: laubloomis.o
 
 
 clean: 
-	rm -f *.o laubloomis
+	rm -f *.o laubloomis bp_relu
