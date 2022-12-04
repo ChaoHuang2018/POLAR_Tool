@@ -12,7 +12,7 @@ Thanks to the characteristic of the ReLU activation function, we can directly ob
 </p>
  
 
-The Taylor model (TM) overapproximation $p(x)+I$ of $\text{ReLU}(x)$ is given by $p(x) = BP(x) - \frac{BP(0)}{2}$ and $I = [-\frac{BP(0)}{2}, \frac{BP(0)}{2}])$ where $BP(0)$ is the Bernstein polynomial approximation $BP(x)$ evaluated at $x=0$. It can be shown that for $x \in [a, b]$ with $a < 0 < b$, the bounds of the interval remainder $I$ are tight for any order-$k$ BP approximation with $k \geq 1$.
+The Taylor model (TM) overapproximation $p(x)+I$ of $\text{ReLU}(x)$ is given by $p(x) = BP(x) - \frac{BP(0)}{2}$ and $I = [-\frac{BP(0)}{2}, \frac{BP(0)}{2}])$ where $BP(0)$ is the Bernstein polynomial approximation $BP(x)$ evaluated at $x=0$. It can be shown that for $x \in [a, b]$ with $a < 0 < b$, the bounds of the interval remainder $I$ are tight for any order-k BP approximation with $k \geq 1$.
 
 
 ## Installation
