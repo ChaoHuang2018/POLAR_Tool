@@ -944,7 +944,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		if(layers[k].activation != "Affine" && layers[k].activation != "ReLU")
 		{
-			if (polar_setting.get_num_threads() < 0) // Single thread
+			if (true || polar_setting.get_num_threads() < 0) // Single thread
             {
                 if(layers[k].activation == "sigmoid")
                 {
@@ -1058,6 +1058,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
                 }
             }
 		}
+        
 
 		// extracting the linear part
 		Matrix<Real> Q_i_Taylor(input_range.size());
@@ -1251,12 +1252,41 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 		tmvTemp.Remainder(J_k);
 
 
-
-		// updating Q
-		for(int j=0; j<Q.size(); ++j)
-		{
-			Q[j] = Phi_i * Q[j];
-		}
+        if (polar_setting.get_num_threads() < 0) // Single thread
+        {
+            // updating Q
+            for(int j=0; j<Q.size(); ++j)
+            {
+                Q[j] = Phi_i * Q[j];
+            }
+        }
+        else 
+        {
+            int Q_size = Q.size();
+            Matrix<Real> Q_js[Q_size];
+            std::copy(Q.begin(), Q.end(), Q_js);
+            vector<std::thread> threads;
+            if(polar_setting.get_num_threads() > 0) 
+            {
+                threads.reserve(polar_setting.get_num_threads());
+            } 
+            for(int j=0; j<Q_size; ++j)
+            {
+                threads.emplace_back([&](int j) 
+                {
+                    Q_js[j] = Phi_i * Q_js[j];
+                }, j); 
+            }
+            for (auto& th: threads) 
+            {
+                th.join();
+            }
+            for(int j=0; j<Q.size(); ++j)
+            {
+                Q[j] = Q_js[j];
+            }
+        }
+    
 
 		Q.push_back(Phi_i);
 
@@ -1279,22 +1309,57 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 
 
-		// updating q_i
+		//cout <<  "updating q_i" << endl;
 		q_i = tmvTemp;
 
 		Matrix<Interval> imTemp = Q[0] * I1;
+        if (polar_setting.get_num_threads() < 0) // Single thread
+        {
+            for(int j=0; j<q_i.tms.size(); ++j)
+            {
+                q_i.tms[j].remainder += mathbb_J[j][0] + imTemp[j][0];
+            }
+        }else 
+        {
+            int q_i_size = q_i.tms.size();
+            
 
-		for(int j=0; j<q_i.tms.size(); ++j)
-		{
-			q_i.tms[j].remainder += mathbb_J[j][0] + imTemp[j][0];
-		}
+            Interval mathbb_J_js[q_i_size], imTemp_js[q_i_size];
+            for (int j=0; j < q_i_size; j++) 
+            {
+                mathbb_J_js[j] = mathbb_J[j][0];
+                imTemp_js[j] = imTemp[j][0];
+            }
+            Interval remainders[q_i_size];
+            vector<std::thread> threads;
+            if(polar_setting.get_num_threads() > 0) 
+            {
+                threads.reserve(polar_setting.get_num_threads());
+            } 
+            for(int j=0; j<q_i_size; ++j)
+            {
+                threads.emplace_back([&](int j) 
+                {
+                    //cout << "the hell?" << endl;
+                    remainders[j] = mathbb_J_js[j] + imTemp_js[j];
+                }, j); 
+            }
+            for (auto& th: threads) 
+            {
+                th.join();
+            }
+            for (int j=0; j < q_i_size; j++) 
+            {
+                q_i.tms[j].remainder += remainders[j];
+            }
+        }
 
 	}
 
 	result = q_i;
 
-
-	// applying the scalars and offset
+    
+	// cout << "applying the scalars and offset" << endl;
     for(int i = 0; i < result.tms.size(); ++i)
     {
         if(result.tms[i].expansion.terms.size() == 0)
