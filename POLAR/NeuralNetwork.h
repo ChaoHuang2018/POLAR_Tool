@@ -1,4 +1,6 @@
 #include "Neuron.h"
+#include <thread>
+#include <mutex>
 
 using namespace flowstar;
 using namespace std;
@@ -31,8 +33,8 @@ public:
         return this->bias;
     }
     
-    void pre_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain) const;
-    
+    void pre_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting) const;
+ 
     void post_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const;
 };
 

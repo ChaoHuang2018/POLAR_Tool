@@ -267,3 +267,14 @@ unsigned int PolarSetting::get_symbolic_queue_size()
 {
     return this->symbolic_queue_size;
 }
+
+
+int PolarSetting::get_num_threads()
+{
+    return this->num_threads;
+}
+
+void PolarSetting::set_num_threads(int num_threads)
+{
+    this->num_threads = num_threads;
+}

@@ -1,6 +1,8 @@
 #include <fstream>
 #include <iostream>
 #include "NeuralNetwork.h"
+#include <thread>
+#include <mutex>
 
 Layer::Layer()
 {
@@ -12,16 +14,67 @@ Layer::Layer(string act, Matrix<Real> w, Matrix<Real> b)
     weight = w;
     bias = b;
 }
-
-void Layer::pre_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain) const
+ 
+void Layer::pre_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting) const
 {
     result.clear();
     result = weight * input;
     Matrix<Real> bias_temp = bias;
-    for (int i = 0; i < bias_temp.rows(); i++)
+    
+    if (polar_setting.get_num_threads() < 0) 
     {
-        Polynomial<Real> poly_temp(bias_temp[i][0], domain.size());
-        result.tms[i].expansion += poly_temp;
+        for (int i = 0; i < bias_temp.rows(); i++)
+        {
+            Polynomial<Real> poly_temp(bias_temp[i][0], domain.size());
+            result.tms[i].expansion += poly_temp;
+        }
+    } 
+    else 
+    {
+        result.clear();
+        result = weight * input;
+        Matrix<Real> bias_temp = bias;
+
+        
+        // Get the number of neurons
+        int num_rows = bias_temp.rows();
+        //cout << "-------- Multi-thread All " << num_rows << " Neurons Pre Activate -------- " << endl;
+        // Create placeholder for the biases and expansions
+        Real bias_arr[num_rows];
+        Polynomial<Real> expansions[num_rows];
+        
+        // Fillout the placeholders
+        for (int i = 0; i < num_rows; i++) 
+        {
+            bias_arr[i] = bias_temp[i][0];
+            expansions[i] = result.tms[i].expansion;
+        }
+
+        // Create multiple threads;
+        vector<std::thread> threads;
+        //vector<thread> ths(this->num_threads);
+        // Add biases to the expansions
+        for (int i = 0; i < num_rows; i++) 
+        {
+            threads.emplace_back([&](int j) {
+                //mtx.lock();
+                Polynomial<Real> poly_temp(bias_arr[j], domain.size());
+                expansions[j] += poly_temp;
+            }, i);
+        }
+        for (auto& th: threads) 
+        {
+            th.join();
+        }
+        //threads.clear();
+        
+        // Pass the updated expansions to the Taylor Model
+        for (int i = 0; i < num_rows; i++)
+        {
+            result.tms[i].expansion = expansions[i];
+        }
+        //cout << "-------- Multi-thread All Neurons Pre Done -------- " << endl;
+        //cout << "Result size: " << result.tms.size() << endl;
     }
 }
 
@@ -29,21 +82,63 @@ void Layer::post_activate(TaylorModelVec<Real> &result, TaylorModelVec<Real> &in
 {
     result.clear();
     
-    vector<Neuron> neuron_list;
-    for (unsigned int i = 0; i < input.tms.size(); ++i)
+
+    if (polar_setting.get_num_threads() < 0) 
     {
-        Neuron neuron(this->activation);
-        neuron_list.push_back(neuron);
-    }
+        vector<Neuron> neuron_list;
+        for (unsigned int i = 0; i < input.tms.size(); ++i)
+        {
+            Neuron neuron(this->activation);
+            neuron_list.push_back(neuron);
+        }
+        
+        for (unsigned int i = 0; i < input.tms.size(); ++i)
+        {
+    //        cout << "------" << "Neuron - " << i << " -------" << endl;
+            TaylorModel<Real> tmTemp;
+    //        cout << "Input remainder: " << input.tms[i].remainder << endl;
+            neuron_list[i].taylor_model_approx(tmTemp, input.tms[i], domain, polar_setting, setting);
+            result.tms.push_back(tmTemp);
+        }
+    } 
+    else 
+    {
+        int num_rows = input.tms.size();
+        //cout << "-------- Multi-thread All " << num_rows << " Neurons Post Activate -------- " << endl;
     
-    for (unsigned int i = 0; i < input.tms.size(); ++i)
-    {
-//        cout << "------" << "Neuron - " << i << " -------" << endl;
-        TaylorModel<Real> tmTemp;
-//        cout << "Input remainder: " << input.tms[i].remainder << endl;
-        neuron_list[i].taylor_model_approx(tmTemp, input.tms[i], domain, polar_setting, setting);
-        result.tms.push_back(tmTemp);
+        // Create TaylorModel placeholder arrays for the input and output TaylorModels
+        TaylorModel<Real> tm_is[num_rows], tm_os[num_rows];
+        // Fill out the input TaylorModels' placeholder arrary
+        std::copy(input.tms.begin(), input.tms.end(), tm_is);
+        // Create multiple threads
+        vector<std::thread> threads;
+        //vector<thread> ths(this->num_threads);
+        // Fill out the output TaylorModels' placeholder array
+        for (unsigned int i = 0; i < num_rows; ++i) 
+        {
+            threads.emplace_back([&](int j) {
+                Neuron neuron(this->activation);
+                //mtx.lock();
+                neuron.taylor_model_approx(tm_os[j], tm_is[j], domain, polar_setting, setting);
+                //mtx.unlock();
+            }, i);
+        }
+        for (auto& th: threads)
+        {
+            th.join();
+        }
+        threads.clear();
+        // Create result Taylor models
+        result.tms.reserve(num_rows);
+        
+        for (int i = 0; i < num_rows; i++)
+        {
+            result.tms.push_back(tm_os[i]);
+        }
+        //cout << "-------- Multi-thread All Neurons Post Done -------- " << endl;
+        //cout << "Result size: " << result.tms.size() << endl;
     }
+        
 }
 
 NeuralNetwork::NeuralNetwork()
@@ -284,11 +379,11 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
         Layer layer = layers[s];
         
         TaylorModelVec<Real> tmvTemp_pre;
-        layer.pre_activate(tmvTemp_pre, tmv_all_layer[s], domain);
-//        cout << "pre: " << tmvTemp_pre.tms[0].remainder << endl;
-        
-        
         TaylorModelVec<Real> tmvTemp_post;
+		 
+        layer.pre_activate(tmvTemp_pre, tmv_all_layer[s], domain, polar_setting);
+//        cout << "pre: " << tmvTemp_pre.tms[0].remainder << endl;
+    
         layer.post_activate(tmvTemp_post, tmvTemp_pre, domain, polar_setting, setting);
 //        cout << "post: " << tmvTemp_post.tms[0].remainder << endl;
 
@@ -384,11 +479,61 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		tmv_layer_input = layers[k].weight * q_i;
 
-	    for (int j=0; j<layers[k].bias.rows(); j++)
-	    {
-	        Polynomial<Real> poly_temp(layers[k].bias[j][0], domain.size());
-	        tmv_layer_input.tms[j].expansion += poly_temp;
-	    }
+		if (polar_setting.get_num_threads() < 0) // Single thread
+		{
+			for (int j=0; j<layers[k].bias.rows(); j++)
+			{
+				Polynomial<Real> poly_temp(layers[k].bias[j][0], domain.size());
+				tmv_layer_input.tms[j].expansion += poly_temp;
+			}
+		} 
+		else 
+		{
+			// cout << "Multi-Thread get_tmv_output_symbolic for layer " << k <<endl;
+			//
+			// Get the number of neurons
+			int num_rows = layers[k].bias.rows();
+
+			// Create placeholder for the biases and expansions
+			Real bias_arr[num_rows];
+			Polynomial<Real> expansions[num_rows];
+			
+			
+			// Fillout the placeholders
+			for (int j = 0; j < num_rows; j++) 
+			{
+				bias_arr[j] = layers[k].bias[j][0];
+				expansions[j] = tmv_layer_input.tms[j].expansion;
+			}
+			 
+			// Create multiple threads;
+			//vector<thread> ths(this->num_threads);
+			vector<thread> threads;
+			if(polar_setting.get_num_threads() > 0) 
+			{
+				threads.reserve(polar_setting.get_num_threads());
+			} 
+			
+			// Add biases to the expansions
+			for (int j = 0; j < num_rows; j++) 
+			{
+				threads.emplace_back([&](int j_) {
+					//mtx.lock();
+					Polynomial<Real> poly_temp(bias_arr[j_], domain.size());
+					expansions[j_] += poly_temp;
+				}, j);
+			}
+			for (auto& th: threads) 
+			{
+				th.join();
+			}
+			threads.clear();
+			for (int j = 0; j < num_rows; j++)
+			{
+				tmv_layer_input.tms[j].expansion = expansions[j];
+			}
+			//cout << "-------- Multi-thread All Neurons Pre Done -------- " << endl;
+		}
 
 	    tmv_layer_input.intEval(input_range, domain);
 
@@ -403,48 +548,159 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 		{
 			if(layers[k].activation == "ReLU")
 			{
-				for(int j=0; j<input_range.size(); ++j)
+
+				if (polar_setting.get_num_threads() < 0) // Single thread
 				{
-	                UnivariatePolynomial<Real> up;
-	                gen_bern_poly(up, layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
+					for(int j=0; j<input_range.size(); ++j)
+					{
+						UnivariatePolynomial<Real> up;
+						gen_bern_poly(up, layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
 
-	                Berns_poly[j] = up;
+						Berns_poly[j] = up;
 
-	                Real error;
-	                up.evaluate(error, Real(0));
+						Real error;
+						up.evaluate(error, Real(0));
 
-	                Interval rem;
+						Interval rem;
 
-	                if(up.coefficients.size() > 2)
-	                {
-	                	Interval I(-0.5*error, 0.5*error, 1);
-	                 	rem = I;
-	                 	up.coefficients[0] -= 0.5*error;
-//	                 	cout << I << endl;
-	                }
+						if(up.coefficients.size() > 2)
+						{
+							Interval I(-0.5*error, 0.5*error, 1);
+							rem = I;
+							up.coefficients[0] -= 0.5*error;
+	//	                 	cout << I << endl;
+						}
 
-	                Berns_rem[j] = rem;
+						Berns_rem[j] = rem;
+					}
+				} 
+				else 
+				{
+					// cout << "Multi-Thread bern_poly coefficient computation for layer " << k <<endl;
+					// Get size of input range
+					unsigned int rangeDim = input_range.size();
+                    Interval input_range_arr[rangeDim];
+                    std::copy(input_range.begin(), input_range.end(), input_range_arr);
+        
+					// Create place holder for Berns polys and remainders
+                    UnivariatePolynomial<Real> Berns_poly_arr[rangeDim];
+					Interval Berns_rem_arr[rangeDim];
+			 
+					// Create multiple threads;
+					//vector<thread> ths(this->num_threads);
+					vector<thread> threads;
+					if(polar_setting.get_num_threads() > 0) 
+					{
+						threads.reserve(polar_setting.get_num_threads());
+					} 
+					
+					// Add biases to the expansions
+					for (int j = 0; j < rangeDim; j++) 
+					{
+						threads.emplace_back([&](int j_) {
+							UnivariatePolynomial<Real> up;
+						    gen_bern_poly(up, layers[k].activation, input_range_arr[j_], polar_setting.get_bernstein_order());
+						    Berns_poly_arr[j_] = up;
+						    Real error;
+						    up.evaluate(error, Real(0));
+						    Interval rem;
+
+						    if(up.coefficients.size() > 2)
+						    {
+							    Interval I(-0.5*error, 0.5*error, 1);
+							    rem = I;
+							    up.coefficients[0] -= 0.5*error;
+	                // cout << I << endl;
+						    }
+						    Berns_rem_arr[j_] = rem;
+						}, j);
+					}
+					for (auto& th: threads) 
+					{
+						th.join();
+					}
+					threads.clear();
+					for (int j = 0; j < rangeDim; j++)
+                    {
+                        Berns_rem[j] = Berns_rem_arr[j];
+                        Berns_poly[j] = Berns_poly_arr[j];
+                    }
+					//cout << "-------- Multi-thread All Neurons Pre Done -------- " << endl;
 				}
+
 			}
 			else
 			{
-				for(int j=0; j<input_range.size(); ++j)
+                if (polar_setting.get_num_threads() < 0) // Single thread
 				{
-	                UnivariatePolynomial<Real> up;
-	                gen_bern_poly(up, layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
+                    for(int j=0; j<input_range.size(); ++j)
+                    {
+                        UnivariatePolynomial<Real> up;
+                        gen_bern_poly(up, layers[k].activation, input_range[j], polar_setting.get_bernstein_order());
 
-	                Berns_poly[j] = up;
+                        Berns_poly[j] = up;
 
-					double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
+                        double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range[j], polar_setting.get_partition_num());
 
-//					cout << error << endl;
+    //					cout << error << endl;
 
-//					if(error > 1e-5)
-//						cout << error << endl;
+    //					if(error > 1e-5)
+    //						cout << error << endl;
 
-					Interval rem(-error, error);
-					Berns_rem[j] = rem;
-				}
+                        Interval rem(-error, error);
+                        Berns_rem[j] = rem;
+                    }
+                }
+                else
+                {
+                    // cout << "Multi-Thread bern_poly coefficient computation for layer " << k <<endl;
+					// Get size of input range
+					unsigned int rangeDim = input_range.size();
+                    Interval input_range_arr[rangeDim];
+                    std::copy(input_range.begin(), input_range.end(), input_range_arr);
+        
+					// Create place holder for Berns polys and remainders
+                    UnivariatePolynomial<Real> Berns_poly_arr[rangeDim];
+					Interval Berns_rem_arr[rangeDim];
+				 
+					// Create multiple threads;
+					//vector<thread> ths(this->num_threads);
+					vector<thread> threads;
+					if(polar_setting.get_num_threads() > 0) 
+					{
+						threads.reserve(polar_setting.get_num_threads());
+					} 
+                    for(int j=0; j<input_range.size(); ++j)
+                    {
+                        threads.emplace_back([&](int j_) {
+                            UnivariatePolynomial<Real> up;
+                            gen_bern_poly(up, layers[k].activation, input_range_arr[j_], polar_setting.get_bernstein_order());
+
+                            Berns_poly_arr[j] = up;
+
+                            double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range_arr[j], polar_setting.get_partition_num());
+
+        //					cout << error << endl;
+
+        //					if(error > 1e-5)
+        //						cout << error << endl;
+
+                            Interval rem(-error, error);
+                            Berns_rem_arr[j_] = rem;
+                            }, j);
+                    }
+                    for (auto& th: threads) 
+					{
+						th.join();
+					}
+					threads.clear();
+					for (int j = 0; j < rangeDim; j++)
+                    {
+                        Berns_rem[j] = Berns_rem_arr[j];
+                        Berns_poly[j] = Berns_poly_arr[j];
+                    }
+
+                }
 			}
 		}
 

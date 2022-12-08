@@ -12,6 +12,7 @@ protected:
     unsigned int taylor_order;
     unsigned int bernstein_order;
     unsigned int partition_num;
+    int num_threads = 12;
     
     // Berns, Taylor, Mix
     string neuron_approx_type;
@@ -78,5 +79,9 @@ public:
     void set_symbolic_queue_size(unsigned int symbolic_queue_size);
 
     unsigned int get_symbolic_queue_size();
+
+    int get_num_threads();
+
+    void set_num_threads(int num_threads);
 
 };
