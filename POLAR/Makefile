@@ -1,7 +1,7 @@
 CXX = g++
 HOME= /usr/local/include
 LIB_HOME = ../flowstar/flowstar-toolbox
-LIBS = -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk
+LIBS = -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk -lpthread
 CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g -L$(LIB_HOME) -L/usr/local/lib
 OBJS = NeuralNetwork.o BernsteinPoly.o Neuron.o PolarSetting.o System.o Specification.o Polar.o
