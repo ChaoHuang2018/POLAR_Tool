@@ -489,7 +489,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 		} 
 		else 
 		{
-			// cout << "Multi-Thread get_tmv_output_symbolic for layer " << k <<endl;
+			//cout << "Multi-Thread get_tmv_output_symbolic for layer " << k <<endl;
 			//
 			// Get the number of neurons
 			int num_rows = layers[k].bias.rows();
@@ -508,7 +508,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 			 
 			// Create multiple threads;
 			//vector<thread> ths(this->num_threads);
-			vector<thread> threads;
+			vector<std::thread> threads;
 			if(polar_setting.get_num_threads() > 0) 
 			{
 				threads.reserve(polar_setting.get_num_threads());
@@ -517,17 +517,16 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 			// Add biases to the expansions
 			for (int j = 0; j < num_rows; j++) 
 			{
-				threads.emplace_back([&](int j_) {
+				threads.emplace_back([&](int j) {
 					//mtx.lock();
-					Polynomial<Real> poly_temp(bias_arr[j_], domain.size());
-					expansions[j_] += poly_temp;
+					Polynomial<Real> poly_temp(bias_arr[j], domain.size());
+					expansions[j] += poly_temp;
 				}, j);
 			}
 			for (auto& th: threads) 
 			{
 				th.join();
 			}
-			threads.clear();
 			for (int j = 0; j < num_rows; j++)
 			{
 				tmv_layer_input.tms[j].expansion = expansions[j];
@@ -576,7 +575,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 				} 
 				else 
 				{
-					// cout << "Multi-Thread bern_poly coefficient computation for layer " << k <<endl;
+					//cout << "Multi-Thread bern_poly coefficient computation for layer " << k <<endl;
 					// Get size of input range
 					unsigned int rangeDim = input_range.size();
                     Interval input_range_arr[rangeDim];
@@ -588,7 +587,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 			 
 					// Create multiple threads;
 					//vector<thread> ths(this->num_threads);
-					vector<thread> threads;
+					vector<std::thread> threads;
 					if(polar_setting.get_num_threads() > 0) 
 					{
 						threads.reserve(polar_setting.get_num_threads());
@@ -597,29 +596,28 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 					// Add biases to the expansions
 					for (int j = 0; j < rangeDim; j++) 
 					{
-						threads.emplace_back([&](int j_) {
-							UnivariatePolynomial<Real> up;
-						    gen_bern_poly(up, layers[k].activation, input_range_arr[j_], polar_setting.get_bernstein_order());
-						    Berns_poly_arr[j_] = up;
+						threads.emplace_back([&](int j) {
+							//UnivariatePolynomial<Real> up;
+						    gen_bern_poly(Berns_poly_arr[j], layers[k].activation, input_range_arr[j], polar_setting.get_bernstein_order());
+						    //Berns_poly_arr[j] = up;
 						    Real error;
-						    up.evaluate(error, Real(0));
+						    Berns_poly_arr[j].evaluate(error, Real(0));
 						    Interval rem;
 
-						    if(up.coefficients.size() > 2)
+						    if(Berns_poly_arr[j].coefficients.size() > 2)
 						    {
 							    Interval I(-0.5*error, 0.5*error, 1);
 							    rem = I;
-							    up.coefficients[0] -= 0.5*error;
+							    Berns_poly_arr[j].coefficients[0] -= 0.5*error;
 	                // cout << I << endl;
 						    }
-						    Berns_rem_arr[j_] = rem;
+						    Berns_rem_arr[j] = rem;
 						}, j);
 					}
 					for (auto& th: threads) 
 					{
 						th.join();
 					}
-					threads.clear();
 					for (int j = 0; j < rangeDim; j++)
                     {
                         Berns_rem[j] = Berns_rem_arr[j];
@@ -653,7 +651,7 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
                 }
                 else
                 {
-                    // cout << "Multi-Thread bern_poly coefficient computation for layer " << k <<endl;
+                    //cout << "Multi-Thread bern_poly coefficient computation for layer " << k <<endl;
 					// Get size of input range
 					unsigned int rangeDim = input_range.size();
                     Interval input_range_arr[rangeDim];
@@ -665,20 +663,20 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 				 
 					// Create multiple threads;
 					//vector<thread> ths(this->num_threads);
-					vector<thread> threads;
+					vector<std::thread> threads;
 					if(polar_setting.get_num_threads() > 0) 
 					{
 						threads.reserve(polar_setting.get_num_threads());
 					} 
                     for(int j=0; j<input_range.size(); ++j)
                     {
-                        threads.emplace_back([&](int j_) {
-                            UnivariatePolynomial<Real> up;
-                            gen_bern_poly(up, layers[k].activation, input_range_arr[j_], polar_setting.get_bernstein_order());
+                        threads.emplace_back([&](int j) {
+                            //UnivariatePolynomial<Real> up;
+                            gen_bern_poly(Berns_poly_arr[j], layers[k].activation, input_range_arr[j], polar_setting.get_bernstein_order());
 
-                            Berns_poly_arr[j] = up;
+                            //Berns_poly_arr[j] = up;
 
-                            double error = gen_bern_err_by_sample(Berns_poly[j], layers[k].activation, input_range_arr[j], polar_setting.get_partition_num());
+                            double error = gen_bern_err_by_sample(Berns_poly_arr[j], layers[k].activation, input_range_arr[j], polar_setting.get_partition_num());
 
         //					cout << error << endl;
 
@@ -686,14 +684,13 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
         //						cout << error << endl;
 
                             Interval rem(-error, error);
-                            Berns_rem_arr[j_] = rem;
+                            Berns_rem_arr[j] = rem;
                             }, j);
                     }
                     for (auto& th: threads) 
 					{
 						th.join();
 					}
-					threads.clear();
 					for (int j = 0; j < rangeDim; j++)
                     {
                         Berns_rem[j] = Berns_rem_arr[j];
@@ -713,17 +710,55 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		if(layers[k].activation != "Affine")
 		{
-			for(int j=0; j<Berns_poly.size(); ++j)
-			{
-				if(Berns_poly[j].coefficients.size() > 1)
-				{
-					Q_i[j][j] = Berns_poly[j].coefficients[1];
-				}
-				else
-				{
-					Q_i[j][j] = 0;
-				}
-			}
+            if (polar_setting.get_num_threads() < 0) // Single thread
+            {
+                for(int j=0; j<Berns_poly.size(); ++j)
+                {
+                    if(Berns_poly[j].coefficients.size() > 1)
+                    {
+                        Q_i[j][j] = Berns_poly[j].coefficients[1];
+                    }
+                    else
+                    {
+                        Q_i[j][j] = 0;
+                    }
+                }
+            }
+            else 
+            {
+                int Berns_poly_size = Berns_poly.size();
+                // Create place holder for Q_i diagonal
+                Real Q_i_diag[Berns_poly_size];
+                // Create place holder for Berns polys and remainders
+                UnivariatePolynomial<Real> Berns_poly_arr[Berns_poly_size];
+                std::copy(Berns_poly.begin(), Berns_poly.end(), Berns_poly_arr);
+                vector<std::thread> threads;
+                if(polar_setting.get_num_threads() > 0) 
+                {
+                    threads.reserve(polar_setting.get_num_threads());
+                } 
+                for(int j=0; j<Berns_poly.size(); ++j)
+                {
+                    threads.emplace_back([&](int j) {
+                        if(Berns_poly_arr[j].coefficients.size() > 1)
+                        {
+                            Q_i_diag[j] = Berns_poly_arr[j].coefficients[1];
+                        }
+                        else
+                        {
+                            Q_i_diag[j] = 0;
+                        }
+                    }, j);
+                }
+                for (auto& th: threads) 
+                {
+                    th.join();
+                }
+                for (int j = 0; j < Berns_poly_size; j++)
+                {
+                     Q_i[j][j] = Q_i_diag[j];
+                }
+            }
 		}
 
 
@@ -735,65 +770,159 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		if(layers[k].activation != "Affine")
 		{
-			for(int j=0; j<Berns_poly.size(); ++j)
-			{
-				TaylorModel<Real> tm_berns;
+            if (polar_setting.get_num_threads() < 0) // Single thread
+            {
+                for(int j=0; j<Berns_poly.size(); ++j)
+                {
+                    TaylorModel<Real> tm_berns;
 
-				if(Berns_poly[j].coefficients.size() > 2)
-				{
-					TaylorModel<Real> tmTemp(Berns_poly[j].coefficients.back(), domain.size());
+                    if(Berns_poly[j].coefficients.size() > 2)
+                    {
+                        TaylorModel<Real> tmTemp(Berns_poly[j].coefficients.back(), domain.size());
 
-					// the nonlinear part
-					for (int i = Berns_poly[j].coefficients.size() - 2; i >= 0; --i)
-					{
-						tmTemp.mul_ctrunc_assign(tmv_layer_input.tms[j], domain, order, setting.tm_setting.cutoff_threshold);
+                        // the nonlinear part
+                        for (int i = Berns_poly[j].coefficients.size() - 2; i >= 0; --i)
+                        {
+                            tmTemp.mul_ctrunc_assign(tmv_layer_input.tms[j], domain, order, setting.tm_setting.cutoff_threshold);
 
-						if(i >= 2)
-						{
-							TaylorModel<Real> tmTemp2(Berns_poly[j].coefficients[i], domain.size());
-							tmTemp += tmTemp2;
-						}
-					}
+                            if(i >= 2)
+                            {
+                                TaylorModel<Real> tmTemp2(Berns_poly[j].coefficients[i], domain.size());
+                                tmTemp += tmTemp2;
+                            }
+                        }
 
-					// the linear part
-					if(Berns_poly[j].coefficients.size() > 1)
-					{
-						tmTemp.expansion += tmv_layer_input.tms[j].expansion * Berns_poly[j].coefficients[1];
-					}
+                        // the linear part
+                        if(Berns_poly[j].coefficients.size() > 1)
+                        {
+                            tmTemp.expansion += tmv_layer_input.tms[j].expansion * Berns_poly[j].coefficients[1];
+                        }
 
-					// the constant
-					if(Berns_poly[j].coefficients.size() > 0)
-					{
-						Polynomial<Real> polyTemp(Berns_poly[j].coefficients[0], domain.size());
-						tmTemp.expansion += polyTemp;
-					}
+                        // the constant
+                        if(Berns_poly[j].coefficients.size() > 0)
+                        {
+                            Polynomial<Real> polyTemp(Berns_poly[j].coefficients[0], domain.size());
+                            tmTemp.expansion += polyTemp;
+                        }
 
-					tm_berns = tmTemp;
-				}
-				else
-				{
-					TaylorModel<Real> tmTemp;
+                        tm_berns = tmTemp;
+                    }
+                    else
+                    {
+                        TaylorModel<Real> tmTemp;
 
-					// the linear part
-					if(Berns_poly[j].coefficients.size() > 1)
-					{
-						tmTemp.expansion = tmv_layer_input.tms[j].expansion * Berns_poly[j].coefficients[1];
-					}
+                        // the linear part
+                        if(Berns_poly[j].coefficients.size() > 1)
+                        {
+                            tmTemp.expansion = tmv_layer_input.tms[j].expansion * Berns_poly[j].coefficients[1];
+                        }
 
-					// the constant
-					if(Berns_poly[j].coefficients.size() > 0)
-					{
-						Polynomial<Real> polyTemp(Berns_poly[j].coefficients[0], domain.size());
-						tmTemp.expansion += polyTemp;
-					}
+                        // the constant
+                        if(Berns_poly[j].coefficients.size() > 0)
+                        {
+                            Polynomial<Real> polyTemp(Berns_poly[j].coefficients[0], domain.size());
+                            tmTemp.expansion += polyTemp;
+                        }
 
-					tm_berns = tmTemp;
-				}
+                        tm_berns = tmTemp;
+                    }
 
-				tm_berns.remainder += Berns_rem[j];
+                    tm_berns.remainder += Berns_rem[j];
 
-				tmvTemp.tms.push_back(tm_berns);
-			}
+                    tmvTemp.tms.push_back(tm_berns);
+                }
+            }
+            else 
+            {
+                int Berns_poly_size = Berns_poly.size();
+                // Create place holder for Berns polys, remainders and Berns Taylor Models
+                UnivariatePolynomial<Real> Berns_poly_arr[Berns_poly_size];
+                std::copy(Berns_poly.begin(), Berns_poly.end(), Berns_poly_arr);
+                Interval Berns_rem_arr[Berns_poly_size];
+                std::copy(Berns_rem.begin(), Berns_rem.end(), Berns_rem_arr);
+                TaylorModel<Real> tm_berns_arr[Berns_poly_size];
+
+                // Create place holder for input Taylor Models
+                TaylorModel<Real> tm_is[Berns_poly_size];
+                std::copy(tmv_layer_input.tms.begin(), tmv_layer_input.tms.end(), tm_is);
+
+                vector<std::thread> threads;
+                if(polar_setting.get_num_threads() > 0) 
+                {
+                    threads.reserve(polar_setting.get_num_threads());
+                } 
+                
+                for(int j=0; j<Berns_poly_size; ++j)
+                {
+                    threads.emplace_back([&](int j) 
+                    {
+                        TaylorModel<Real> tm_berns;
+
+                        if(Berns_poly_arr[j].coefficients.size() > 2)
+                        {
+                            TaylorModel<Real> tmTemp(Berns_poly_arr[j].coefficients.back(), domain.size());
+
+                            // the nonlinear part
+                            for (int i = Berns_poly_arr[j].coefficients.size() - 2; i >= 0; --i)
+                            {
+                                tmTemp.mul_ctrunc_assign(tm_is[j], domain, order, setting.tm_setting.cutoff_threshold);
+
+                                if(i >= 2)
+                                {
+                                    TaylorModel<Real> tmTemp2(Berns_poly_arr[j].coefficients[i], domain.size());
+                                    tmTemp += tmTemp2;
+                                }
+                            }
+
+                            // the linear part
+                            if(Berns_poly_arr[j].coefficients.size() > 1)
+                            {
+                                tmTemp.expansion += tm_is[j].expansion * Berns_poly_arr[j].coefficients[1];
+                            }
+
+                            // the constant
+                            if(Berns_poly_arr[j].coefficients.size() > 0)
+                            {
+                                Polynomial<Real> polyTemp(Berns_poly_arr[j].coefficients[0], domain.size());
+                                tmTemp.expansion += polyTemp;
+                            }
+
+                            tm_berns_arr[j] = tmTemp;
+                        }
+                        else
+                        {
+                            TaylorModel<Real> tmTemp;
+
+                            // the linear part
+                            if(Berns_poly_arr[j].coefficients.size() > 1)
+                            {
+                                tmTemp.expansion = tm_is[j].expansion * Berns_poly_arr[j].coefficients[1];
+                            }
+
+                            // the constant
+                            if(Berns_poly_arr[j].coefficients.size() > 0)
+                            {
+                                Polynomial<Real> polyTemp(Berns_poly_arr[j].coefficients[0], domain.size());
+                                tmTemp.expansion += polyTemp;
+                            }
+
+                            tm_berns_arr[j] = tmTemp;
+                        }
+
+                        tm_berns_arr[j].remainder += Berns_rem_arr[j];
+                    }, j);
+                }
+                
+                for (auto& th: threads) 
+                {
+                    th.join();
+                }
+
+                for(int j=0; j<Berns_poly_size; ++j)
+                {
+                    tmvTemp.tms.push_back(tm_berns_arr[j]);
+                }
+            }
 		}
 		else
 		{
@@ -815,44 +944,119 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		if(layers[k].activation != "Affine" && layers[k].activation != "ReLU")
 		{
-			if(layers[k].activation == "sigmoid")
-			{
-				for(int j=0; j<input_range.size(); ++j)
-				{
-					Real const_part;
-					tmv_layer_input_precond.tms[j].constant(const_part);
-					tmv_layer_input_precond.tms[j].rmConstant();
+			if (polar_setting.get_num_threads() < 0) // Single thread
+            {
+                if(layers[k].activation == "sigmoid")
+                {
+                    for(int j=0; j<input_range.size(); ++j)
+                    {
+                        Real const_part;
+                        tmv_layer_input_precond.tms[j].constant(const_part);
+                        tmv_layer_input_precond.tms[j].rmConstant();
 
-					UnivariateTaylorModel<Real> utm_x;
-					utm_x.expansion.coefficients.push_back(const_part);
-					utm_x.expansion.coefficients.push_back(1);
+                        UnivariateTaylorModel<Real> utm_x;
+                        utm_x.expansion.coefficients.push_back(const_part);
+                        utm_x.expansion.coefficients.push_back(1);
 
-					Interval x_range = input_range[j] - const_part;
+                        Interval x_range = input_range[j] - const_part;
 
-					interval_utm_setting.val = x_range;
+                        interval_utm_setting.val = x_range;
 
-					utm_x.sigmoid_taylor(utm_activation[j], x_range,  polar_setting.get_bernstein_order(), setting.g_setting);
-				}
-			}
-			else if(layers[k].activation == "tanh")
-			{
-				for(int j=0; j<input_range.size(); ++j)
-				{
-					Real const_part;
-					tmv_layer_input_precond.tms[j].constant(const_part);
-					tmv_layer_input_precond.tms[j].rmConstant();
+                        utm_x.sigmoid_taylor(utm_activation[j], x_range,  polar_setting.get_bernstein_order(), setting.g_setting);
+                    }
+                }
+                else if(layers[k].activation == "tanh")
+                {
+                    for(int j=0; j<input_range.size(); ++j)
+                    {
+                        Real const_part;
+                        tmv_layer_input_precond.tms[j].constant(const_part);
+                        tmv_layer_input_precond.tms[j].rmConstant();
 
-					UnivariateTaylorModel<Real> utm_x;
-					utm_x.expansion.coefficients.push_back(const_part);
-					utm_x.expansion.coefficients.push_back(1);
+                        UnivariateTaylorModel<Real> utm_x;
+                        utm_x.expansion.coefficients.push_back(const_part);
+                        utm_x.expansion.coefficients.push_back(1);
 
-					Interval x_range = input_range[j] - const_part;
+                        Interval x_range = input_range[j] - const_part;
 
-					interval_utm_setting.val = x_range;
+                        interval_utm_setting.val = x_range;
 
-					utm_x.tanh_taylor(utm_activation[j], x_range, polar_setting.get_bernstein_order(), setting.g_setting);
-				}
-			}
+                        utm_x.tanh_taylor(utm_activation[j], x_range, polar_setting.get_bernstein_order(), setting.g_setting);
+                    }
+                }
+            }
+            else 
+            {
+                int input_size = input_range.size();
+                // Create place holders for vectors
+                Interval input_range_arr[input_size];
+                std::copy(input_range.begin(), input_range.end(), input_range_arr);
+                TaylorModel<Real> tmv_layer_input_precond_arr[input_size];
+                std::copy(tmv_layer_input_precond.tms.begin(), tmv_layer_input_precond.tms.end(), tmv_layer_input_precond_arr);
+                UnivariateTaylorModel<Real> utm_activation_arr[utm_activation.size()];
+
+                vector<std::thread> threads;
+                if(polar_setting.get_num_threads() > 0) 
+                {
+                    threads.reserve(polar_setting.get_num_threads());
+                } 
+                
+                if(layers[k].activation == "sigmoid")
+                {
+                    for(int j=0; j<input_size; ++j)
+                    {
+                        threads.emplace_back([&](int j) 
+                        {
+                            Real const_part;
+                            tmv_layer_input_precond_arr[j].constant(const_part);
+                            tmv_layer_input_precond_arr[j].rmConstant();
+
+                            UnivariateTaylorModel<Real> utm_x;
+                            utm_x.expansion.coefficients.push_back(const_part);
+                            utm_x.expansion.coefficients.push_back(1);
+
+                            Interval x_range =  input_range_arr[j] - const_part; //input_range[j] - const_part;
+
+                            interval_utm_setting.val = x_range;
+
+                            utm_x.sigmoid_taylor(utm_activation_arr[j], x_range,  polar_setting.get_bernstein_order(), setting.g_setting);
+                        }, j);
+                    }
+                }
+                else if(layers[k].activation == "tanh")
+                {
+                    for(int j=0; j<input_size; ++j)
+                    {
+                        threads.emplace_back([&](int j) 
+                        {
+                            Real const_part;
+                            tmv_layer_input_precond_arr[j].constant(const_part);
+                            tmv_layer_input_precond_arr[j].rmConstant();
+
+                            UnivariateTaylorModel<Real> utm_x;
+                            utm_x.expansion.coefficients.push_back(const_part);
+                            utm_x.expansion.coefficients.push_back(1);
+
+                            Interval x_range = input_range_arr[j] - const_part;
+
+                            interval_utm_setting.val = x_range;
+
+                            utm_x.tanh_taylor(utm_activation_arr[j], x_range, polar_setting.get_bernstein_order(), setting.g_setting);
+                        }, j);
+                    }
+                }
+                for (auto& th: threads) 
+                {
+                    th.join();
+                }
+
+                for(int j=0; j<input_size; ++j)
+                {
+                    //tmv_layer_input_precond.tms[j].constant(tmv_layer_input_precond_arr[j].expansion.constant_part);
+                    //tmv_layer_input_precond.tms[j].rmConstant();
+                    utm_activation[j] = utm_activation_arr[j];
+                }
+            }
 		}
 
 		// extracting the linear part
@@ -877,69 +1081,161 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
 
 		if(layers[k].activation != "Affine" && layers[k].activation != "ReLU")
 		{
-			for(int j=0; j<utm_activation.size(); ++j)
-			{
-				TaylorModel<Real> tm_taylor;
+			if (polar_setting.get_num_threads() < 0) // Single thread
+            {
+                for(int j=0; j<utm_activation.size(); ++j)
+                {
+                    TaylorModel<Real> tm_taylor;
 
-				if(utm_activation[j].expansion.coefficients.size() > 2)
-				{
-					TaylorModel<Real> tmTemp(utm_activation[j].expansion.coefficients.back(), domain.size());
+                    if(utm_activation[j].expansion.coefficients.size() > 2)
+                    {
+                        TaylorModel<Real> tmTemp(utm_activation[j].expansion.coefficients.back(), domain.size());
 
-					// the nonlinear part
-					for (int i = utm_activation[j].expansion.coefficients.size() - 2; i >= 0; --i)
-					{
-						tmTemp.mul_ctrunc_assign(tmv_layer_input_precond.tms[j], domain, order, setting.tm_setting.cutoff_threshold);
+                        // the nonlinear part
+                        for (int i = utm_activation[j].expansion.coefficients.size() - 2; i >= 0; --i)
+                        {
+                            tmTemp.mul_ctrunc_assign(tmv_layer_input_precond.tms[j], domain, order, setting.tm_setting.cutoff_threshold);
 
-						if(i >= 2)
-						{
-							TaylorModel<Real> tmTemp2(utm_activation[j].expansion.coefficients[i], domain.size());
-							tmTemp += tmTemp2;
-						}
-					}
+                            if(i >= 2)
+                            {
+                                TaylorModel<Real> tmTemp2(utm_activation[j].expansion.coefficients[i], domain.size());
+                                tmTemp += tmTemp2;
+                            }
+                        }
 
-					// the linear part
-					if(utm_activation[j].expansion.coefficients.size() > 1)
-					{
-						tmTemp.expansion += tmv_layer_input_precond.tms[j].expansion * utm_activation[j].expansion.coefficients[1];
-					}
+                        // the linear part
+                        if(utm_activation[j].expansion.coefficients.size() > 1)
+                        {
+                            tmTemp.expansion += tmv_layer_input_precond.tms[j].expansion * utm_activation[j].expansion.coefficients[1];
+                        }
 
-					// the constant
-					if(utm_activation[j].expansion.coefficients.size() > 0)
-					{
-						Polynomial<Real> polyTemp(utm_activation[j].expansion.coefficients[0], domain.size());
-						tmTemp.expansion += polyTemp;
-					}
+                        // the constant
+                        if(utm_activation[j].expansion.coefficients.size() > 0)
+                        {
+                            Polynomial<Real> polyTemp(utm_activation[j].expansion.coefficients[0], domain.size());
+                            tmTemp.expansion += polyTemp;
+                        }
 
-					tm_taylor = tmTemp;
-				}
-				else
-				{
-					TaylorModel<Real> tmTemp;
+                        tm_taylor = tmTemp;
+                    }
+                    else
+                    {
+                        TaylorModel<Real> tmTemp;
 
-					// the linear part
-					if(utm_activation[j].expansion.coefficients.size() > 1)
-					{
-						tmTemp.expansion = tmv_layer_input_precond.tms[j].expansion * utm_activation[j].expansion.coefficients[1];
-					}
+                        // the linear part
+                        if(utm_activation[j].expansion.coefficients.size() > 1)
+                        {
+                            tmTemp.expansion = tmv_layer_input_precond.tms[j].expansion * utm_activation[j].expansion.coefficients[1];
+                        }
 
-					// the constant
-					if(utm_activation[j].expansion.coefficients.size() > 0)
-					{
-						Polynomial<Real> polyTemp(utm_activation[j].expansion.coefficients[0], domain.size());
-						tmTemp.expansion += polyTemp;
-					}
+                        // the constant
+                        if(utm_activation[j].expansion.coefficients.size() > 0)
+                        {
+                            Polynomial<Real> polyTemp(utm_activation[j].expansion.coefficients[0], domain.size());
+                            tmTemp.expansion += polyTemp;
+                        }
 
-					tm_taylor = tmTemp;
-				}
+                        tm_taylor = tmTemp;
+                    }
 
-				tm_taylor.remainder += utm_activation[j].remainder;
+                    tm_taylor.remainder += utm_activation[j].remainder;
 
-				if(tm_taylor.remainder.width() < tmvTemp.tms[j].remainder.width())
-				{
-					tmvTemp.tms[j] = tm_taylor;
-					Q_i[j][j] = Q_i_Taylor[j][j];
-				}
-			}
+                    if(tm_taylor.remainder.width() < tmvTemp.tms[j].remainder.width())
+                    {
+                        tmvTemp.tms[j] = tm_taylor;
+                        Q_i[j][j] = Q_i_Taylor[j][j];
+                    }
+                }
+            }
+            else 
+            {
+                int utm_activation_size = utm_activation.size();
+                // Create place holders for vectors
+                TaylorModel<Real> tmv_layer_input_precond_arr[utm_activation_size];
+                std::copy(tmv_layer_input_precond.tms.begin(), tmv_layer_input_precond.tms.end(), tmv_layer_input_precond_arr);
+                UnivariateTaylorModel<Real> utm_activation_arr[utm_activation_size];
+                std::copy(utm_activation.begin(), utm_activation.end(), utm_activation_arr);
+                TaylorModel<Real> tm_taylors[utm_activation_size];
+                vector<std::thread> threads;
+                if(polar_setting.get_num_threads() > 0) 
+                {
+                    threads.reserve(polar_setting.get_num_threads());
+                } 
+
+                for(int j=0; j<utm_activation.size(); ++j)
+                {
+                    threads.emplace_back([&](int j) 
+                    {
+                        //TaylorModel<Real> tm_taylor;
+
+                        if(utm_activation_arr[j].expansion.coefficients.size() > 2)
+                        {
+                            TaylorModel<Real> tmTemp(utm_activation_arr[j].expansion.coefficients.back(), domain.size());
+
+                            // the nonlinear part
+                            for (int i = utm_activation_arr[j].expansion.coefficients.size() - 2; i >= 0; --i)
+                            {
+                                tmTemp.mul_ctrunc_assign(tmv_layer_input_precond_arr[j], domain, order, setting.tm_setting.cutoff_threshold);
+
+                                if(i >= 2)
+                                {
+                                    TaylorModel<Real> tmTemp2(utm_activation_arr[j].expansion.coefficients[i], domain.size());
+                                    tmTemp += tmTemp2;
+                                }
+                            }
+
+                            // the linear part
+                            if(utm_activation_arr[j].expansion.coefficients.size() > 1)
+                            {
+                                tmTemp.expansion += tmv_layer_input_precond_arr[j].expansion * utm_activation_arr[j].expansion.coefficients[1];
+                            }
+
+                            // the constant
+                            if(utm_activation_arr[j].expansion.coefficients.size() > 0)
+                            {
+                                Polynomial<Real> polyTemp(utm_activation_arr[j].expansion.coefficients[0], domain.size());
+                                tmTemp.expansion += polyTemp;
+                            }
+
+                            tm_taylors[j] = tmTemp;
+                        }
+                        else
+                        {
+                            TaylorModel<Real> tmTemp;
+
+                            // the linear part
+                            if(utm_activation_arr[j].expansion.coefficients.size() > 1)
+                            {
+                                tmTemp.expansion = tmv_layer_input_precond_arr[j].expansion * utm_activation_arr[j].expansion.coefficients[1];
+                            }
+
+                            // the constant
+                            if(utm_activation_arr[j].expansion.coefficients.size() > 0)
+                            {
+                                Polynomial<Real> polyTemp(utm_activation_arr[j].expansion.coefficients[0], domain.size());
+                                tmTemp.expansion += polyTemp;
+                            }
+
+                            tm_taylors[j] = tmTemp;
+                        }
+
+                        tm_taylors[j].remainder += utm_activation_arr[j].remainder;
+                    }, j);
+                }
+                for (auto& th: threads) 
+                {
+                    th.join();
+                }
+
+                for(int j=0; j<utm_activation_size; ++j)
+                {
+                    if(tm_taylors[j].remainder.width() < tmvTemp.tms[j].remainder.width())
+                        {
+                            tmvTemp.tms[j] = tm_taylors[j];
+                            Q_i[j][j] = Q_i_Taylor[j][j];
+                        }
+                }
+            }
 		}
 
 
