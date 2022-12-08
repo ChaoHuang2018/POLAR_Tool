@@ -1,12 +1,12 @@
 # POLAR Official version
-POLAR [1] is a reachability analysis framework for neural-network controlled systems (NNCSs) based on polynomial arithmetic. Compared with existing arithmetic approaches that use standard Taylor models, our framework uses a novel approach to iteratively overapproximate the neuron output ranges layer-by-layer with a combination of Bernstein polynomial interpolation for continuous activation functions and Taylor model arithmetic for the other operations. This approach can overcome the main drawback in the standard Taylor model arithmetic, i.e. its inability to handle functions that cannot be well approximated by Taylor polynomials, and significantly improve the accuracy and efficiency of reachable states computation for NNCSs. To further tighten the overapproximation, our method keeps the Taylor model remainders symbolic under the linear mappings when estimating the output range of a neural network. 
+POLAR [1] is a reachability analysis framework for neural-network controlled systems (NNCSs) based on polynomial arithmetic. Compared with existing arithmetic approaches that use standard Taylor models, our framework uses a novel approach to iteratively overapproximate the neuron output ranges layer-by-layer with a combination of Bernstein polynomial approximation for continuous activation functions and Taylor model arithmetic for the other operations. This approach can overcome the main drawback in the standard Taylor model arithmetic, i.e. its inability to handle functions that cannot be well approximated by Taylor polynomials, and significantly improve the accuracy and efficiency of reachable states computation for NNCSs. To further tighten the overapproximation, our method keeps the Taylor model remainders symbolic under the linear mappings when estimating the output range of a neural network. 
 
 Experiment results across a suite of benchmarks show that POLAR significantly outperforms the state-of-the-art techniques on both efficiency and tightness of reachable set estimation.
 
 ## Tight Bounds for Bernstein Polynomial Approximation of ReLU
-The following special treatment for Bernstein polynomial (BP) interpolation on ReLU units was also implemented in the submission to the AINNCS category in ARCH-COMP 2022 in addition to the techniques described in [1].
+The following special treatment for Bernstein polynomial (BP) approximation on ReLU units was also implemented in the submission to the AINNCS category in ARCH-COMP 2022 in addition to the techniques described in [1].
  
-Thanks to the characteristic of the ReLU activation function, we can directly obtain tight bounds for the BP interpolation as shown in the following [figure](/tests/bp_relu.png) where the dashes lines represent upper and lower bounds of the BP approximation. 
+Thanks to the characteristic of the ReLU activation function, we can directly obtain tight bounds for the BP approximation as shown in the following [figure](/tests/bp_relu.png) where the dashes lines represent upper and lower bounds of the BP approximation. 
 <p align="center">
   <img src="/tests/bp_relu.png" />
 </p>
