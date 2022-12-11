@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
 
 		// taylor propagation
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Berns", "Concrete");
+		polar_setting.set_num_threads(0);
 		TaylorModelVec<Real> tmv_output;
 
 		if(if_symbo == 0){
