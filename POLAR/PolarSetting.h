@@ -7,7 +7,7 @@ using namespace std;
 
 class PolarSetting
 {
-protected:
+public:
     
     unsigned int taylor_order;
     unsigned int bernstein_order;
