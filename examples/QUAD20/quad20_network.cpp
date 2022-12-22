@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 						"(sin(x7)/cos(x8))*x11 + (cos(x7)/cos(x8))*x12",
 						"-0.92592592592593*x11*x12 + 18.51851851851852*u1",
 						"0.92592592592593*x10*x12 + 18.51851851851852*u2",
-						"0"
+						"0",
 						"1","0","0","0"}, vars);
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);

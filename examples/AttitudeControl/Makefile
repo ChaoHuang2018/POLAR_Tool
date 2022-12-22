@@ -1,13 +1,13 @@
-CXX = g++
+CXX = g++-8
 HOME= /usr/local/include
 POLAR_HOME = ../../POLAR
 FLOWSTAR_HOME = ../../flowstar/flowstar-toolbox
-LIBS = -lpolar -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk
+LIBS = -lpolar -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk -lpthread
 CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: nn_attitude_control_sigmoid flowstar_1step testoldexample
+all: nn_attitude_control_sigmoid flowstar_1step nncs_attitude_control_sigmoid
 
 nn_attitude_control_sigmoid: nn_attitude_control_sigmoid.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
@@ -15,7 +15,7 @@ nn_attitude_control_sigmoid: nn_attitude_control_sigmoid.o
 flowstar_1step: flowstar_1step.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
-testoldexample: testoldexample.o
+nncs_attitude_control_sigmoid: nncs_attitude_control_sigmoid.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 %.o: %.cc
@@ -27,5 +27,5 @@ testoldexample: testoldexample.o
 
 
 clean:
-	rm -f *.o nn_attitude_control_sigmoid flowstar_1step
+	rm -f *.o nn_attitude_control_sigmoid flowstar_1step nncs_attitude_control_sigmoid
 
