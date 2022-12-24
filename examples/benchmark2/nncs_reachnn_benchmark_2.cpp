@@ -89,9 +89,10 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// run the reachability computation
-	clock_t begin, end;
+	time_t start_timer;
+	time_t end_timer;
 	double seconds;
-	begin = clock();
+	time(&start_timer);
 
 	int n = stoi(argv[2]); // total number of control steps
 
@@ -124,10 +125,10 @@ int main(int argc, char *argv[])
 	}
 
 	// time cost
-	end = clock();
-	printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
-	seconds = (end - begin) / CLOCKS_PER_SEC;
-	std::string running_time ="Running Time: %lf\n" + to_string(seconds) + " seconds";
+	time(&end_timer);
+	seconds = difftime(start_timer, end_timer);
+	printf("time cost: %lf\n", -seconds);
+	std::string running_time ="Running Time: %lf\n" + to_string(-seconds) + " seconds";
 
 	// create a subdir named outputs to save result
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);

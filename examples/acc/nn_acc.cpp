@@ -187,6 +187,7 @@ int main(int argc, char *argv[])
 
 	time(&end_timer);
 	seconds = difftime(start_timer, end_timer);
+	printf("time cost: %lf\n", -seconds);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
