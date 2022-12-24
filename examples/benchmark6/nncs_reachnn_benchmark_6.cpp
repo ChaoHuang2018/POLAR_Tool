@@ -47,7 +47,8 @@ int main(int argc, char *argv[])
 	unsigned int order = stoi(argv[4]);
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(stod(argv[7]), order);
+	//setting.setFixedStepsize(stod(argv[7]), order);
+	setting.setFixedStepsize(0.1, order);
 	setting.setCutoffThreshold(1e-10);
 	setting.printOff();
 
@@ -60,7 +61,8 @@ int main(int argc, char *argv[])
 	// POLAR setting
 	unsigned int taylor_order = order;	// same as the flowpipe order, but it is not necessary
 	unsigned int bernstein_order = stoi(argv[3]);
-	unsigned int partition_num = 4000;
+	//unsigned int partition_num = 4000;
+	unsigned int partition_num = 10;	
 	unsigned int if_symbo = stoi(argv[5]);
 
 	PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Symbolic");
@@ -100,7 +102,8 @@ int main(int argc, char *argv[])
 
 	int n = stoi(argv[2]);// total number of control steps
 
-	Symbolic_Remainder sr(initialSet, 1000);
+	//Symbolic_Remainder sr(initialSet, 1000);
+	Symbolic_Remainder sr(initialSet, 100);
 
 	system.reach(result, initialSet, n, setting, polar_setting, safeSet, sr);
 

@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
 	unsigned int order = stoi(argv[4]);
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.005, order); // order = 4/5
+	//setting.setFixedStepsize(0.005, order); // order = 4/5
+	setting.setFixedStepsize(0.1, order);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10); //core dumped
@@ -86,7 +87,10 @@ int main(int argc, char *argv[])
 
 	// translate the initial set to a flowpipe
 	Flowpipe initial_set(X0);
-	Symbolic_Remainder symbolic_remainder(initial_set, 500);
+
+	//Symbolic_Remainder symbolic_remainder(initial_set, 500);
+	Symbolic_Remainder symbolic_remainder(initial_set, 100);
+
 	// no unsafe set
 	vector<Constraint> safeSet;
 
@@ -103,7 +107,8 @@ int main(int argc, char *argv[])
 	// unsigned int order = 5;
 	Interval cutoff_threshold(-1e-12, 1e-12);
 	unsigned int bernstein_order = stoi(argv[3]);
-	unsigned int partition_num = 4000;
+	//unsigned int partition_num = 4000;
+	unsigned int partition_num = 10;
 
 	unsigned int if_symbo = stoi(argv[5]);
 
