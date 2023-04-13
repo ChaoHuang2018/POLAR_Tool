@@ -26,7 +26,7 @@ POLAR relies on the Taylor model arithmetic library provided by Flow*. Please in
 
 - Install dependencies through apt-get install
 ```
-sudo apt-get install m4 libgmp3-dev libmpfr-dev libmpfr-doc libgsl-dev gsl-bin bison flex gnuplot-x11 libglpk-dev gcc-8 g++-8 libopenmpi-dev
+sudo apt-get install m4 libgmp3-dev libmpfr-dev libmpfr-doc libgsl-dev gsl-bin bison flex gnuplot-x11 libglpk-dev gcc-8 g++-8 libopenmpi-dev libpthread-stubs0-dev
 ```
 - Download Flow*
 ```
