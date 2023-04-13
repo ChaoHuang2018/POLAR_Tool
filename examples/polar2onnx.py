@@ -44,8 +44,10 @@ class NeuralNetwork(nn.Module):
         for i in range(len(hidden_size_list)-1):
             self.layers.append(nn.Linear(hidden_size_list[i], hidden_size_list[i+1]))
         self.layers.append(nn.Linear(hidden_size_list[-1], control_size))
+        print(self.layers)
+        # assert False
         self.activations = []
-        self.affine = nn.Linear(1, 1)
+        # self.affine = nn.Linear(control_size, control_size)
 
         for act in activation_list:
             if act == "ReLU":
@@ -54,6 +56,8 @@ class NeuralNetwork(nn.Module):
                 self.activations.append(nn.Sigmoid())
             elif act == "tanh":
                 self.activations.append(nn.Tanh())
+            elif act == "Affine":
+                self.activations.append('Affine')
             else:
                 raise NotImplementedError
     
@@ -61,8 +65,11 @@ class NeuralNetwork(nn.Module):
         assert len(self.layers) == len(self.activations) 
         x = state
         for i in range(len(self.layers)):
-            x = self.activations[i](self.layers[i](x))
-        return self.affine(x)
+            if self.activations[i] == 'Affine':
+                x = self.layers[i](x)
+            else:
+                x = self.activations[i](self.layers[i](x))
+        return x
 
 def load_weights_bias(file):
     """
@@ -105,13 +112,14 @@ def load_weights_bias(file):
     torch_param_list.append(np.array([[scale]]))
     torch_param_list.append(np.array([-offset * scale]))
     NN = NeuralNetwork(state_size, control_size, hidden_size_list, activations)
+    print(NN)
 
     idx = 0
     for name, layer_param in NN.named_parameters():
-        print(layer_param.shape, torch_param_list[idx].shape)
+        print(name, layer_param.shape, torch_param_list[idx].shape)
         layer_param.data = nn.parameter.Parameter(torch.from_numpy(torch_param_list[idx]).float())
         idx += 1
-    x = torch.randn(1, 2, requires_grad=True)
+    x = torch.randn(1, state_size, requires_grad=True)
     torch.onnx.export(NN, x, file+".onnx")
     return NN
     
@@ -119,15 +127,6 @@ def load_weights_bias(file):
 
 
 if __name__ == "__main__":
-    NN = load_weights_bias('benchmark1/nn_1_relu_tanh')
-    env = UnitTest()
-    state, done = env.state, False
-    tra = []
-    while not done:
-        tra.append(state)
-        u = NN(torch.from_numpy(state).float())
-        state, done = env.step(u)
-    import matplotlib.pyplot as plt
-    tra = np.array(tra)
-    plt.plot(tra[:, 0], tra[:, 1])
-    plt.show()
+    import sys
+    filename = sys.argv[1]
+    NN = load_weights_bias(filename)

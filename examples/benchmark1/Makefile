@@ -30,5 +30,5 @@ nncs_reachnn_benchmark_1: nncs_reachnn_benchmark_1.o
 
 
 clean:
-	rm -f *.o reachnn_benchmark_1 flowstar_1step nncs_reachnn_benchmark_1
+	rm -f *.o reachnn_benchmark_1 flowstar_1step flowstar_1step_v1 nncs_reachnn_benchmark_1
 

@@ -7,12 +7,15 @@ CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: reachnn_benchmark_5 flowstar_1step nncs_reachnn_benchmark_5
+all: reachnn_benchmark_5 flowstar_1step flowstar_1step_v1 nncs_reachnn_benchmark_5
 
 reachnn_benchmark_5: reachnn_benchmark_5.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 flowstar_1step: flowstar_1step.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+flowstar_1step_v1: flowstar_1step_v1.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 nncs_reachnn_benchmark_5: nncs_reachnn_benchmark_5.o
@@ -27,5 +30,5 @@ nncs_reachnn_benchmark_5: nncs_reachnn_benchmark_5.o
 
 
 clean:
-	rm -f *.o reachnn_benchmark_5 flowstar_1step nncs_reachnn_benchmark_5
+	rm -f *.o reachnn_benchmark_5 flowstar_1step flowstar_1step_v1 nncs_reachnn_benchmark_5
 

@@ -1,6 +1,6 @@
 #include "../../POLAR/NeuralNetwork.h"
 //#include "../../flowstar/flowstar-toolbox/Constraint.h"
-
+#include <chrono>
 using namespace std;
 using namespace flowstar;
 
@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	// Declaration of the state variables.
 	unsigned int numVars = 4;
 	
-    intervalNumPrecision = 600;
+    intervalNumPrecision = 100;
 
 	Variables vars;
 
@@ -99,10 +99,10 @@ int main(int argc, char *argv[])
 
 	// the order in use
 	// unsigned int order = 5;
-	Interval cutoff_threshold(-1e-12, 1e-12);
+	Interval cutoff_threshold(-1e-7, 1e-7);
 	unsigned int bernstein_order = stoi(argv[3]);
 	//unsigned int partition_num = 4000;
-	unsigned int partition_num = 10;
+	unsigned int partition_num = 100;
 
 	unsigned int if_symbo = stoi(argv[5]);
 
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 	{
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
-
+	auto begin = std::chrono::high_resolution_clock::now();
 	// perform 35 control steps
 	for (int iter = 0; iter < steps; ++iter)
 	{
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
 		// taylor propagation
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Berns", "Concrete");
-        polar_setting.set_num_threads(0);
+        polar_setting.set_num_threads(12);
 		TaylorModelVec<Real> tmv_output;
 
 		if(if_symbo == 0){
@@ -164,6 +164,12 @@ int main(int argc, char *argv[])
 		tmv_output.Remainder(rm1);
 		cout << "Neural network taylor remainder: " << rm1 << endl;
 
+		Matrix<Real> coefficients(tmv_output.tms.size(), 2);
+		tmv_output.tms[0].expansion.linearCoefficients(coefficients, 0);
+		cout << "Linear coefficient: " << endl;
+		for(int i = 0; i < 2; i++) {
+			cout << coefficients[0][i] << endl;
+		}
 
 
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
@@ -189,7 +195,10 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-
+	auto end = std::chrono::high_resolution_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+	seconds = elapsed.count() *  1e-9;
+	printf("Time measured: %.3f seconds.\n", seconds);
 
 	vector<Constraint> targetSet;
 	Constraint c1("x0 - 0.2", vars);		// x0 <= 0.2
@@ -215,9 +224,12 @@ int main(int argc, char *argv[])
 	}
 
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
-	printf("time cost: %lf\n", -seconds);
+	// time(&end_timer);
+	// seconds = difftime(start_timer, end_timer);
+	// printf("time cost: %lf\n", -seconds);
+	std::string running_time = "Running Time: " + to_string(seconds) + " seconds";
+
+	cout << reach_result << endl;
 	
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -231,9 +243,7 @@ int main(int argc, char *argv[])
 		printf("Can not create the directory for images.\n");
 		exit(1);
 	}
-
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
-
+	
 	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
 	{
@@ -245,7 +255,7 @@ int main(int argc, char *argv[])
 	
 	/* plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(if_symbo), result);
 	 */
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }

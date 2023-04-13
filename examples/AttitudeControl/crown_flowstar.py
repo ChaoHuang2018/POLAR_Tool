@@ -1,7 +1,7 @@
 import os
 import sys
 
-CROWN_DIR = "/home/jiameng/packages/CROWN_FLOWSTAR/alpha-beta-CROWN/complete_verifier/"
+CROWN_DIR = "/mnt/d/TCAD/POLAR_Tool/alpha-beta-CROWN/complete_verifier"
 if not os.path.isdir(CROWN_DIR):
     raise Exception("Please set your own CROWN directory.")
 sys.path.append(CROWN_DIR)
@@ -86,8 +86,7 @@ def ctrl_input_bound(model_ori, input_lb, input_ub, alpha_only=True):
     lb_record = []
     init_global_lb = saved_bounds = saved_slopes = None
     y = None
-    verified_status, init_global_lb, saved_bounds, saved_slopes = incomplete_verifier(model_ori, x,
-                y, data_ub=data_ub, data_lb=data_lb, eps=perturb_eps)
+    verified_status, init_global_lb, saved_bounds, saved_slopes = incomplete_verifier(model_ori, x, norm = arguments.Config["specification"]["norm"], y=y, data_ub=data_ub, data_lb=data_lb, eps=perturb_eps)
     lower_bounds, upper_bounds = saved_bounds[1], saved_bounds[2]
     arguments.Config["bab"]["timeout"] -= (time.time()-start_incomplete)
 
@@ -157,10 +156,11 @@ def main(steps = 5):
         u2_min = (us_min[2] - model_lb.output_offset) * model_lb.output_scale
         u2_max = (us_max[2] - model_ub.output_offset) * model_ub.output_scale
         print("******CTRL BOUND*********", u0_min, u0_max)
-        command = ['./flowstar_1step', '6']
+        command = ['./flowstar_1step_v1', '5']
         command += [str(i) for i in [x0_min, x0_max, x1_min, x1_max, x2_min, x2_max, x3_min, x3_max, x4_min, x4_max, x5_min, x5_max, u0_min, u0_max, u1_min, u1_max, u2_min, u2_max]]
         command += [str(step)]
         command += [arguments.Config["general"]["network_name"]]
+        print(command)
         try:
             flowstar_res = subprocess.check_output(" ".join(command), shell=True, text=True)
         except subprocess.CalledProcessError as e:
@@ -175,6 +175,7 @@ def main(steps = 5):
         print(lines[3])
         print(lines[4])
         print(lines[5])
+        print(lines[0])
         x0_range = [float(i) for i in lines[0].split(' ')]
         x1_range = [float(i) for i in lines[1].split(' ')]
         x2_range = [float(i) for i in lines[2].split(' ')]

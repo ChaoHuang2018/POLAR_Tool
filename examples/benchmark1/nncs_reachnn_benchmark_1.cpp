@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	// stepsize and order for reachability analysis
 	//setting.setFixedStepsize(0.005, order);
 	setting.setFixedStepsize(0.1, order);
-	setting.setCutoffThreshold(1e-8);
+	setting.setCutoffThreshold(1e-7);
 	setting.printOff();
 
 	// remainder estimation
@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
 	unsigned int if_symbo = stoi(argv[5]);
 
 	PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Symbolic");
+	polar_setting.set_num_threads(-1);
 	if(if_symbo == 0){
 			// not using symbolic remainder
 			polar_setting.set_remainder_type("Concrete");

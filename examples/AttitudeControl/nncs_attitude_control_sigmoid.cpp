@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	// stepsize and order for reachability analysis
 	//setting.setFixedStepsize(0.005, order);
 	setting.setFixedStepsize(0.1, order);
-	setting.setCutoffThreshold(1e-7);
+	setting.setCutoffThreshold(1e-5);
 	setting.printOff();
 
 	// remainder estimation
@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 	unsigned int if_symbo = stoi(argv[5]);
 
 	PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Symbolic");
+	polar_setting.set_num_threads(-1);
 	if(if_symbo == 0){
 			// not using symbolic remainder
 			polar_setting.set_remainder_type("Concrete");
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
 	int n = stoi(argv[2]); // total number of control steps
 
 	//Symbolic_Remainder sr(initialSet, 2000);
-	Symbolic_Remainder sr(initialSet, 100);
+	Symbolic_Remainder sr(initialSet, 50);
 
 	system.reach(result, initialSet, n, setting, polar_setting, safeSet, sr);
 
@@ -157,13 +158,13 @@ int main(int argc, char *argv[])
 	plot_setting.printOn();
 	
 	plot_setting.setOutputDims("x0", "x1");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nncs_ac_sigmoid_x0_x1_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nncs_ac_sigmoid_x0_x1_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	plot_setting.setOutputDims("x2", "x3");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nncs_ac_sigmoid_x2_x3_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nncs_ac_sigmoid_x2_x3_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	plot_setting.setOutputDims("x4", "x5");
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", "nncs_ac_sigmoid_x4_x5_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "nncs_ac_sigmoid_x4_x5_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 	
 	//plot_setting.setOutputDims("t", "x1");
 	//plot_setting.plot_2D_interval_GNUPLOT("./outputs/", "nncs_ac_sigmoid_x4_x5_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);

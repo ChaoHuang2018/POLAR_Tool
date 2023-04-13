@@ -3,6 +3,7 @@
 //#include "../domain_computation.h"
 //#include "../dynamics_linearization.h"
 #include <math.h>
+#include <chrono>
 using namespace std;
 using namespace flowstar;
 
@@ -12,7 +13,7 @@ using namespace flowstar;
 
 int main(int argc, char *argv[])
 {
-	intervalNumPrecision = 600;
+	intervalNumPrecision = 100;
 	
 	/*
 	// Declaration of the state variables.
@@ -124,14 +125,14 @@ int main(int argc, char *argv[])
 	unsigned int order = stoi(argv[4]);
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.005, order); // order = 4/5
+	setting.setFixedStepsize(0.1, order); // order = 4/5
 	//setting.setFixedStepsize(0.005, order); // order = 4/5
 
 	// time horizon for a single control step
 	//setting.setTime(1);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-10); //core dumped
+	setting.setCutoffThreshold(1e-6); //core dumped
 	//setting.setCutoffThreshold(1e-7);
 
 	// queue size for the symbolic remainder
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
 	//Interval cutoff_threshold(-1e-7, 1e-7);
 	Interval cutoff_threshold(-1e-10, 1e-10);
 	unsigned int bernstein_order = stoi(argv[3]);
-	unsigned int partition_num = 4000;
+	unsigned int partition_num = 200;
 
 	unsigned int if_symbo = stoi(argv[5]);
 
@@ -268,7 +269,7 @@ int main(int argc, char *argv[])
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
 
-	// perform 35 control steps
+	auto begin = std::chrono::high_resolution_clock::now();
 	for (int iter = 0; iter < steps; ++iter)
 	{
 		cout << "Step " << iter << " starts.      " << endl;
@@ -321,6 +322,7 @@ int main(int argc, char *argv[])
 
 		// taylor propagation (new)
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
+		polar_setting.set_num_threads(12);
 		TaylorModelVec<Real> tmv_output;
 
 		// not using symbolic remainder
@@ -386,13 +388,18 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	auto end = std::chrono::high_resolution_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+	seconds = elapsed.count() *  1e-9;
+	printf("Time measured: %.3f seconds.\n", seconds);
+
 	vector<Interval> end_box;
 	string reach_result;
 	reach_result = "Verification result: Unknown(35)";
 	result.fp_end_of_time.intEval(end_box, order, setting.tm_setting.cutoff_threshold);
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
+	// time(&end_timer);
+	// seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -401,7 +408,8 @@ int main(int argc, char *argv[])
 	
 	
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
+	std::string running_time = "Running Time: " + to_string(seconds) + " seconds";
+	cout << running_time << endl;
 
 	ofstream result_output(dir_name + "/Steps_" + to_string(steps) + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
@@ -420,7 +428,7 @@ int main(int argc, char *argv[])
 	//plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v4_docking_tanh64x64_tanh/", "Steps" + to_string(steps) + "_x5x6_"  + to_string(if_symbo), result);
 	plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v4_docking_tanh64x64_tanh/", nn_name + "Steps" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 	//plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v4_docking_tanh64x64_tanh/", "Steps" + to_string(steps) + "_x5x6_"  + to_string(if_symbo), result);
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/docking_v4_docking_tanh64x64_tanh/", nn_name + "Steps" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/docking_v4_docking_tanh64x64_tanh/", nn_name + "Steps" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 	//plot_setting.plot_2D_octagon_GNUPLOT("./outputs/docking_v4_docking_tanh64x64_tanh/", "Steps" + to_string(steps) + "_x5x6_"  + to_string(if_symbo), result);
 	
  

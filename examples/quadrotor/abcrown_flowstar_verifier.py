@@ -45,7 +45,7 @@ def config_args():
     arguments.Config.add_argument("--crown", action='store_true', help='Compute CROWN verified accuracy before verification (not used).', hierarchy=h + ["get_crown_verified_acc"])
     
     h = ["flowstar"]
-    arguments.Config.add_argument("--flowstar", type=str, help='flowstar exe file name', default = 'flowstar_1step', hierarchy=h + ["flowstar"])
+    arguments.Config.add_argument("--flowstar", type=str, help='flowstar exe file name', default = 'flowstar_1step_v1', hierarchy=h + ["flowstar"])
     arguments.Config.add_argument("--order", type=int, default = 6, help='flowstar order', hierarchy=h + ["order"])
     
 

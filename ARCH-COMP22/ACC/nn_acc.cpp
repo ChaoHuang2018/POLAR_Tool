@@ -220,6 +220,7 @@ int main(int argc, char *argv[])
 
 		// taylor propagation (new)
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Taylor", "Concrete");
+        polar_setting.set_num_threads(-1);
 		TaylorModelVec<Real> tmv_output;
 		//tmv_output.tms.push_back(TaylorModel<Real>(-1.7690021, 1));
 

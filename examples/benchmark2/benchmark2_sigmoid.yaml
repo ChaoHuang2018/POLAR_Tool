@@ -15,8 +15,8 @@ data:
   end: 10
   num_classes: 1
 init:
-  min: [0.79, 0.79]
-  max: [0.81, 0.81]
+  min: [0.7, 0.7]
+  max: [0.9, 0.9]
 #specification:
   #norm: .inf  # Linf norm (can also be 2 or 1).
   #epsilon: 100.  # epsilon=2./255.

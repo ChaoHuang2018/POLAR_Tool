@@ -2,7 +2,8 @@ import os
 import sys
 
 # CROWN_DIR = "/home/jiameng/packages/CROWN_FLOWSTAR/alpha-beta-CROWN/complete_verifier/"
-CROWN_DIR = "/home/zhilu/layR/ITNE_CROWN/alpha-beta-CROWN/complete_verifier/"
+# CROWN_DIR = "/home/zhilu/layR/ITNE_CROWN/alpha-beta-CROWN/complete_verifier/"
+CROWN_DIR = "/mnt/d/TCAD/POLAR_Tool/alpha-beta-CROWN/complete_verifier/"
 if not os.path.isdir(CROWN_DIR):
     raise Exception("Please set your own CROWN directory.")
 sys.path.append(CROWN_DIR)
@@ -87,8 +88,8 @@ def ctrl_input_bound(model_ori, input_lb, input_ub, alpha_only=True):
     lb_record = []
     init_global_lb = saved_bounds = saved_slopes = None
     y = None
-    verified_status, init_global_lb, saved_bounds, saved_slopes = incomplete_verifier(model_ori, x,
-                y, data_ub=data_ub, data_lb=data_lb, eps=perturb_eps)
+    verified_status, init_global_lb, saved_bounds, saved_slopes = incomplete_verifier(model_ori, x, norm = arguments.Config["specification"]["norm"], 
+                y=y, data_ub=data_ub, data_lb=data_lb, eps=perturb_eps)
     lower_bounds, upper_bounds = saved_bounds[1], saved_bounds[2]
     arguments.Config["bab"]["timeout"] -= (time.time()-start_incomplete)
 
@@ -174,7 +175,7 @@ def main(steps = 5, flowstar_stepsize = 0.05):
             possible_ctrl_idxs = post_processing(us_min, us_max)
             print("possible_ctrl_idxs:", possible_ctrl_idxs)
             for ctrl_idx in possible_ctrl_idxs:
-                command = ['./flowstar_1step', '6']
+                command = ['./flowstar_1step_v1', '4']
                 command += [str(i) for pair in zip(xs_min, xs_max) for i in pair]
                 command += [str(ctrl_idx)]
                 command += [str(flowstar_stepsize), str(step), str(in_step_id)]

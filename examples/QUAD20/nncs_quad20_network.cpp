@@ -1,5 +1,6 @@
 #include "../../POLAR/NNCS.h"
 //#include "../../flowstar/flowstar-toolbox/Constraint.h"
+#include <chrono>
 
 using namespace std;
 using namespace flowstar;
@@ -87,6 +88,7 @@ int main(int argc, char *argv[])
 	unsigned int if_symbo = stoi(argv[5]);
 
 	PolarSetting polar_setting(order, bernstein_order, partition_num, comb, "Symbolic");
+	polar_setting.set_num_threads(-1);
 	if(if_symbo == 0){
 			// not using symbolic remainder
 			polar_setting.set_remainder_type("Concrete");
@@ -137,15 +139,22 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// run the reachability computation
-	clock_t begin, end;
+	// clock_t begin, end;
 	double seconds;
-	begin = clock();
+	// begin = clock();
 
 	int n = stoi(argv[2]); // total number of control steps
 
 	Symbolic_Remainder sr(initialSet, 2000);
 
+	auto begin = std::chrono::high_resolution_clock::now();
+
 	system.reach(result, initialSet, n, setting, polar_setting, safeSet, sr);
+
+	auto end = std::chrono::high_resolution_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+	seconds = elapsed.count() *  1e-9;
+	printf("Time measured: %.3f seconds.\n", seconds);
 
 	
 	// end box or target set
@@ -155,9 +164,9 @@ int main(int argc, char *argv[])
 	reach_result = "Verification result: Unknown";
 
 	// time cost
-	end = clock();
-	printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
-	seconds = (end - begin) / CLOCKS_PER_SEC;
+	// end = clock();
+	// printf("time cost: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
+	// seconds = (end - begin) / CLOCKS_PER_SEC;
 	string running_time ="Running Time: \n" + to_string(seconds) + " seconds";
 
 	// create a subdir named outputs to save result

@@ -1,5 +1,5 @@
 #include "../../POLAR/NeuralNetwork.h"
-
+#include <chrono>
 using namespace std;
 using namespace flowstar;
 
@@ -176,6 +176,7 @@ int main(int argc, char *argv[])
 	// unsigned int order = 5;
 	Interval cutoff_threshold(-1e-7, 1e-7);
 	unsigned int bernstein_order = stoi(argv[3]);
+	// unsigned int partition_num = 4000;
 	unsigned int partition_num = 4000;
 
 	unsigned int if_symbo = stoi(argv[5]);
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
 
     int run_step = 0;
 
-	// perform 35 control steps
+	auto begin = std::chrono::high_resolution_clock::now();
 	for (int iter = 0; iter < steps; ++iter)
 	{
 		cout << "Step " << iter << " starts.      " << endl;
@@ -220,6 +221,7 @@ int main(int argc, char *argv[])
 		// taylor propagation
         // taylor propagation
         PolarSetting polar_setting(order, bernstein_order, partition_num, comb, "Concrete");
+		polar_setting.set_num_threads(-1);
         TaylorModelVec<Real> tmv_output;
 
         time(&nn_start_timer);
@@ -266,6 +268,11 @@ int main(int argc, char *argv[])
         run_step = iter;
 	}
 
+	auto end = std::chrono::high_resolution_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+	seconds = elapsed.count() *  1e-9;
+	printf("Time measured: %.3f seconds.\n", seconds);
+
 	vector<Interval> end_box;
 	string reach_result;
 	reach_result = "Verification result: " + to_string(run_step);
@@ -276,8 +283,8 @@ int main(int argc, char *argv[])
     Interval tmRange;
     tm_.tms[0].intEval(tmRange, result.fp_end_of_time.domain);
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
+	// time(&end_timer);
+	// seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -292,7 +299,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
+	std::string running_time = "Running Time: " + to_string(seconds) + " seconds";
 
 
 	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");

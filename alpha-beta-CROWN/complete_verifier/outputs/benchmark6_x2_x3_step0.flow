@@ -1,0 +1,15 @@
+state var u,x0,x1,x2,x3
+
+gnuplot interval x2 , x3
+
+order 6
+
+cutoff 1.000000e-08
+
+output benchmark6_x2_x3_step0
+
+continuous flowpipes
+{
+tm var local_var_1,local_var_2,local_var_3,local_var_4,local_var_5
+
+}

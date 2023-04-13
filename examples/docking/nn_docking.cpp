@@ -133,8 +133,8 @@ int main(int argc, char *argv[])
 	//setting.setTime(0.1);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-10); //core dumped
-	//setting.setCutoffThreshold(1e-7);
+	//setting.setCutoffThreshold(1e-10); //core dumped
+	setting.setCutoffThreshold(1e-7);
 
 	// queue size for the symbolic remainder
 	// Not in the newest version??
@@ -277,7 +277,12 @@ int main(int argc, char *argv[])
 			else norm = 1.;
 			tmv_input.tms.push_back(initial_set.tmvPre.tms[i] / norm);
 			//tmv_input.tms.push_back(tmv_temp.tms[i]);
-	 
+		}
+
+		for (TaylorModel<Real> tm: tmv_input.tms) {
+			Interval box;
+			tm.intEval(box, initial_set.domain);
+			cout << "Initial nn input interval: [" << box.inf() << ", " << box.sup() << "]" << endl; 
 		}
 
 		// taylor propagation (old)
@@ -297,7 +302,7 @@ int main(int argc, char *argv[])
 		*/
 
 		// taylor propagation (new)
-        PolarSetting polar_setting(order, bernstein_order, partition_num, "Taylor", "Concrete");
+        PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
 		TaylorModelVec<Real> tmv_output;
 
 		// not using symbolic remainder
@@ -310,6 +315,12 @@ int main(int argc, char *argv[])
 		Matrix<Interval> rm1(nn.get_num_of_outputs(), 1);
 		tmv_output.Remainder(rm1);
 		cout << "Neural network taylor remainder: " << rm1 << endl;
+
+
+		initial_set.tmvPre.tms[u1_id] = tmv_output.tms[0];
+		initial_set.tmvPre.tms[u2_id] = tmv_output.tms[1];
+		initial_set.tmvPre.tms[u3_id] = tmv_output.tms[2];
+		initial_set.tmvPre.tms[u4_id] = tmv_output.tms[3];
 
 		// taylor
 		// NNTaylor nn_taylor1(nn);

@@ -61,7 +61,7 @@ int main(int argc, char *argvs[])
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
 	*/
 	// Define the continuous dynamics.
-	ODE<Real> dynamics({"x1","u * x1^2 - x0","1","0"}, vars);
+	ODE<Real> dynamics({"x1","u * x1^2 - x0","0"}, vars);
 	// Specify the parameters for reachability computation.
 	Computational_Setting setting(vars);
 

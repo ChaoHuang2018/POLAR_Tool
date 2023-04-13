@@ -1,4 +1,5 @@
 #include "../../POLAR/NeuralNetwork.h"
+#include <chrono>
 //#include "../NNTaylor.h"
 //#include "../domain_computation.h"
 //#include "../dynamics_linearization.h"
@@ -8,7 +9,7 @@ using namespace flowstar;
 
 int main(int argc, char *argv[])
 {
-	intervalNumPrecision = 600;
+	intervalNumPrecision = 100;
 	
 	// Check 'ARCH-COMP20_Category_Report_Artificial_Intelligence_and_Neural_Network_Control_Systems_-AINNCS-_for_Continuous_and_Hybrid_Systems_Plants.pdf'
 	// Declaration of the state variables.
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
 	setting.setFixedStepsize(0.1, order);
 
 	// cutoff threshold
-	setting.setCutoffThreshold(1e-10); //core dumped
+	setting.setCutoffThreshold(1e-5); //core dumped
 
 	setting.printOff();
 
@@ -92,7 +93,17 @@ int main(int argc, char *argv[])
 	Symbolic_Remainder symbolic_remainder(initial_set, 100);
 
 	// no unsafe set
-	vector<Constraint> safeSet;
+	vector<Constraint> safeSet, targetSet;
+
+	Constraint c1("x4 - 22.87", vars);		// 
+	Constraint c2("-x4 + 22.81 ", vars);	// 
+	Constraint c3("x5 - 30.02", vars);		// 
+	Constraint c4("-x5 + 29.88", vars);		// 
+
+	targetSet.push_back(c1);
+	targetSet.push_back(c2);
+	targetSet.push_back(c3);
+	targetSet.push_back(c4);
 
 	// result of the reachability computation
 	Result_of_Reachability result;
@@ -111,7 +122,7 @@ int main(int argc, char *argv[])
 	unsigned int partition_num = 10;
 
 	unsigned int if_symbo = stoi(argv[5]);
-
+ 
 	double err_max = 0;
 	time_t start_timer;
 	time_t end_timer;
@@ -139,7 +150,7 @@ int main(int argc, char *argv[])
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
 
-	// perform 35 control steps
+	auto begin = std::chrono::high_resolution_clock::now();
 	for (int iter = 0; iter < steps; ++iter)
 	{
 		cout << "Step " << iter << " starts.      " << endl;
@@ -153,7 +164,9 @@ int main(int argc, char *argv[])
 
 		// taylor propagation (new)
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Taylor", "Concrete");
+		polar_setting.set_num_threads(-1);
 		TaylorModelVec<Real> tmv_output;
+		//tmv_output.tms.push_back(TaylorModel<Real>(-1.7690021, 1));
 
 		nn.get_output_tmv_symbolic(tmv_output, tmv_input, initial_set.domain, polar_setting, setting);
 
@@ -184,15 +197,29 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+	auto end = std::chrono::high_resolution_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+	seconds = elapsed.count() *  1e-9;
+	printf("Time measured: %.3f seconds.\n", seconds);
 
 	vector<Interval> end_box;
 	string reach_result;
-	reach_result = "Verification result: Unknown(35)";
+	// reach_result = "Verification result: Unknown(35)";
 	result.fp_end_of_time.intEval(end_box, order, setting.tm_setting.cutoff_threshold);
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
-	printf("time cost: %lf\n", -seconds);
+	bool b = result.fp_end_of_time.isInTarget(targetSet, setting);
+	if(b)
+	{
+		reach_result = "Verification result: Yes(" + to_string(steps) + ")";
+	}
+	else
+	{
+		reach_result = "Verification result: No(" + to_string(steps) + ")";
+	}
+
+	// time(&end_timer);
+	// seconds = difftime(start_timer, end_timer);
+	// printf("time cost: %lf\n", -seconds);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -207,7 +234,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
+	std::string running_time = "Running Time: " + to_string(seconds) + " seconds";
 
 	ofstream result_output("./outputs/acc_tanh20x20x20_x4x5_steps_" + to_string(steps) + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
@@ -215,6 +242,7 @@ int main(int argc, char *argv[])
 		result_output << reach_result << endl;
 		result_output << running_time << endl;
 	}
+	cout << reach_result << endl;
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
 

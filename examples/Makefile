@@ -1,19 +1,27 @@
-CXX = g++
+
+CXX = g++-8
 HOME= /usr/local/include
-POLAR_HOME = ../POLAR
-FLOWSTAR_HOME = ../flowstar
-LIBS = -lpolar -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk
+POLAR_HOME = ../../POLAR
+FLOWSTAR_HOME = ../../flowstar/flowstar-toolbox
+LIBS = -lpolar -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk -lpthread
 CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: nn_attitude_control_sigmoid reachnn_benchmark_1_relu_tanh
-
-nn_attitude_control_sigmoid: nn_attitude_control_sigmoid.o
-	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+all: reachnn_benchmark_1_relu_tanh
 
 reachnn_benchmark_1_relu_tanh: reachnn_benchmark_1_relu_tanh.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_acc: nn_acc.o $(OBJS)
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_rejoin: nn_rejoin.o $(OBJS)
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_docking: nn_docking.o $(OBJS)
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
 
 
 

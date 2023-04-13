@@ -1,4 +1,5 @@
 #include "../../POLAR/NNCS.h"
+#include <chrono>
 //#include "../../flowstar/flowstar-toolbox/Constraint.h"
 
 using namespace std;
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
 
 	// stepsize and order for reachability analysis
 	//setting.setFixedStepsize(stod(argv[7]), order);
-	setting.setFixedStepsize(0.1, order);
+	setting.setFixedStepsize(0.05, order);
 	setting.setCutoffThreshold(1e-10);
 	setting.printOff();
 
@@ -65,6 +66,7 @@ int main(int argc, char *argv[])
 	unsigned int if_symbo = stoi(argv[5]);
 
 	PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Symbolic");
+	polar_setting.set_num_threads(12);
 	if(if_symbo == 0){
 			// not using symbolic remainder
 			polar_setting.set_remainder_type("Concrete");
@@ -94,18 +96,23 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// run the reachability computation
-	time_t start_timer;
-	time_t end_timer;
+	// time_t start_timer;
+	// time_t end_timer;
 	double seconds;
-	time(&start_timer);
+	// time(&start_timer);
 
 	int n = stoi(argv[2]);   // total number of control steps
 
 	//Symbolic_Remainder sr(initialSet, 1000);
 	Symbolic_Remainder sr(initialSet, 100);
 
+	auto begin = std::chrono::high_resolution_clock::now();
 	system.reach(result, initialSet, n, setting, polar_setting, safeSet, sr);
 
+	auto end = std::chrono::high_resolution_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+	seconds = elapsed.count() *  1e-9;
+	printf("Time measured: %.3f seconds.\n", seconds);
 	
 	// end box or target set
 	vector<Constraint> targetSet;
@@ -132,10 +139,10 @@ int main(int argc, char *argv[])
 	}
 
 	// time cost
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
-	printf("time cost: %lf\n", -seconds);
-	std::string running_time ="Running Time: %lf\n" + to_string(-seconds) + " seconds";
+	// time(&end_timer);
+	// seconds = difftime(start_timer, end_timer);
+	// printf("time cost: %lf\n", -seconds);
+	std::string running_time ="Running Time: %lf\n" + to_string(seconds) + " seconds";
 
 	// create a subdir named outputs to save result
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
@@ -157,7 +164,7 @@ int main(int argc, char *argv[])
 	Plot_Setting plot_setting(vars);
 	plot_setting.printOn();
 	plot_setting.setOutputDims("x0", "x1");
-	plot_setting.plot_2D_interval_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_interval_MATLAB("./outputs/", benchmark_name + "_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	//plot_setting.setOutputDims("t", "x1");
 	//plot_setting.plot_2D_interval_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(n) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);

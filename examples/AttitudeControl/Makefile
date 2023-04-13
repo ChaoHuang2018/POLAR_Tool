@@ -7,12 +7,15 @@ CFLAGS = -I . -I $(HOME) -g -O3 -std=c++11
 LINK_FLAGS = -g  -L$(POLAR_HOME) -L$(FLOWSTAR_HOME) -L/usr/local/lib
 
 
-all: nn_attitude_control_sigmoid flowstar_1step nncs_attitude_control_sigmoid
+all: nn_attitude_control_sigmoid flowstar_1step flowstar_1step_v1 nncs_attitude_control_sigmoid
 
 nn_attitude_control_sigmoid: nn_attitude_control_sigmoid.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 flowstar_1step: flowstar_1step.o
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+flowstar_1step_v1: flowstar_1step_v1.o
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 nncs_attitude_control_sigmoid: nncs_attitude_control_sigmoid.o
@@ -27,5 +30,5 @@ nncs_attitude_control_sigmoid: nncs_attitude_control_sigmoid.o
 
 
 clean:
-	rm -f *.o nn_attitude_control_sigmoid flowstar_1step nncs_attitude_control_sigmoid
+	rm -f *.o nn_attitude_control_sigmoid flowstar_1step nncs_attitude_control_sigmoid flowstar_1step_v1
 

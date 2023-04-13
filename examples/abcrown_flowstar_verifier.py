@@ -6,6 +6,7 @@ print(CROWN_DIR)
 if not os.path.isdir(CROWN_DIR):
     raise Exception("Please set your own CROWN directory.")
 sys.path.append(CROWN_DIR)
+# sys.path.append("/mnt/d/TCAD/POLAR_Tool/alpha-beta-CROWN/")
 
 import subprocess
 import socket
@@ -90,6 +91,7 @@ def flowstar(exp_name, flowstar_name, plt_name, step, ux_min, ux_max):
         flowstar_res = subprocess.check_output(" ".join([f'./{exp_name}/{flowstar_name}', command]), shell=True, text=True)
         lines = flowstar_res.split('\n')
         #print(lines)
+        print(x_min, len(x_min), lines)
         for i in range(len(x_min)):
             x_range = [float(j) for j in lines[i].split(' ')]
             x_min[i] = x_range[0]
@@ -97,7 +99,7 @@ def flowstar(exp_name, flowstar_name, plt_name, step, ux_min, ux_max):
             print("state variable {}th bounds: {} and {}".format(i, x_min[i], x_max[i]))
         return explode, x_min, x_max
     except subprocess.CalledProcessError as e:
-        print("Flowstar Error at step", step)
+        print("Flowstar Error at step", step, 'Error as', e)
         return True, None, None
 
     
@@ -198,7 +200,7 @@ def main():
         else:
             print(plt_path)
             with open(plt_path, "a") as f_o:
-                with open(os.path.join("./outputs", "_".join([plt_name, "crown_flowstar"]), f"step{step}.m"), "r") as f_i:
+                with open(os.path.join(f"./outputs/step_{step}_1.m"), "r") as f_i:
                     for line in f_i:
                         f_o.write(line)
                     f_i.close()

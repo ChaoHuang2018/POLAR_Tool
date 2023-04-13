@@ -1,6 +1,6 @@
 #include "../../POLAR/NeuralNetwork.h"
 //#include "../flowstar-toolbox/Constraint.h"
-
+#include<chrono>
 using namespace std;
 using namespace flowstar;
 
@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
 	unsigned int order = stoi(argv[4]);
 
 	// stepsize and order for reachability analysis
-	//setting.setFixedStepsize(stod(argv[7]), order);
-	setting.setFixedStepsize(0.1, order);
+	setting.setFixedStepsize(stod(argv[7]), order);
+	// setting.setFixedStepsize(0.1, order);
 
 	// time horizon for a single control step
 	//setting.setTime(0.1);
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 	{
 		cout << "High order abstraction with symbolic remainder starts." << endl;
 	}
-
+	auto begin = std::chrono::high_resolution_clock::now();
 	// perform 35 control steps
 	for (int iter = 0; iter < steps; ++iter)
 	{
@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
 
 		// taylor propagation
         PolarSetting polar_setting(order, bernstein_order, partition_num, "Mix", "Concrete");
+		polar_setting.set_num_threads(12);
 		TaylorModelVec<Real> tmv_output;
 
 		if(if_symbo == 0){
@@ -180,6 +181,10 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+	auto end = std::chrono::high_resolution_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+	seconds = elapsed.count() *  1e-9;
+	printf("Time measured: %.3f seconds.\n", seconds);
 
 
 	vector<Constraint> targetSet;
@@ -204,11 +209,12 @@ int main(int argc, char *argv[])
 	{
 		reach_result = "Verification result: No(" + to_string(steps) + ")";
 	}
+	cout << reach_result << endl;
 
 
-	time(&end_timer);
-	seconds = difftime(start_timer, end_timer);
-	printf("time cost: %lf\n", -seconds);
+	// time(&end_timer);
+	// seconds = difftime(start_timer, end_timer);
+	// printf("time cost: %lf\n", -seconds);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -223,7 +229,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	std::string running_time = "Running Time: " + to_string(-seconds) + " seconds";
+	std::string running_time = "Running Time: " + to_string(seconds) + " seconds";
 
 	ofstream result_output("./outputs/" + benchmark_name + "_" + to_string(if_symbo) + ".txt");
 	if (result_output.is_open())
@@ -233,7 +239,7 @@ int main(int argc, char *argv[])
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_octagon_GNUPLOT("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", benchmark_name + "_" + to_string(steps) + "_"  + to_string(if_symbo), result.tmv_flowpipes, setting);
 
 	return 0;
 }

@@ -48,7 +48,7 @@ int main(int argc, char *argvs[])
 	int u_id = vars.declareVar("u");
 
 	int domainDim = numVars + 1;
-
+	/*
 	// Define the continuous dynamics.
 	Expression<Real> deriv_x0("-x0*(0.1+(x0+x1)^2)", vars); // theta_r = 0
 	Expression<Real> deriv_x1("(u+x0)*(0.1+(x0+x1)^2)", vars);
@@ -60,9 +60,11 @@ int main(int argc, char *argvs[])
 	ode_rhs[u_id] = deriv_u;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
-
+	*/
+	// Define the continuous dynamics.
+	ODE<Real> dynamics({"-x0*(0.1+(x0+x1)^2)","(u+x0)*(0.1+(x0+x1)^2)","0"}, vars);
 	// Specify the parameters for reachability computation.
-	Computational_Setting setting;
+	Computational_Setting setting(vars);
 
 	unsigned int order = stoi(argv[1]);
 
@@ -70,7 +72,7 @@ int main(int argc, char *argvs[])
 	setting.setFixedStepsize(0.02, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.1);
+	//setting.setTime(0.1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10);
@@ -85,7 +87,7 @@ int main(int argc, char *argvs[])
 
 	//setting.printOn();
 
-	setting.prepare();
+	//setting.prepare();
 
 	/*
 	 * Initial set can be a box which is represented by a vector of intervals.
@@ -111,13 +113,15 @@ int main(int argc, char *argvs[])
 
 	// no unsafe set
 	vector<Constraint> unsafeSet;
+	// no unsafe set
+	vector<Constraint> safeSet;
 
 	// result of the reachability computation
 	Result_of_Reachability result;
 
 	// Always using symbolic remainder
-	dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
-
+	//dynamics.reach_sr(result, setting, initial_set, unsafeSet, symbolic_remainder);
+	dynamics.reach(result, initial_set, 0.1, setting, safeSet, symbolic_remainder);
 	if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 	{
 		initial_set = result.fp_end_of_time;
@@ -169,8 +173,9 @@ int main(int argc, char *argvs[])
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
     plot_setting.setOutputDims("x0", "x1");
-    plot_setting.plot_2D_octagon_MATLAB(c, "/step" + to_string(stoi(argv[3])), result);
-
+    //plot_setting.plot_2D_octagon_MATLAB(c, "/step" + to_string(stoi(argv[3])), result);
+	plot_setting.plot_2D_octagon_MATLAB("./outputs/", "step_"  + to_string(stoi(argv[3])) + "_"  + to_string(1), result.tmv_flowpipes, setting);
+    
 
 
 	return 0;

@@ -1,0 +1,3 @@
+Experiment name: benchmark4
+Complete: 11/10
+Total time: 68.36840343475342

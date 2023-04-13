@@ -1,3 +1,3 @@
 Experiment name: benchmark6
 Complete: 11/10
-Total time: 45.5443069934845
+Total time: 109.36472630500793
