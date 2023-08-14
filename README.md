@@ -171,4 +171,4 @@ SYSTEM_0.m # plotted reachable sets. Run the command in MATLAB.
 [POLAR-Express: Efficient and Precise Formal Reachability Analysis of Neural-Network Controlled Systems](https://arxiv.org/abs/2304.01218)
 
 [2] Chao Huang, Jiameng Fan, Xin Chen, Wenchao Li and Qi Zhu.
-[POLAR: A Polynomial Arithmetic Framework for Verifying Neural-Network Controlled Systems](https://arxiv.org/pdf/2106.13867.pdf), Proceedings of the 20th International Symposium on Automated Technology for Verification and Analysis (ATVA 2022).
+[POLAR: A Polynomial Arithmetic Framework for Verifying Neural-Network Controlled Systems](https://dl.acm.org/doi/abs/10.1007/978-3-031-19992-9_27), Proceedings of the 20th International Symposium on Automated Technology for Verification and Analysis (ATVA 2022).
