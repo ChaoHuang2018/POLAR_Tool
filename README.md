@@ -164,7 +164,7 @@ SYSTEM_0.m # plotted reachable sets. Run the command in MATLAB.
 ``` -->
 
 ## Contributors
-[Chao Huang](https://chaohuang2018.github.io/main/), [Jiameng Fan](https://www.jiamengf.com), [Xin Chen](https://udayton.edu/directory/artssciences/computerscience/chen-xin.php), [Zhilu Wang](http://zhulab.ece.northwestern.edu/people/zhilu.html), [Weichao Zhou](https://sites.google.com/view/zwc662/), [Wenchao Li](http://sites.bu.edu/depend/people/), [Qi Zhu](http://users.eecs.northwestern.edu/~qzhu/)
+[Chao Huang](https://chaohuang2018.github.io/main/), [Jiameng Fan](https://www.jiamengf.com), [Xin Chen](https://udayton.edu/directory/artssciences/computerscience/chen-xin.php), [Zhilu Wang](http://zhulab.ece.northwestern.edu/people/zhilu.html), [Yixuan Wang](https://wangyixu14.github.io/), [Weichao Zhou](https://sites.google.com/view/zwc662/), [Wenchao Li](http://sites.bu.edu/depend/people/), [Qi Zhu](http://users.eecs.northwestern.edu/~qzhu/)
 
 ## References
 [1] Yixuan Wang, Weichao Zhou, Jiameng Fan, Zhilu Wang, Jiajun Li, Xin Chen, Chao Huang, Wenchao Li and Qi Zhu.
