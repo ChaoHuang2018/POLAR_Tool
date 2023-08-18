@@ -1,0 +1,1133 @@
+hybrid reachability
+{
+	 state var _f1, _f2, _f3, _f4, _f5, _f6, _f7, _f8, _f9, _f10, _f11, _f12, _f13, _f14, _f15, _f16, _f17, _f18, _f19, _f20, x1, x2, x3, x4, x5, x6, u1, u2, u3, k, d28, d34, d35, d36, d37, d38, d45, d46, d47, d48, d56, d57, d58, d67, d68, d78, clock
+
+	setting
+	{
+		adaptive steps {min 1e-6, max 0.1}
+		time 6
+		remainder estimation 1e-1
+		identity precondition 
+		matlab octagon clock, _f1
+		fixed orders 3
+		cutoff 1e-6
+		precision 100
+		output quadrotor_mpc_tanh_verisig
+		max jumps 151
+		print on
+	}
+
+	modes
+	{
+		m0
+		{
+			nonpoly ode
+			{
+				d34' = 0
+				d56' = 0
+				d78' = 0
+				d36' = 0
+				d58' = 0
+				d35' = 0
+				d57' = 0
+				d38' = 0
+				_f20' = 0
+				d37' = 0
+				u1' = 0
+				u2' = 0
+				u3' = 0
+				_f16' = 0
+				_f17' = 0
+				_f18' = 0
+				_f19' = 0
+				_f12' = 0
+				d45' = 0
+				d67' = 0
+				_f13' = 0
+				_f14' = 0
+				d47' = 0
+				_f15' = 0
+				d46' = 0
+				d68' = 0
+				d48' = 0
+				_f2' = 0
+				_f10' = 0
+				_f1' = 0
+				_f11' = 0
+				k' = 0
+				d28' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f6' = 0
+				_f5' = 0
+				_f8' = 0
+				_f7' = 0
+				_f9' = 0
+				x1' = 0
+				x2' = 0
+				x3' = 0
+				x4' = 0
+				x5' = 0
+				x6' = 0
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		DNNm1
+		{
+			nonpoly ode
+			{
+				d34' = 0
+				d56' = 0
+				d78' = 0
+				d36' = 0
+				d58' = 0
+				d35' = 0
+				d57' = 0
+				d38' = 0
+				_f20' = 0
+				d37' = 0
+				u1' = 0
+				u2' = 0
+				u3' = 0
+				_f16' = 0
+				_f17' = 0
+				_f18' = 0
+				_f19' = 0
+				_f12' = 0
+				d45' = 0
+				d67' = 0
+				_f13' = 0
+				_f14' = 0
+				d47' = 0
+				_f15' = 0
+				d46' = 0
+				d68' = 0
+				d48' = 0
+				_f2' = 0
+				_f10' = 0
+				_f1' = 0
+				_f11' = 0
+				k' = 0
+				d28' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f6' = 0
+				_f5' = 0
+				_f8' = 0
+				_f7' = 0
+				_f9' = 0
+				x1' = 0
+				x2' = 0
+				x3' = 0
+				x4' = 0
+				x5' = 0
+				x6' = 0
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		ControlCompute
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 0.0
+			}
+		}
+		Segment1
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = x4 - 0.25
+				x2' = x5 + 0.25
+				x3' = x6
+				x4' = 9.81 * sin(u1) / cos(u1)
+				x5' = -9.81 * sin(u2) / cos(u2)
+				x6' = u3 - 9.81
+			}
+			inv
+			{
+				clock <= 0.2
+			}
+		}
+		Segment2
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = x4 - 0.25
+				x2' = x5 - 0.25
+				x3' = x6
+				x4' = 9.81 * sin(u1) / cos(u1)
+				x5' = -9.81 * sin(u2) / cos(u2)
+				x6' = u3 - 9.81
+			}
+			inv
+			{
+				clock <= 0.2
+			}
+		}
+		Segment3
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = x4
+				x2' = x5 + 0.25
+				x3' = x6
+				x4' = 9.81 * sin(u1) / cos(u1)
+				x5' = -9.81 * sin(u2) / cos(u2)
+				x6' = u3 - 9.81
+			}
+			inv
+			{
+				clock <= 0.2
+			}
+		}
+		Segment4
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = x4 + 0.25
+				x2' = x5 - 0.25
+				x3' = x6
+				x4' = 9.81 * sin(u1) / cos(u1)
+				x5' = -9.81 * sin(u2) / cos(u2)
+				x6' = u3 - 9.81
+			}
+			inv
+			{
+				clock <= 0.2
+			}
+		}
+		Planner
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 0.0
+			}
+		}
+		startmode
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 0.0
+			}
+		}
+		x1_l
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		x1_u
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		x2_l
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		x2_u
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		x3_l
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		x3_u
+		{
+			nonpoly ode
+			{
+				d34' = 0.0
+				d56' = 0.0
+				d78' = 0.0
+				d36' = 0.0
+				d58' = 0.0
+				d35' = 0.0
+				d57' = 0.0
+				d38' = 0.0
+				d37' = 0.0
+				_f20' = 0.0
+				u1' = 0.0
+				u2' = 0.0
+				u3' = 0.0
+				_f16' = 0.0
+				_f17' = 0.0
+				_f18' = 0.0
+				_f19' = 0.0
+				d45' = 0.0
+				d67' = 0.0
+				_f12' = 0.0
+				_f13' = 0.0
+				d47' = 0.0
+				_f14' = 0.0
+				d46' = 0.0
+				d68' = 0.0
+				_f15' = 0.0
+				d48' = 0.0
+				_f2' = 0.0
+				_f10' = 0.0
+				clock' = 1.0
+				k' = 0.0
+				d28' = 0.0
+				_f1' = 0.0
+				_f11' = 0.0
+				_f4' = 0.0
+				_f3' = 0.0
+				_f6' = 0.0
+				_f5' = 0.0
+				_f8' = 0.0
+				_f7' = 0.0
+				_f9' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				x3' = 0.0
+				x4' = 0.0
+				x5' = 0.0
+				x6' = 0.0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+	}
+	jumps
+	{
+		m0 -> DNNm1
+		guard { }
+		reset { clock' := 0 }
+		interval aggregation
+		ControlCompute -> Planner
+		guard { clock = 0.0 _f15 <= 0.0 d28 <= 0.0 d38 <= 0.0 d48 <= 0.0 d58 <= 0.0 d68 <= 0.0 d78 <= 0.0 }
+		reset { u1' := 0.1 u2' := 0.1 u3' := 11.81 }
+		interval aggregation
+		ControlCompute -> Planner
+		guard { clock = 0.0 _f14 <= 0.0 _f20 <= 0.0 d37 <= 0.0 d47 <= 0.0 d57 <= 0.0 d67 <= 0.0 d78 >= 0.0 }
+		reset { u1' := 0.1 u2' := 0.1 u3' := 7.81 }
+		interval aggregation
+		ControlCompute -> Planner
+		guard { clock = 0.0 _f13 <= 0.0 _f19 <= 0.0 d36 <= 0.0 d46 <= 0.0 d56 <= 0.0 d67 >= 0.0 d68 >= 0.0 }
+		reset { u1' := 0.1 u2' := -0.1 u3' := 11.81 }
+		interval aggregation
+		ControlCompute -> Planner
+		guard { clock = 0.0 _f12 <= 0.0 _f18 <= 0.0 d35 <= 0.0 d45 <= 0.0 d56 >= 0.0 d57 >= 0.0 d58 >= 0.0 }
+		reset { u1' := 0.1 u2' := -0.1 u3' := 7.81 }
+		interval aggregation
+		ControlCompute -> Planner
+		guard { clock = 0.0 _f11 <= 0.0 _f17 <= 0.0 d34 <= 0.0 d45 >= 0.0 d46 >= 0.0 d47 >= 0.0 d48 >= 0.0 }
+		reset { u1' := -0.1 u2' := 0.1 u3' := 11.81 }
+		interval aggregation
+		ControlCompute -> Planner
+		guard { clock = 0.0 _f10 <= 0.0 _f16 <= 0.0 d34 >= 0.0 d35 >= 0.0 d36 >= 0.0 d37 >= 0.0 d38 >= 0.0 }
+		reset { u1' := -0.1 u2' := 0.1 u3' := 7.81 }
+		interval aggregation
+		ControlCompute -> Planner
+		guard { clock = 0.0 _f9 <= 0.0 _f16 >= 0.0 _f17 >= 0.0 _f18 >= 0.0 _f19 >= 0.0 _f20 >= 0.0 d28 >= 0.0 }
+		reset { u1' := -0.1 u2' := -0.1 u3' := 11.81 }
+		interval aggregation
+		ControlCompute -> Planner
+		guard { clock = 0.0 _f9 >= 0.0 _f10 >= 0.0 _f11 >= 0.0 _f12 >= 0.0 _f13 >= 0.0 _f14 >= 0.0 _f15 >= 0.0 }
+		reset { u1' := -0.1 u2' := -0.1 u3' := 7.81 }
+		interval aggregation
+		Segment1 -> x1_l
+		guard { x1 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment1 -> x1_u
+		guard { x1 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment1 -> x2_l
+		guard { x2 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment1 -> x2_u
+		guard { x2 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment1 -> x3_l
+		guard { x3 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment1 -> x3_u
+		guard { x3 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment2 -> x1_l
+		guard { x1 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment2 -> x1_u
+		guard { x1 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment2 -> x2_l
+		guard { x2 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment2 -> x2_u
+		guard { x2 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment2 -> x3_l
+		guard { x3 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment2 -> x3_u
+		guard { x3 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment3 -> x1_l
+		guard { x1 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment3 -> x1_u
+		guard { x1 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment3 -> x2_l
+		guard { x2 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment3 -> x2_u
+		guard { x2 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment3 -> x3_l
+		guard { x3 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment3 -> x3_u
+		guard { x3 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment4 -> x1_l
+		guard { x1 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment4 -> x1_u
+		guard { x1 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment4 -> x2_l
+		guard { x2 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment4 -> x2_u
+		guard { x2 >= 0.32 }
+		reset { }
+		interval aggregation
+		Segment4 -> x3_l
+		guard { x3 <= -0.32 }
+		reset { }
+		interval aggregation
+		Segment4 -> x3_u
+		guard { x3 >= 0.32 }
+		reset { }
+		interval aggregation
+		Planner -> Segment1
+		guard { clock = 0.0 k <= 9.0 }
+		reset { }
+		interval aggregation
+		Planner -> Segment2
+		guard { clock = 0.0 k >= 10.0 k <= 19.0 }
+		reset { }
+		interval aggregation
+		Planner -> Segment3
+		guard { clock = 0.0 k >= 20.0 k <= 24.0 }
+		reset { }
+		interval aggregation
+		Planner -> Segment4
+		guard { clock = 0.0 k >= 25.0 k <= 29.0 }
+		reset { }
+		interval aggregation
+		DNNm1 -> ControlCompute
+		guard { clock = 0.0 }
+		reset { d34' := _f3 - _f4 d56' := _f5 - _f6 d78' := _f7 - _f8 d36' := _f3 - _f6 d58' := _f5 - _f8 d35' := _f3 - _f5 d57' := _f5 - _f7 d38' := _f3 - _f8 _f20' := _f2 - _f7 d37' := _f3 - _f7 _f16' := _f2 - _f3 _f17' := _f2 - _f4 _f18' := _f2 - _f5 _f19' := _f2 - _f6 _f12' := _f1 - _f5 d45' := _f4 - _f5 d67' := _f6 - _f7 _f13' := _f1 - _f6 _f14' := _f1 - _f7 d47' := _f4 - _f7 _f15' := _f1 - _f8 d46' := _f4 - _f6 d68' := _f6 - _f8 d48' := _f4 - _f8 _f10' := _f1 - _f3 _f11' := _f1 - _f4 d28' := _f2 - _f8 _f9' := _f1 - _f2 }
+		interval aggregation
+		Segment1 -> m0
+		guard { clock = 0.2 }
+		reset { _f2' := 0.2 * x2 _f1' := 0.2 * x1 clock' := 0.0 k' := k + 1.0 _f4' := 0.1 * x4 _f3' := 0.2 * x3 _f6' := 0.1 * x6 _f5' := 0.1 * x5 }
+		interval aggregation
+		Segment2 -> m0
+		guard { clock = 0.2 }
+		reset { _f2' := 0.2 * x2 _f1' := 0.2 * x1 clock' := 0.0 k' := k + 1.0 _f4' := 0.1 * x4 _f3' := 0.2 * x3 _f6' := 0.1 * x6 _f5' := 0.1 * x5 }
+		interval aggregation
+		Segment3 -> m0
+		guard { clock = 0.2 }
+		reset { _f2' := 0.2 * x2 _f1' := 0.2 * x1 clock' := 0.0 k' := k + 1.0 _f4' := 0.1 * x4 _f3' := 0.2 * x3 _f6' := 0.1 * x6 _f5' := 0.1 * x5 }
+		interval aggregation
+		Segment4 -> m0
+		guard { clock = 0.2 }
+		reset { _f2' := 0.2 * x2 _f1' := 0.2 * x1 clock' := 0.0 k' := k + 1.0 _f4' := 0.1 * x4 _f3' := 0.2 * x3 _f6' := 0.1 * x6 _f5' := 0.1 * x5 }
+		interval aggregation
+		startmode -> m0
+		guard { clock = 0.0 }
+		reset { _f2' := 0.2 * x2 _f1' := 0.2 * x1 _f4' := 0.1 * x4 _f3' := 0.2 * x3 _f6' := 0.1 * x6 _f5' := 0.1 * x5 }
+		interval aggregation
+	}
+	init
+	{
+		startmode
+		{
+			x1 in [0.025, 0.05]
+			x2 in [0, 0.025]
+			x3 in [0, 0]
+			x4 in [0, 0]
+			x5 in [0, 0]
+			x6 in [0, 0]
+			k in [0, 0]
+			_f1 in [0, 0]
+			_f2 in [0, 0]
+			_f3 in [0, 0]
+			_f4 in [0, 0]
+			_f5 in [0, 0]
+			_f6 in [0, 0]
+			_f7 in [0, 0]
+			_f8 in [0, 0]
+			_f9 in [0, 0]
+			_f10 in [0, 0]
+			_f11 in [0, 0]
+			_f12 in [0, 0]
+			_f13 in [0, 0]
+			_f14 in [0, 0]
+			_f15 in [0, 0]
+			_f16 in [0, 0]
+			_f17 in [0, 0]
+			_f18 in [0, 0]
+			_f19 in [0, 0]
+			_f20 in [0, 0]
+			u1 in [0, 0]
+			u2 in [0, 0]
+			u3 in [0, 0]
+			d28 in [0, 0]
+			d34 in [0, 0]
+			d35 in [0, 0]
+			d36 in [0, 0]
+			d37 in [0, 0]
+			d38 in [0, 0]
+			d45 in [0, 0]
+			d46 in [0, 0]
+			d47 in [0, 0]
+			d48 in [0, 0]
+			d56 in [0, 0]
+			d57 in [0, 0]
+			d58 in [0, 0]
+			d67 in [0, 0]
+			d68 in [0, 0]
+			d78 in [0, 0]
+			clock in [0, 0]
+		}
+	}
+}
+unsafe
+{
+	x1_l
+	{
+		x1 <= -0.32
+	}
+	x1_u
+	{
+		x1 >= 0.32
+	}
+	x2_l
+	{
+		x2 <= -0.32
+	}
+	x2_u
+	{
+		x2 >= 0.32
+	}
+	x3_l
+	{
+		x3 <= -0.32
+	}
+	x3_u
+	{
+		x3 >= 0.32
+	}
+}

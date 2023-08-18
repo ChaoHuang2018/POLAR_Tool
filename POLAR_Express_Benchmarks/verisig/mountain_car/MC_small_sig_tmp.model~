@@ -1,0 +1,184 @@
+hybrid reachability
+{
+	 state var _f1, _f2, x1, x2, temp, k, clock
+
+	setting
+	{
+		adaptive steps {min 1e-6, max 0.01}
+		time 150
+		remainder estimation 1e-1
+		identity precondition 
+		gnuplot octagon x1, x2
+		fixed orders 4
+		cutoff 1e-18
+		precision 100
+		output MC_small_sig_tmp
+		max jumps 600
+		print on
+	}
+
+	modes
+	{
+		m0
+		{
+			nonpoly ode
+			{
+				temp' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				k' = 0
+				clock' = 1
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		DNNm1
+		{
+			nonpoly ode
+			{
+				temp' = 0
+				x1' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				k' = 0
+				clock' = 1
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		_reset_mode1
+		{
+			nonpoly ode
+			{
+				temp' = _f1 * 0.0015 - 0.0025 * cos(3.0 * x1)
+				x1' = 0.0
+				x2' = 0.0
+				_f2' = 0.0
+				clock' = 1.0
+				_f1' = 0.0
+				k' = 0.0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+		mode2
+		{
+			nonpoly ode
+			{
+				temp' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				_f2' = 0.0
+				clock' = 1.0
+				_f1' = 0.0
+				k' = 0.0
+			}
+			inv
+			{
+				clock <= 0.0
+			}
+		}
+		mode3
+		{
+			nonpoly ode
+			{
+				temp' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				_f2' = 0.0
+				clock' = 1.0
+				_f1' = 0.0
+				k' = 0.0
+			}
+			inv
+			{
+				clock <= 0.0
+			}
+		}
+		unsafe1
+		{
+			nonpoly ode
+			{
+				temp' = 0.0
+				x1' = 0.0
+				x2' = 0.0
+				_f2' = 0.0
+				clock' = 1.0
+				_f1' = 0.0
+				k' = 0.0
+			}
+			inv
+			{
+				clock <= 1.0
+			}
+		}
+	}
+	jumps
+	{
+		m0 -> DNNm1
+		guard { }
+		reset { clock' := 0 }
+		interval aggregation
+		_reset_mode1 -> mode2
+		guard { clock = 1.0 x2 + temp <= 0.07 x2 + temp >= -0.07 }
+		reset { temp' := temp x1' := x1 + x2 + temp x2' := x2 + temp clock' := 0.0 }
+		interval aggregation
+		_reset_mode1 -> mode2
+		guard { clock = 1.0 x2 + temp >= 0.07 }
+		reset { x1' := x1 + 0.07 x2' := 0.07 clock' := 0.0 }
+		interval aggregation
+		_reset_mode1 -> mode2
+		guard { clock = 1.0 x2 + temp <= -0.07 }
+		reset { x1' := x1 + -0.07 x2' := -0.07 clock' := 0.0 }
+		interval aggregation
+		mode2 -> mode3
+		guard { clock = 0.0 x1 >= 0.45 }
+		reset { }
+		interval aggregation
+		mode2 -> unsafe1
+		guard { k >= 150.0 x1 <= 0.45 }
+		reset { }
+		interval aggregation
+		DNNm1 -> _reset_mode1
+		guard { clock = 0.0 }
+		reset { temp' := 0.0 clock' := 0.0 k' := k + 1.0 }
+		interval aggregation
+		mode2 -> m0
+		guard { clock = 0.0 x1 >= -1.2 x1 <= 0.45 }
+		reset { _f2' := x2 _f1' := x1 clock' := 0.0 }
+		interval aggregation
+		mode2 -> m0
+		guard { clock = 0.0 x1 <= -1.2 }
+		reset { temp' := 0.0 x1' := -1.2 _f2' := 0.0 x2' := 0.0 _f1' := -1.2 clock' := 0.0 }
+		interval aggregation
+	}
+	init
+	{
+		mode2
+		{
+			x1 in [-0.53, -0.5]
+			x2 in [0, 0]
+			_f1 in [0, 0]
+			_f2 in [0, 0]
+			temp in [0, 0]
+			k in [0, 0]
+			clock in [0, 0]
+		}
+	}
+}
+unsafe
+{
+	unsafe1
+	{
+		x1 <= 0.45
+	}
+}

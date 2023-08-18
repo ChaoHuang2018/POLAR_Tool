@@ -1,0 +1,13 @@
+# B5 tanh (sys 484)
+
+systype = ode
+syschoice = 484
+nnfile-sfx = Examples/Networks/B5_tanh.sfx
+nn-offset = 0. # also read from nn file (erasing this one)
+nn-scaling = 11.  # also read from nn file (erasing this one)
+time-horizon = 2.
+integration-step = 0.05
+control-step = 0.2
+order = 4
+initial-values = [0.38,0.4] [0.45,0.47] [0.25,0.27]
+variables-to-display = 1 2

@@ -1,0 +1,335 @@
+hybrid reachability
+{
+	 state var _f1, _f2, _f3, _f4, _f5, _f6, _f7, _f8, _f9, _f10, _f11, _f12, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, t, u0, u1, u2, worldtime, clock
+
+	setting
+	{
+		adaptive steps {min 1e-6, max 0.005}
+		time 5
+		remainder estimation 1e-1
+		identity precondition
+		matlab octagon clock, x3
+		fixed orders 4
+		cutoff 1e-7
+		precision 100
+		output quad_sig_tmp
+		max jumps 181
+		print on
+	}
+
+	modes
+	{
+		m0
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x1' = 0
+				x2' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				_f7' = 0
+				_f8' = 0
+				_f9' = 0
+				_f10' = 0
+				_f11' = 0
+				_f12' = 0
+				x4' = 0
+				x5' = 0
+				x6' = 0
+				x7' = 0
+				x8' = 0
+				x9' = 0
+				x10' = 0
+				x11' = 0
+				x12' = 0
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		DNNm1
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x1' = 0
+				x2' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				_f7' = 0
+				_f8' = 0
+				_f9' = 0
+				_f10' = 0
+				_f11' = 0
+				_f12' = 0
+				x4' = 0
+				x5' = 0
+				x6' = 0
+				x7' = 0
+				x8' = 0
+				x9' = 0
+				x10' = 0
+				x11' = 0
+				x12' = 0
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		_cont_sys
+		{
+			nonpoly ode
+			{
+				worldtime' = 1.0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x1' = cos(x8)*cos(x9)*x4 + (sin(x7)*sin(x8)*cos(x9) - cos(x7)*sin(x9))*x5 + (cos(x7)*sin(x8)*cos(x9) + sin(x7)*sin(x9))*x6
+				x2' = cos(x8)*sin(x9)*x4 + (sin(x7)*sin(x8)*sin(x9) + cos(x7)*cos(x9))*x5 + (cos(x7)*sin(x8)*sin(x9) - sin(x7)*cos(x9))*x6
+				x3' = sin(x8)*x4 - sin(x7)*cos(x8)*x5 - cos(x7)*cos(x8)*x6
+				x4' = x12*x5 - x11*x6 - 9.81*sin(x8)
+				x5' = x10*x6 - x12*x4 + 9.81*cos(x8)*sin(x7)
+				x6' = x11*x4 - x10*x5 + 9.81*cos(x8)*cos(x7) - 9.81 - u0 / 1.4
+				x7' = x10 + (sin(x7)*(sin(x8)/cos(x8)))*x11 + (cos(x7)*(sin(x8)/cos(x8)))*x12
+				x8' = cos(x7)*x11 - sin(x7)*x12
+				x9' = (sin(x7)/cos(x8))*x11 + (cos(x7)/cos(x8))*x12
+				x10' = -0.92592592592593*x11*x12 + 18.51851851851852*u1
+				x11' = 0.92592592592593*x10*x12 + 18.51851851851852*u2
+				x12' = 0
+				_f2' = 0
+				_f1' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				_f7' = 0
+				_f8' = 0
+				_f9' = 0
+				_f10' = 0
+				_f11' = 0
+				_f12' = 0
+			}
+			inv
+			{
+				clock <= 0.1
+			}
+		}
+		unsafe1
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x1' = 0
+				x2' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				_f7' = 0
+				_f8' = 0
+				_f9' = 0
+				_f10' = 0
+				_f11' = 0
+				_f12' = 0
+				x4' = 0
+				x5' = 0
+				x6' = 0
+				x7' = 0
+				x8' = 0
+				x9' = 0
+				x10' = 0
+				x11' = 0
+				x12' = 0
+			}
+			inv
+			{
+				clock <= 5.0
+			}
+		}
+		startmode
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x1' = 0
+				x2' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				_f7' = 0
+				_f8' = 0
+				_f9' = 0
+				_f10' = 0
+				_f11' = 0
+				_f12' = 0
+				x4' = 0
+				x5' = 0
+				x6' = 0
+				x7' = 0
+				x8' = 0
+				x9' = 0
+				x10' = 0
+				x11' = 0
+				x12' = 0
+			}
+			inv
+			{
+				clock <= 0.0
+			}
+		}
+		unsafe2
+		{
+			nonpoly ode
+			{
+				worldtime' = 0
+				u0' = 0
+				u1' = 0
+				u2' = 0
+				x1' = 0
+				x2' = 0
+				_f2' = 0
+				x2' = 0
+				_f1' = 0
+				x3' = 0
+				clock' = 1
+				_f4' = 0
+				_f3' = 0
+				_f5' = 0
+				_f6' = 0
+				_f7' = 0
+				_f8' = 0
+				_f9' = 0
+				_f10' = 0
+				_f11' = 0
+				_f12' = 0
+				x4' = 0
+				x5' = 0
+				x6' = 0
+				x7' = 0
+				x8' = 0
+				x9' = 0
+				x10' = 0
+				x11' = 0
+				x12' = 0
+			}
+			inv
+			{
+				clock <= 5.0
+			}
+		}
+	}
+	jumps
+	{
+		m0 -> DNNm1
+		guard { }
+		reset { clock' := 0 }
+		interval aggregation
+		_cont_sys -> unsafe1
+		guard { worldtime = 5.0 x3 >= 1.5 }
+		reset { clock' := 0.0 }
+		interval aggregation
+		_cont_sys -> unsafe2
+		guard { worldtime = 5.0 x3 <= -1.5 }
+		reset { clock' := 0.0 }
+		interval aggregation
+		DNNm1 -> _cont_sys
+		guard { }
+		reset { u0' := _f1 u1' := _f2 u2' := _f3 clock' := 0.0 }
+		interval aggregation
+		_cont_sys -> m0
+		guard { clock = 0.1 }
+		reset { _f2' := x2 _f1' := x1 clock' := 0.0 _f4' := x4 _f3' := x3 _f5' := x5 _f6' := x6 _f7' := x7 _f8' := x8 _f9' := x9 _f10' := x10 _f11' := x11 _f12' := x12}
+		interval aggregation
+		startmode -> m0
+		guard { clock = 0.0 }
+		reset { _f2' := x2 _f1' := x1 clock' := 0.0 _f4' := x4 _f3' := x3 _f5' := x5 _f6' := x6 _f7' := x7 _f8' := x8 _f9' := x9 _f10' := x10 _f11' := x11 _f12' := x12 }
+		interval aggregation
+	}
+	init
+	{
+		startmode
+		{
+			x1 in [-0.4, 0.4]
+			x2 in [-0.4, 0.4]
+			x3 in [-0.4, 0.4]
+			x4 in [-0.4, 0.4]
+			x5 in [-0.4, 0.4]
+			x6 in [-0.4, 0.4]
+			x7 in [0, 0]
+			x8 in [0, 0]
+			x9 in [0, 0]
+			x10 in [0, 0]
+			x11 in [0, 0]
+			x12 in [0, 0]
+			_f1 in [0, 0]
+			_f2 in [0, 0]
+			_f3 in [0, 0]
+			_f4 in [0, 0]
+			_f5 in [0, 0]
+			_f6 in [0, 0]
+			_f7 in [0, 0]
+			_f8 in [0, 0]
+			_f9 in [0, 0]
+			_f10 in [0, 0]
+			_f11 in [0, 0]
+			_f12 in [0, 0]
+			u0 in [0, 0]
+			u1 in [0, 0]
+			u2 in [0, 0]
+			worldtime in [0, 0]
+			clock in [0, 0]
+		}
+	}
+}
+unsafe
+{
+	unsafe1
+	{
+		x3 >= 1.5
+	}
+	unsafe2
+	{
+		x3 <= -1.5
+	}
+}

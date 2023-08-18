@@ -1,0 +1,12 @@
+# B2 sigmoid (sys 481)
+
+systype = ode
+syschoice = 481
+nnfile-sfx = Examples/Networks/B2_sigmoid.sfx
+nn-offset = 0.5 # also read from nn file (erasing this one)
+nn-scaling = 8.  # also read from nn file (erasing this one)
+time-horizon = 2.0
+integration-step = 0.05
+control-step = 0.2
+order = 4
+initial-values = [0.7,0.9] [0.7,0.9]

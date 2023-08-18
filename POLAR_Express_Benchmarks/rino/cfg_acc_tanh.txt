@@ -1,0 +1,11 @@
+# ACC tanh (sys 491)
+
+systype = ode
+syschoice = 491
+nnfile-sfx = Examples/Networks/acc_tanh.sfx
+time-horizon = 5.
+integration-step = 0.04
+control-step = 0.1
+order = 6
+samples-per-dim = 3
+initial-values = [90,91] [32,32.05] [0,0] [10,11] [30,30.05] [0,0]

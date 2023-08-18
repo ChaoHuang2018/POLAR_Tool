@@ -1,0 +1,29 @@
+init: 
+  mode: startmode
+  states:
+    - x0 in [0.7, 0.9]
+    - x1 in [0.7, 0.9]
+
+unsafe:
+  - mode: unsafe1
+    states:
+    - x0 >= 0.1
+  - mode: unsafe2
+    states:
+    - x0 <= -0.3
+  - mode: unsafe3
+    states:
+    - x1 >= 0.5
+  - mode: unsafe4
+    states:
+    - x1 <= -0.35    
+
+gnuplot: 'octagon x0, x1'
+adaptive steps: '{min 1e-6, max 0.01}'
+precision: '100'
+fixed orders: '4'
+print: 'on'
+time: 1.4
+max jumps: 151
+plot: true
+cutoff: '1e-10'

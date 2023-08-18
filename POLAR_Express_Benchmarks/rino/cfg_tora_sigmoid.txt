@@ -1,0 +1,13 @@
+# Tora sigmoid (sys 461)
+
+systype = ode
+syschoice = 461
+nnfile-sfx = Examples/Networks/tora_sigmoid.sfx
+nn-offset = 0.5 # also read from nn file (erasing this one)
+nn-scaling = 22.  # also read from nn file (erasing this one)
+time-horizon = 5.
+control-step = 0.5
+integration-step = 0.1
+order = 4
+initial-values = [-0.77,-0.75] [-0.45,-0.43] [0.51,0.54] [-0.3,-0.28]
+samples-per-dim = 3

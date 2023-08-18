@@ -1,0 +1,12 @@
+# B3 sigmoid (sys 482)
+
+systype = ode
+syschoice = 482
+nnfile-sfx = Examples/Networks/B3_sigmoid.sfx
+nn-offset = 0.5 # also read from nn file (erasing this one)
+nn-scaling = 4.  # also read from nn file (erasing this one)
+time-horizon = 6.
+integration-step = 0.05
+control-step = 0.1
+order = 4
+initial-values = [0.8,0.9] [0.4,0.5]

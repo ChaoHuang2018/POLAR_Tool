@@ -1,0 +1,13 @@
+# docking tanh 
+
+systype = ode
+syschoice = 601
+nnfile-sfx = Examples/Networks/docking_tanh.sfx
+nn-offset = 0. # also read from nn file (erasing this one)
+nn-scaling = 1.  # also read from nn file (erasing this one)
+time-horizon = 120
+integration-step = 0.1
+control-step = 1.0
+order = 3
+initial-values = [0.024,0.026] [0.024,0.026] [-0.2755,-0.2755] [-0.2755,-0.2755] [0.1948,0.1948] [0.2697,0.2755]
+#initial-values = [90,91] [32,32.05] [0,0] [10,11] [30,30.05] [0,0]

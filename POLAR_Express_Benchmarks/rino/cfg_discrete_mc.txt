@@ -1,0 +1,15 @@
+# Discrete-time Mountain-Car
+
+systype = discrete
+syschoice = 23
+nnfile-sfx = Examples/Networks/mc_small.sfx
+nbsteps = 150
+samples-per-dim = 5
+points-per-graph = 50
+iter-method = 1
+skew = 1
+AEextension-order = 1
+initial-values = [-0.53,-0.5] [0.,0.0]
+#initial-values = [-0.53,-0.5] [0.,0.00]
+interactive-visualization = 0
+create-png = 1

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<sspaceex xmlns="http://www-verimag.imag.fr/xml-namespaces/sspaceex" version="0.2" math="SpaceEx">
+  <component id="plant">
+    <param name="x1" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="x2" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="temp" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="clock" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="_f1" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="_f2" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="k" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="max_speed" type="real" local="false" d1="1" d2="1" dynamics="const" />
+    <param name="min_speed" type="real" local="false" d1="1" d2="1" dynamics="const" />
+    <param name="power" type="real" local="false" d1="1" d2="1" dynamics="const" />
+    <param name="goal_position" type="real" local="false" d1="1" d2="1" dynamics="const" />
+    <param name="min_position" type="real" local="false" d1="1" d2="1" dynamics="const" />
+    <location id="1" name="_reset_mode1" x="255.0" y="123.0" width="162.0" height="132.0">
+      <invariant>clock &lt;= 1</invariant>
+      <flow>x1' == 0 &amp;
+x2' == 0 &amp;
+temp' == _f1 * power - 0.0025 * cos(3 * x1) &amp;
+clock' == 1</flow>
+    </location>
+    <location id="2" name="mode2" x="748.0" y="119.0" width="160.0" height="152.0">
+      <invariant>clock &lt;= 0</invariant>
+      <flow>x1' == 0 &amp;
+x2' == 0 &amp;
+temp' == 0 &amp;
+clock' == 1</flow>
+    </location>
+    <location id="3" name="mode3" x="746.0" y="536.0" width="170.0" height="130.0">
+      <invariant>clock &lt;= 0</invariant>
+      <flow>x1' == 0 &amp;
+x2' == 0 &amp;
+temp' == 0 &amp;
+clock' == 1</flow>
+    </location>
+    <location id="4" name="DNN" x="253.0" y="549.0" width="154.0" height="142.0" />
+    <location id="5" name="unsafe1" x="1013.0" y="119.0" width="126.0" height="98.0">
+      <invariant>clock &lt;= 1</invariant>
+      <flow>clock' == 1</flow>
+    </location>
+    <transition source="1" target="2">
+      <guard>clock = 1 &amp;
+x2 + temp &lt;= max_speed &amp;
+x2 + temp &gt;= min_speed</guard>
+      <assignment>x1 := x1 + x2 + temp &amp; 
+x2 := x2 + temp &amp;
+temp := temp &amp;
+clock := 0</assignment>
+      <labelposition x="-92.0" y="-29.0" width="176.0" height="76.0" />
+    </transition>
+    <transition source="2" target="3">
+      <guard>clock = 0 &amp;
+x1 &gt;= goal_position</guard>
+      <labelposition x="-71.0" y="-40.0" width="144.0" height="86.0" />
+    </transition>
+    <transition source="2" target="4">
+      <guard>clock = 0 &amp;
+x1 &gt;= min_position &amp;
+x1 &lt;= goal_position</guard>
+      <assignment>_f1 := x1 &amp;
+_f2 := x2 &amp;
+clock := 0</assignment>
+      <labelposition x="-80.0" y="-63.0" width="156.0" height="124.0" />
+      <middlepoint x="582.5" y="419.0" />
+    </transition>
+    <transition source="2" target="4">
+      <guard>clock = 0 &amp;
+x1 &lt;= min_position</guard>
+      <assignment>_f1 := min_position &amp;
+_f2 := 0 &amp;
+x1 := min_position &amp;
+x2 := 0 &amp;
+temp := 0 &amp;
+clock := 0</assignment>
+      <labelposition x="-145.0" y="-40.0" width="168.0" height="152.0" />
+      <middlepoint x="447.0" y="334.5" />
+    </transition>
+    <transition source="4" target="1">
+      <guard>clock = 0</guard>
+      <assignment>temp := 0 &amp;
+clock := 0 &amp;
+k := k + 1</assignment>
+      <labelposition x="-139.0" y="-85.0" width="176.0" height="162.0" />
+      <middlepoint x="254.5" y="341.5" />
+    </transition>
+    <transition source="1" target="2">
+      <guard>clock = 1 &amp;
+x2 + temp &gt;= max_speed</guard>
+      <assignment>x1 := x1 + max_speed &amp; 
+x2 := max_speed &amp;
+clock := 0</assignment>
+      <labelposition x="-134.0" y="-59.0" width="242.0" height="104.0" />
+      <middlepoint x="495.5" y="64.0" />
+    </transition>
+    <transition source="1" target="2">
+      <guard>clock = 1 &amp;
+x2 + temp &lt;= min_speed</guard>
+      <assignment>x1 := x1 + min_speed &amp; 
+x2 := min_speed &amp;
+clock := 0</assignment>
+      <labelposition x="-78.0" y="-16.0" width="176.0" height="112.0" />
+      <middlepoint x="492.5" y="196.0" />
+    </transition>
+    <transition source="2" target="5">
+      <guard>k &gt;= 150 &amp;
+x1 &lt;= goal_position</guard>
+      <labelposition x="-28.0" y="-24.0" width="132.0" height="98.0" />
+    </transition>
+  </component>
+  <component id="constants">
+    <bind component="plant" as="plant_1" x="258.0" y="103.0" width="106.0" height="78.0">
+      <map key="max_speed">0.07</map>
+      <map key="min_speed">-0.07</map>
+      <map key="power">0.0015</map>
+      <map key="goal_position">0.45</map>
+      <map key="min_position">-1.2</map>
+    </bind>
+  </component>
+</sspaceex>
+

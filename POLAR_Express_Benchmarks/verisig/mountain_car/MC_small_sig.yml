@@ -1,0 +1,17 @@
+time: 150
+max jumps: 600
+gnuplot: octagon x1, x2
+remainder estimation: '1e-1'
+adaptive steps: '{min 1e-6, max 0.01}'
+fixed orders: 4
+cutoff: '1e-18'
+init: 
+  mode: mode2
+  states:
+    - x1 in [-0.53, -0.5]
+    - x2 in [0, 0]
+
+unsafe:
+  - mode: unsafe1
+    states:
+    - x1 <= 0.45

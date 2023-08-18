@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<sspaceex xmlns="http://www-verimag.imag.fr/xml-namespaces/sspaceex" math="SpaceEx" version="0.2">
+  <component id="ACC_sys">
+    <param controlled="false" d1="1" d2="1" dynamics="any" local="true" name="x0" type="real" />
+    <param controlled="false" d1="1" d2="1" dynamics="any" local="true" name="x1" type="real" />
+    <param controlled="false" d1="1" d2="1" dynamics="any" local="true" name="x2" type="real" />
+    <param controlled="false" d1="1" d2="1" dynamics="any" local="true" name="x3" type="real" />
+    <param controlled="false" d1="1" d2="1" dynamics="any" local="true" name="x4" type="real" />
+    <param controlled="false" d1="1" d2="1" dynamics="any" local="true" name="x5" type="real" />
+    <param name="clock" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="_f1" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="_f2" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="_f3" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="_f4" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="_f5" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="u" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <param name="worldtime" type="real" local="true" d1="1" d2="1" dynamics="any" controlled="false" />
+    <location id="1" name="_cont_ACC" x="369.0" y="565.0" width="326.0" height="186.0">
+      <invariant>clock &lt;= 0.1</invariant>
+      <flow>x0' == x1 &amp;
+x1' == x2 &amp;
+x2' == -2.0 * x2 - 0.0001 * x1 * x1 - 4.0 &amp;
+x3' == x4 &amp;
+x4' == x5 &amp;
+x5' == 2.0 * u - 2.0 * x5 - 0.0001 * x4 * x4 &amp;
+clock' == 1 &amp;
+u' == 0 &amp;
+worldtime' == 1</flow>
+    </location>
+    <location id="2" name="DNN" x="364.0" y="121.0" width="164.0" height="132.0" />
+    <location id="4" name="startmode" x="692.0" y="120.0" width="144.0" height="120.0">
+      <invariant>clock &lt;= 0</invariant>
+      <flow>clock' == 1</flow>
+    </location>
+    <location id="3" name="unsafe1" x="811.0" y="282.0" width="102.0" height="90.0">
+      <invariant>clock &gt;= 0</invariant>
+      <flow>clock' == 1</flow>
+    </location>
+    <location id="5" name="unsafe2" x="814.0" y="398.0" width="104.0" height="78.0">
+      <invariant>clock &gt;= 0</invariant>
+      <flow>clock' == 1</flow>
+    </location>
+    <location id="6" name="unsafe3" x="810.0" y="507.0" width="100.0" height="78.0">
+      <invariant>clock &gt;= 0</invariant>
+      <flow>clock' == 1</flow>
+    </location>
+    <location id="7" name="unsafe4" x="809.0" y="604.0" width="102.0" height="78.0">
+      <invariant>clock &gt;= 0</invariant>
+      <flow>clock' == 1</flow>
+    </location>
+    <transition source="1" target="2">
+      <guard>clock = 0.1</guard>
+      <assignment>_f1 := 30 &amp;
+_f2 := 1.4 &amp;
+_f3 := x4 &amp;
+_f4 := x0 - x3 &amp;
+_f5 := x1 - x4 &amp;
+clock := 0</assignment>
+      <labelposition x="-133.0" y="2.0" width="134.0" height="148.0" />
+      <middlepoint x="266.5" y="297.0" />
+    </transition>
+    <transition source="2" target="1">
+      <assignment>clock := 0 &amp;
+u := _f1</assignment>
+      <labelposition x="-13.0" y="-57.0" width="104.0" height="86.0" />
+      <middlepoint x="486.5" y="290.0" />
+    </transition>
+    <transition source="4" target="2">
+      <guard>clock = 0</guard>
+      <assignment>_f1 := 30 &amp;
+_f2 := 1.4 &amp;
+_f3 := x4 &amp;
+_f4 := x0 - x3 &amp;
+_f5 := x1 - x4 &amp;
+clock := 0</assignment>
+      <labelposition x="-59.0" y="-82.0" width="134.0" height="162.0" />
+    </transition>
+    <transition source="1" target="3">
+      <guard>worldtime = 5 &amp;
+x1 &gt;= 22.88</guard>
+      <labelposition x="-14.0" y="-91.0" width="144.0" height="78.0" />
+    </transition>
+    <transition source="1" target="5">
+      <guard>worldtime = 5 &amp;
+x1 &lt;= 22.81</guard>
+      <labelposition x="-12.0" y="-44.0" width="104.0" height="68.0" />
+    </transition>
+    <transition source="1" target="6">
+      <guard>worldtime = 5 &amp;
+x4 &gt;= 30.02</guard>
+      <labelposition x="-4.0" y="-25.0" width="102.0" height="64.0" />
+    </transition>
+    <transition source="1" target="7">
+      <guard>worldtime = 5 &amp;
+x4 &lt;= 29.88</guard>
+      <labelposition x="-32.0" y="-11.0" width="146.0" height="68.0" />
+    </transition>
+  </component>
+  <component id="ACC_net">
+    <bind component="ACC_sys" as="ACC_sys_1" x="326.0" y="291.0" width="312.0" height="240.0" />
+  </component>
+</sspaceex>
+

@@ -1,0 +1,37 @@
+time: 6
+max jumps: 151
+remainder estimation: '1e-1'
+adaptive steps: '{min 1e-6, max 0.1}'
+fixed orders: 3
+cutoff: '1e-6'
+gnuplot: octagon clock, _f1
+init: 
+  mode: startmode
+  states:
+    - x1 in [0.025, 0.05]
+    - x2 in [0, 0.025]
+    - x3 in [0, 0]
+    - x4 in [0, 0]
+    - x5 in [0, 0]
+    - x6 in [0, 0]     
+    - k in [0, 0] 
+
+unsafe:
+  - mode: x1_l
+    states:
+    - x1 <= -0.32
+  - mode: x1_u
+    states:
+    - x1 >= 0.32
+  - mode: x2_l
+    states:
+    - x2 <= -0.32
+  - mode: x2_u
+    states:
+    - x2 >= 0.32
+  - mode: x3_l
+    states:
+    - x3 <= -0.32
+  - mode: x3_u
+    states:
+    - x3 >= 0.32

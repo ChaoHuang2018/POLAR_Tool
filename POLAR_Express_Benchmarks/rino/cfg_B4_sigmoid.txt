@@ -1,0 +1,12 @@
+# B4 sigmoid (sys 483)
+
+systype = ode
+syschoice = 483
+nnfile-sfx = Examples/Networks/B4_sigmoid.sfx
+nn-offset = 0.5 # also read from nn file (erasing this one)
+nn-scaling = 20.  # also read from nn file (erasing this one)
+time-horizon = 1.
+integration-step = 0.02
+control-step = 0.1
+order = 4
+initial-values = [0.25,0.27] [0.08,0.1] [0.25,0.27]

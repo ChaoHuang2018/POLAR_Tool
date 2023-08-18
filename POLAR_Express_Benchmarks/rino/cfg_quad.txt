@@ -1,0 +1,12 @@
+systype = ode
+syschoice = 603
+nnfile-sfx = Examples/Networks/quad.sfx
+time-horizon = 5.0
+integration-step = 0.05
+control-step = 0.1
+order = 4
+#samples-per-dim = 3
+initial-values = [-0.4,0.4] [-0.4,0.4] [-0.4,0.4] [-0.4,0.4] [-0.4,0.4] [-0.4,0.4] [0.0,0.0] [0.0,0.0] [0.0,0.0] [0.0,0.0] [0.0,0.0] [0.0,0.0]
+variables-to-display = 1 2
+interactive-visualization = 0
+create-png = 1
