@@ -13,6 +13,8 @@ public:
     unsigned int bernstein_order;
     unsigned int partition_num;
     int num_threads = 12;
+
+    int interval_precision = 100; 
     
     // Berns, Taylor, Mix
     string neuron_approx_type;
@@ -30,6 +32,9 @@ public:
     //output setting
     vector<string> output_dim;
     string output_filename;
+    double fail_fill_width = 1e12;
+    bool if_plot;
+  
     
     int validate();
     
@@ -84,4 +89,14 @@ public:
 
     void set_num_threads(int num_threads);
 
+    void set_interval_precision(int p) { interval_precision = p; }
+    
+    int get_interval_precision() const { return interval_precision; }
+
+    void   set_fail_fill_width(double v) { fail_fill_width = v; }
+    double get_fail_fill_width() const { return fail_fill_width; }
+    bool   has_fail_fill_width() const { return true; }
+
+    bool   get_if_plot() const { return this->if_plot; }
+    void set_if_plot(bool if_plot) {this->if_plot = if_plot; }
 };

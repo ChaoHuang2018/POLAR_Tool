@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
 	// stepsize and order for reachability analysis
 	//setting.setFixedStepsize(0.005, order);
-	setting.setFixedStepsize(0.01, order);
+	setting.setFixedStepsize(0.1, order);
 
 	// time horizon for a single control step
 	/*
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	Result_of_Reachability result;
 
 	// define the neural network controller
-	string nn_name = "nn_1_"+net_name;
+	string nn_name = "nn_1_"+net_name+".json";
 	NeuralNetwork nn(nn_name);
 
 	// the order in use
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 			cout << coefficients[0][i] << endl;
 		}
 
-		cout << "u_id: " << u_id << endl;
+
 		initial_set.tmvPre.tms[u_id] = tmv_output.tms[0];
         //initial_set.tmvPre.tms[u_id].output(cout, vars);
         //cout << endl;

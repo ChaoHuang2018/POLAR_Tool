@@ -1,0 +1,79 @@
+# ===== Compiler =====
+CXX         ?= g++-15
+STD         ?= -std=c++11
+
+# ===== Homebrew prefix (Apple Silicon 默认 /opt/homebrew) =====
+BREW_PREFIX ?= $(shell brew --prefix)
+
+# ===== flowstar 静态库位置 =====
+FLOWSTAR_HOME ?= $(abspath ../flowstar/flowstar-toolbox)
+FLOWSTAR_LIB  ?= $(FLOWSTAR_HOME)
+
+# ===== Includes / Libs from Homebrew =====
+MPFR_HOME  ?= $(BREW_PREFIX)/opt/mpfr
+GMP_HOME   ?= $(BREW_PREFIX)/opt/gmp
+GSL_HOME   ?= $(BREW_PREFIX)/opt/gsl
+GLPK_HOME  ?= $(BREW_PREFIX)/opt/glpk
+
+# ===== Flags =====
+CXXFLAGS   ?= -O3 -g $(STD) -I.
+CXXFLAGS   += -I$(MPFR_HOME)/include -I$(GMP_HOME)/include -I$(GSL_HOME)/include -I$(GLPK_HOME)/include
+# 如需包含 flowstar 的头文件，可按需启用：
+# CXXFLAGS   += -I$(FLOWSTAR_HOME)
+
+# ==== ONNX + Protobuf (pkg-config) ====
+# 如果本机已安装 onnx/protobuf 的 pkg-config 文件，就自动启用直读 ONNX
+ONNX_PKG_OK := $(shell pkg-config --exists onnx && echo yes)
+PB_PKG_OK   := $(shell pkg-config --exists protobuf && echo yes)
+
+ifeq ($(ONNX_PKG_OK),yes)
+  CPPFLAGS += $(shell pkg-config --cflags onnx)
+  LDLIBS   += $(shell pkg-config --libs onnx)
+  # ONNX 依赖 protobuf；有就一起加
+  ifeq ($(PB_PKG_OK),yes)
+    CPPFLAGS += $(shell pkg-config --cflags protobuf)
+    LDLIBS   += $(shell pkg-config --libs protobuf)
+  else
+    # 没有 protobuf 的 pkg-config，就先假设系统库可直接链接
+    LDLIBS += -lprotobuf
+  endif
+  CPPFLAGS += -DUSE_ONNX_PROTO
+endif
+
+
+LDFLAGS    ?= -g -L$(FLOWSTAR_LIB)
+LDFLAGS    += -L$(MPFR_HOME)/lib -L$(GMP_HOME)/lib -L$(GSL_HOME)/lib -L$(GLPK_HOME)/lib
+
+LIBS       ?= -lflowstar -lmpfr -lgmp -lgsl -lgslcblas -lglpk -lpthread -lm
+
+# 运行期若需要 rpath（通常不必），可取消注释：
+# LDFLAGS += -Wl,-rpath,$(FLOWSTAR_LIB) \
+#            -Wl,-rpath,$(MPFR_HOME)/lib -Wl,-rpath,$(GMP_HOME)/lib \
+#            -Wl,-rpath,$(GSL_HOME)/lib  -Wl,-rpath,$(GLPK_HOME)/lib
+
+# ===== Objects =====
+OBJS = NeuralNetwork.o BernsteinPoly.o Neuron.o PolarSetting.o System.o Specification.o Polar.o
+
+# ===== Targets =====
+.PHONY: all polar_lib polar_tool clean
+all: polar_lib polar_tool
+# all: benchmark6_tanh
+
+polar_tool: Polar_tool.o $(OBJS)
+	$(CXX) -w $(LDFLAGS) -L./ -o $@ $^ $(LIBS)
+
+polar_lib: $(OBJS)
+	ar rcs libpolar.a $^
+
+# ===== Build rules =====
+%.o: %.cc
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+%.o: %.c
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+clean:
+	rm -f *.o libpolar.a polar_tool
+
+

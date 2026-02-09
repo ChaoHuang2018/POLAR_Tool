@@ -147,221 +147,34 @@ NeuralNetwork::NeuralNetwork()
 
 NeuralNetwork::NeuralNetwork(string filename)
 {
+    // NEW: JSON vs TXT 自动分发
+    if (ends_with(filename, ".json")) {
+        std::ifstream fin(filename);
+        if (!fin) throw std::runtime_error("Cannot open json: " + filename);
+        json j; fin >> j;
+        loadFromJsonObject(j); 
+        return;
+    }
+
+    // NEW: ONNX 直读分发
+    if (ends_with(filename, ".onnx")) {
+        loadFromOnnxFile(filename);    
+        return;
+    }
+
+    // 默认按 txt 读取（保持兼容）
     std::ifstream input(filename);
-    std::string line;
-
-    // Parse the structure of neural networks
-    if (getline(input, line))
-    {
-    }
-    else
-    {
-        cout << "failed to read file: Neural Network." << endl;
-    }
-    try
-    {
-        num_of_inputs = stoi(line);
-    }
-    catch (std::invalid_argument &e)
-    {
-        cout << "Problem during string/integer conversion!" << endl;
-        cout << line << endl;
-    }
-    getline(input, line);
-    num_of_outputs = stoi(line);
-    getline(input, line);
-//    try
-//    {
-//        input >> num_of_hidden_layers;
-//    }
-//    catch (...)
-//    {
-//        cout << "aaa" << endl;
-//    }
-     num_of_hidden_layers = stoi(line);
-
-//    cout << "num_of_inputs" << num_of_inputs << ", " << num_of_outputs << ", " << num_of_hidden_layers << endl;
-//
-//    exit(0);
-
-    std::vector<int> network_structure(num_of_hidden_layers + 1, 0);
-    for (int idx = 0; idx < num_of_hidden_layers; idx++)
-    {
-        getline(input, line);
-        network_structure[idx] = stoi(line);
-    }
-    network_structure[network_structure.size() - 1] = num_of_outputs;
-
-    // parse the activation function
-    std::vector<std::string> activation;
-    for (int idx = 0; idx < num_of_hidden_layers + 1; idx++)
-    {
-        getline(input, line);
-        activation.push_back(line);
-    }
-
-    // Parse the input text file and store weights and bias
-
-    // a question here. need to confirm on 10/20/2020 afternoon.
-    // compute parameters of the input layer
-    Matrix<Real> weight0(network_structure[0], num_of_inputs);
-    Matrix<Real> bias0(network_structure[0], 1);
-    for (int i = 0; i < network_structure[0]; i++)
-    {
-        for (int j = 0; j < num_of_inputs; j++)
-        {
-            getline(input, line);
-            weight0[i][j] = stod(line);
-        }
-        getline(input, line);
-        bias0[i][0] = stod(line);
-    }
-    Layer input_layer(activation[0], weight0, bias0);
-    // cout << "weight0: " << weight0 << endl;
-    // cout << "bias0: " << bias0 << endl;
-    layers.push_back(input_layer);
-
-    // compute the parameters of hidden layers
-    for (int layer_idx = 0; layer_idx < num_of_hidden_layers; layer_idx++)
-    {
-        Matrix<Real> weight(network_structure[layer_idx + 1], network_structure[layer_idx]);
-        Matrix<Real> bias(network_structure[layer_idx + 1], 1);
-
-        for (int i = 0; i < network_structure[layer_idx + 1]; i++)
-        {
-            for (int j = 0; j < network_structure[layer_idx]; j++)
-            {
-                getline(input, line);
-                weight[i][j] = stod(line);
-            }
-            getline(input, line);
-            bias[i][0] = stod(line);
-        }
-
-        // cout << "weight_" + to_string(layer_idx + 1) + ":" << weight << endl;
-        // cout << "bias_" + to_string(layer_idx + 1) + ":" << bias << endl;
-        Layer hidden_layer(activation[layer_idx + 1], weight, bias);
-        layers.push_back(hidden_layer);
-    }
-    // Affine mapping of the output
-    getline(input, line);
-    offset = stod(line);
-    
-    getline(input, line);
-    scale_factor = stod(line);
-    
-//    cout << "number of hidden layers: " << layers.size() << endl;
+    if (!input) throw std::runtime_error("Cannot open txt: " + filename);
+    loadFromTxtStream(input);
 
 }
 
 NeuralNetwork::NeuralNetwork(string filename, string PYTHONPATH)
 {
     system((PYTHONPATH + " " + "onnx_converter" + " " + filename).c_str());
-	std::ifstream input(filename);
-    std::string line;
-
-    // Parse the structure of neural networks
-    if (getline(input, line))
-    {
-    }
-    else
-    {
-        cout << "failed to read file: Neural Network." << endl;
-    }
-    try
-    {
-        num_of_inputs = stoi(line);
-    }
-    catch (std::invalid_argument &e)
-    {
-        cout << "Problem during string/integer conversion!" << endl;
-        cout << line << endl;
-    }
-    getline(input, line);
-    num_of_outputs = stoi(line);
-    getline(input, line);
-//    try
-//    {
-//        input >> num_of_hidden_layers;
-//    }
-//    catch (...)
-//    {
-//        cout << "aaa" << endl;
-//    }
-     num_of_hidden_layers = stoi(line);
-
-//    cout << "num_of_inputs" << num_of_inputs << ", " << num_of_outputs << ", " << num_of_hidden_layers << endl;
-//
-//    exit(0);
-
-    std::vector<int> network_structure(num_of_hidden_layers + 1, 0);
-    for (int idx = 0; idx < num_of_hidden_layers; idx++)
-    {
-        getline(input, line);
-        network_structure[idx] = stoi(line);
-    }
-    network_structure[network_structure.size() - 1] = num_of_outputs;
-
-    // parse the activation function
-    std::vector<std::string> activation;
-    for (int idx = 0; idx < num_of_hidden_layers + 1; idx++)
-    {
-        getline(input, line);
-        activation.push_back(line);
-    }
-
-    // Parse the input text file and store weights and bias
-
-    // a question here. need to confirm on 10/20/2020 afternoon.
-    // compute parameters of the input layer
-    Matrix<Real> weight0(network_structure[0], num_of_inputs);
-    Matrix<Real> bias0(network_structure[0], 1);
-    for (int i = 0; i < network_structure[0]; i++)
-    {
-        for (int j = 0; j < num_of_inputs; j++)
-        {
-            getline(input, line);
-            weight0[i][j] = stod(line);
-        }
-        getline(input, line);
-        bias0[i][0] = stod(line);
-    }
-    Layer input_layer(activation[0], weight0, bias0);
-    // cout << "weight0: " << weight0 << endl;
-    // cout << "bias0: " << bias0 << endl;
-    layers.push_back(input_layer);
-
-    // compute the parameters of hidden layers
-    for (int layer_idx = 0; layer_idx < num_of_hidden_layers; layer_idx++)
-    {
-        Matrix<Real> weight(network_structure[layer_idx + 1], network_structure[layer_idx]);
-        Matrix<Real> bias(network_structure[layer_idx + 1], 1);
-
-        for (int i = 0; i < network_structure[layer_idx + 1]; i++)
-        {
-            for (int j = 0; j < network_structure[layer_idx]; j++)
-            {
-                getline(input, line);
-                weight[i][j] = stod(line);
-            }
-            getline(input, line);
-            bias[i][0] = stod(line);
-        }
-
-        // cout << "weight_" + to_string(layer_idx + 1) + ":" << weight << endl;
-        // cout << "bias_" + to_string(layer_idx + 1) + ":" << bias << endl;
-        Layer hidden_layer(activation[layer_idx + 1], weight, bias);
-        layers.push_back(hidden_layer);
-    }
-    // Affine mapping of the output
-    getline(input, line);
-    offset = stod(line);
-    
-    getline(input, line);
-    scale_factor = stod(line);
-    
-//    cout << "number of hidden layers: " << layers.size() << endl;
-
+    std::ifstream input(filename);
+    if (!input) throw std::runtime_error("Cannot open converted nn file: " + filename);
+    loadFromTxtStream(input);
 }
 
 void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<Real> &input, const std::vector<Interval> &domain, PolarSetting &polar_setting, const Computational_Setting &setting) const
@@ -375,17 +188,37 @@ void NeuralNetwork::get_output_tmv(TaylorModelVec<Real> &result, TaylorModelVec<
     for (int s = 0; s < num_of_hidden_layers + 1; s++)
     {
         //cout << "num_of_hidden_layersL: " << num_of_hidden_layers << endl;
-        cout << "------------- Layer " << s << " starts. -------------" << endl;
+        // cout << "------------- Layer " << s << " starts. -------------" << endl;
         Layer layer = layers[s];
         
         TaylorModelVec<Real> tmvTemp_pre;
         TaylorModelVec<Real> tmvTemp_post;
+
+        Variables tmvars;
+        int x_id = tmvars.declareVar("x");
+
 		 
         layer.pre_activate(tmvTemp_pre, tmv_all_layer[s], domain, polar_setting);
 //        cout << "pre: " << tmvTemp_pre.tms[0].remainder << endl;
+
+        Variables pre_vars;
+        for(unsigned int i=0; i<tmvTemp_pre.tms.size(); ++i)
+        {
+            int var = pre_vars.declareVar("y_"+to_string(s)+"_"+to_string(i));
+        }
+        cout << "Pre" << endl;
+        tmvTemp_pre.output(cout, pre_vars, tmvars);
     
         layer.post_activate(tmvTemp_post, tmvTemp_pre, domain, polar_setting, setting);
 //        cout << "post: " << tmvTemp_post.tms[0].remainder << endl;
+
+        Variables post_vars;
+        for(unsigned int i=0; i<tmvTemp_post.tms.size(); ++i)
+        {
+            int var = post_vars.declareVar("y_"+to_string(s)+"_"+to_string(i));
+        }
+        cout << "Post" << endl;
+        tmvTemp_post.output(cout, post_vars, tmvars);
 
         tmv_all_layer.push_back(tmvTemp_post);
     }
@@ -1377,4 +1210,522 @@ void NeuralNetwork::get_output_tmv_symbolic(TaylorModelVec<Real> & result, Taylo
     {
     	result.tms[i] *= scale_factor;
     }
+}
+
+void NeuralNetwork::loadFromTxtStream(std::istream& input)
+{
+    std::string line;
+
+    if (!getline(input, line)) {
+        std::cout << "failed to read file: Neural Network." << std::endl;
+        throw std::runtime_error("empty nn txt");
+    }
+    try { num_of_inputs = stoi(line); }
+    catch (...) { std::cout << "string/integer conversion error!\n" << line << std::endl; throw; }
+
+    getline(input, line); num_of_outputs = stoi(line);
+    getline(input, line); num_of_hidden_layers = stoi(line);
+
+    std::vector<int> network_structure(num_of_hidden_layers + 1, 0);
+    for (int idx = 0; idx < num_of_hidden_layers; idx++) {
+        getline(input, line);
+        network_structure[idx] = stoi(line);
+    }
+    network_structure.back() = num_of_outputs;
+
+    std::vector<std::string> activation;
+    activation.reserve(num_of_hidden_layers + 1);
+    for (int idx = 0; idx < num_of_hidden_layers + 1; idx++) {
+        getline(input, line);
+        activation.push_back(line);
+    }
+
+    // Input layer
+    Matrix<Real> weight0(network_structure[0], num_of_inputs);
+    Matrix<Real> bias0(network_structure[0], 1);
+    for (int i = 0; i < network_structure[0]; i++) {
+        for (int j = 0; j < num_of_inputs; j++) { getline(input, line); weight0[i][j] = stod(line); }
+        getline(input, line); bias0[i][0] = stod(line);
+    }
+    layers.clear();
+    layers.emplace_back(activation[0], weight0, bias0);
+
+    // Hidden + output layer
+    for (int layer_idx = 0; layer_idx < num_of_hidden_layers; layer_idx++) {
+        Matrix<Real> weight(network_structure[layer_idx + 1], network_structure[layer_idx]);
+        Matrix<Real> bias(network_structure[layer_idx + 1], 1);
+        for (int i = 0; i < network_structure[layer_idx + 1]; i++) {
+            for (int j = 0; j < network_structure[layer_idx]; j++) { getline(input, line); weight[i][j] = stod(line); }
+            getline(input, line); bias[i][0] = stod(line);
+        }
+        layers.emplace_back(activation[layer_idx + 1], weight, bias);
+    }
+
+    getline(input, line); offset = stod(line);
+    getline(input, line); scale_factor = stod(line);
+}
+
+
+// NEW: Import from Json object
+void NeuralNetwork::loadFromJsonObject(const json& j)
+{
+    // 基本字段
+    if (!j.contains("type") || tolower_str(j.at("type").get<std::string>()) != "mlp")
+        throw std::runtime_error("JSON NN must have type='mlp'");
+    num_of_inputs  = j.at("in_dim").get<int>();
+    num_of_outputs = j.at("out_dim").get<int>();
+    offset         = j.value("offset", 0.0);
+    scale_factor   = j.value("scale", 1.0);
+
+    const auto& JL = j.at("layers");
+    if (!JL.is_array() || JL.empty()) throw std::runtime_error("JSON layers empty");
+
+    layers.clear();
+    int prev_in = num_of_inputs;
+    int hidden_count = 0;
+
+    for (size_t li = 0; li < JL.size(); ++li) {
+        const auto& L = JL[li];
+        if (!L.contains("W") || !L.contains("b"))
+            throw std::runtime_error("JSON layer missing W/b");
+
+        // Read weights
+        const auto& Wj = L.at("W");
+        if (!Wj.is_array() || Wj.empty()) throw std::runtime_error("W empty");
+        int out_dim = (int)Wj.size();
+        int in_dim  = (int)Wj.at(0).size();
+        if (in_dim != prev_in)
+            throw std::runtime_error("in_dim mismatch at layer " + std::to_string(li));
+
+        Matrix<Real> W(out_dim, in_dim);
+        for (int r = 0; r < out_dim; ++r) {
+            if ((int)Wj.at(r).size() != in_dim) throw std::runtime_error("W row size mismatch");
+            for (int c = 0; c < in_dim; ++c) {
+                W[r][c] = Wj.at(r).at(c).get<double>();
+            }
+        }
+
+        // Read bias
+        const auto& bj = L.at("b");
+        if ((int)bj.size() != out_dim) throw std::runtime_error("b size mismatch");
+        Matrix<Real> B(out_dim, 1);
+        for (int r = 0; r < out_dim; ++r) B[r][0] = bj.at(r).get<double>();
+
+        // Read activation
+        std::string act = map_activation_json_to_internal(L.value("act", "linear"));
+
+        // Into stack
+        layers.emplace_back(act, W, B);
+        prev_in = out_dim;
+
+        // Number of hidden layer
+        if ((int)li < (int)JL.size() - 1) hidden_count++;
+    }
+
+    num_of_hidden_layers = hidden_count; 
+}
+
+
+void NeuralNetwork::loadFromOnnxFile(const std::string& path)
+{
+#ifndef USE_ONNX_PROTO
+    throw std::runtime_error("ONNX direct parse not enabled. Build with -DUSE_ONNX_PROTO.");
+#else
+    offset = 0.0;
+    scale_factor = 1.0;
+    layers.clear();
+
+    // 1) 读取 ONNX protobuf
+    onnx::ModelProto model;
+    {
+        std::ifstream ifs(path, std::ios::binary);
+        if (!ifs) throw std::runtime_error("Cannot open ONNX: " + path);
+        google::protobuf::io::IstreamInputStream is(&ifs);
+        if (!model.ParseFromZeroCopyStream(&is)) {
+            throw std::runtime_error("Failed to parse ONNX protobuf: " + path);
+        }
+    }
+    const onnx::GraphProto& G = model.graph();
+
+    // 2) 收集 initializers（name -> tensor）
+    std::unordered_map<std::string, const onnx::TensorProto*> init;
+    init.reserve((size_t)G.initializer_size());
+    for (const auto& t : G.initializer()) init.emplace(t.name(), &t);
+
+    // 输出端仿射累积： y <- out_a * y + out_b
+    double out_a = 1.0, out_b = 0.0;
+
+    // 读取 initializer 的“标量或全等一维向量” -> double
+    auto read_uniform_const = [&](const std::string& name, double& val)->bool {
+        auto it = init.find(name);
+        if (it == init.end()) return false;
+        const onnx::TensorProto* tp = it->second;
+
+        std::vector<double> flat;
+        auto load_float = [&](const onnx::TensorProto* t){
+            if (t->has_raw_data()) {
+                const std::string& raw = t->raw_data();
+                size_t n = raw.size() / sizeof(float);
+                std::vector<float> buf(n);
+                std::memcpy(buf.data(), raw.data(), n*sizeof(float));
+                flat.resize(n);
+                for (size_t i=0;i<n;++i) flat[i] = static_cast<double>(buf[i]);
+            } else {
+                const int n = t->float_data_size();
+                flat.resize(n);
+                for (int i=0;i<n;++i) flat[i] = static_cast<double>(t->float_data(i));
+            }
+        };
+        auto load_double = [&](const onnx::TensorProto* t){
+            if (t->has_raw_data()) {
+                const std::string& raw = t->raw_data();
+                size_t n = raw.size() / sizeof(double);
+                flat.resize(n);
+                std::memcpy(flat.data(), raw.data(), n*sizeof(double));
+            } else {
+                const int n = t->double_data_size();
+                flat.resize(n);
+                for (int i=0;i<n;++i) flat[i] = t->double_data(i);
+            }
+        };
+        if (tp->data_type() == onnx::TensorProto::FLOAT) load_float(tp);
+        else if (tp->data_type() == onnx::TensorProto::DOUBLE) load_double(tp);
+        else return false;
+
+        if (flat.empty()) return false;
+        double v0 = flat[0];
+        for (double v : flat) if (std::fabs(v - v0) > 0.0) return false; // 必须全等
+        val = v0;
+        return true;
+    };
+
+
+    // ---- 辅助：读取 tensor 为 Matrix<Real>（2D）----
+    auto tensor_to_matrix = [](const onnx::TensorProto* tp, int64_t& rows, int64_t& cols) -> Matrix<Real> {
+        if (!tp) throw std::runtime_error("Null tensor proto");
+        std::vector<double> flat;
+
+        auto load_float = [&](const onnx::TensorProto* t){
+            if (t->has_raw_data()) {
+                const std::string& raw = t->raw_data();
+                size_t n = raw.size() / sizeof(float);
+                std::vector<float> buf(n);
+                std::memcpy(buf.data(), raw.data(), n*sizeof(float));
+                flat.resize(n);
+                for (size_t i=0;i<n;++i) flat[i] = static_cast<double>(buf[i]);
+            } else {
+                const int n = t->float_data_size();
+                flat.resize(n);
+                for (int i=0;i<n;++i) flat[i] = static_cast<double>(t->float_data(i));
+            }
+        };
+        auto load_double = [&](const onnx::TensorProto* t){
+            if (t->has_raw_data()) {
+                const std::string& raw = t->raw_data();
+                size_t n = raw.size() / sizeof(double);
+                flat.resize(n);
+                std::memcpy(flat.data(), raw.data(), n*sizeof(double));
+            } else {
+                const int n = t->double_data_size();
+                flat.resize(n);
+                for (int i=0;i<n;++i) flat[i] = t->double_data(i);
+            }
+        };
+
+        if (tp->data_type() == onnx::TensorProto::FLOAT)      load_float(tp);
+        else if (tp->data_type() == onnx::TensorProto::DOUBLE) load_double(tp);
+        else throw std::runtime_error("Unsupported tensor dtype (expect FLOAT/DOUBLE).");
+
+        if (tp->dims_size() != 2) throw std::runtime_error("Expect 2D weight tensor.");
+        rows = tp->dims(0);
+        cols = tp->dims(1);
+        if ((int64_t)flat.size() != rows*cols) throw std::runtime_error("Tensor size mismatch.");
+
+        Matrix<Real> M((unsigned)rows, (unsigned)cols);
+        size_t k=0;
+        for (unsigned r=0;r<(unsigned)rows;++r)
+            for (unsigned c=0;c<(unsigned)cols;++c)
+                M[r][c] = flat[k++];
+        return M;
+    };
+
+    // ---- 辅助：读取 bias 为 [out,1] 的 Matrix<Real> ----
+    auto tensor_to_bias_col = [](const onnx::TensorProto* tp, int64_t& out_dim) -> Matrix<Real> {
+        if (!tp) throw std::runtime_error("Null bias tensor");
+        std::vector<double> flat;
+
+        auto load_float = [&](const onnx::TensorProto* t){
+            if (t->has_raw_data()) {
+                const std::string& raw = t->raw_data();
+                size_t n = raw.size() / sizeof(float);
+                std::vector<float> buf(n);
+                std::memcpy(buf.data(), raw.data(), n*sizeof(float));
+                flat.resize(n);
+                for (size_t i=0;i<n;++i) flat[i] = static_cast<double>(buf[i]);
+            } else {
+                const int n = t->float_data_size();
+                flat.resize(n);
+                for (int i=0;i<n;++i) flat[i] = static_cast<double>(t->float_data(i));
+            }
+        };
+        auto load_double = [&](const onnx::TensorProto* t){
+            if (t->has_raw_data()) {
+                const std::string& raw = t->raw_data();
+                size_t n = raw.size() / sizeof(double);
+                flat.resize(n);
+                std::memcpy(flat.data(), raw.data(), n*sizeof(double));
+            } else {
+                const int n = t->double_data_size();
+                flat.resize(n);
+                for (int i=0;i<n;++i) flat[i] = t->double_data(i);
+            }
+        };
+
+        if (tp->data_type() == onnx::TensorProto::FLOAT)      load_float(tp);
+        else if (tp->data_type() == onnx::TensorProto::DOUBLE) load_double(tp);
+        else throw std::runtime_error("Unsupported bias dtype.");
+
+        if (tp->dims_size()==1) out_dim = tp->dims(0);
+        else if (tp->dims_size()==2) out_dim = std::max<int64_t>(tp->dims(0), tp->dims(1));
+        else throw std::runtime_error("Bias dims unsupported.");
+
+        if ((int64_t)flat.size() != out_dim) throw std::runtime_error("Bias size mismatch.");
+
+        Matrix<Real> B((unsigned)out_dim, 1u);
+        for (unsigned r=0;r<(unsigned)out_dim;++r) B[r][0] = flat[r];
+        return B;
+    };
+
+    auto map_act_from_onnx = [](const std::string& op)->std::string{
+        std::string a = tolower_str(op);
+        if (a=="relu") return "ReLU";
+        if (a=="tanh") return "tanh";
+        if (a=="sigmoid") return "sigmoid";
+        if (a=="identity" || a=="linear") return "Affine";
+        return "Affine";
+    };
+
+    // 收集“第一层之前”的 x 预处理：x' = pre_s * x + pre_o   （仅支持标量，足够覆盖我们导出的 ONNX）
+    double pre_s = 1.0;
+    double pre_o = 0.0;
+    Real pre_sR = Real(1.0);
+    Real pre_oR = Real(0.0);
+    bool   first_linear_seen = false;
+
+    // 小工具：从 initializer 读一个标量 double（支持形如 [], [1]）
+    auto read_scalar_from_init = [&](const std::string& name, double& out)->bool {
+        auto it = init.find(name);
+        if (it == init.end()) return false;
+        const onnx::TensorProto* tp = it->second;
+        // 允许标量、长度为1的一维或二维
+        size_t n_elems = 0;
+        if (tp->has_raw_data()) {
+            const std::string& raw = tp->raw_data();
+            if (tp->data_type() == onnx::TensorProto::FLOAT) {
+                if (raw.size() != sizeof(float)) return false;
+                float v; std::memcpy(&v, raw.data(), sizeof(float));
+                out = static_cast<double>(v); return true;
+            } else if (tp->data_type() == onnx::TensorProto::DOUBLE) {
+                if (raw.size() != sizeof(double)) return false;
+                double v; std::memcpy(&v, raw.data(), sizeof(double));
+                out = v; return true;
+            } else return false;
+        } else {
+            if (tp->data_type() == onnx::TensorProto::FLOAT) {
+                if (tp->float_data_size() != 1) return false;
+                out = static_cast<double>(tp->float_data(0)); return true;
+            } else if (tp->data_type() == onnx::TensorProto::DOUBLE) {
+                if (tp->double_data_size() != 1) return false;
+                out = tp->double_data(0); return true;
+            } else return false;
+        }
+    };
+
+    // 3) 解析节点：Gemm 或 MatMul(+Add) + 激活
+    bool pending_activation = false;
+    int  in_dim = -1, out_dim_decl = -1;
+
+    for (int ni = 0; ni < G.node_size(); ++ni) {
+        const onnx::NodeProto& node = G.node(ni);
+        std::string op = tolower_str(node.op_type());
+
+        // 0) 第一层之前：输入端标量 Mul/Add 折叠（可有可无），以及纯形状算子忽略
+        if (!first_linear_seen) {
+            if (op == "mul" || op == "add") {
+                double cst; bool has_scalar = false;
+                if (node.input_size() == 2) {
+                    has_scalar = read_scalar_from_init(node.input(0), cst) || read_scalar_from_init(node.input(1), cst);
+                }
+                if (has_scalar) {
+                    if (op == "mul") { pre_s *= cst; pre_o *= cst; pre_sR *= Real(cst); pre_oR *= Real(cst); }
+                    else            { pre_o += cst; pre_oR += Real(cst); }
+                    continue;
+                }
+            }
+            if (op == "unsqueeze" || op == "squeeze" || op == "reshape" || op == "flatten" || op == "identity") {
+                continue; // 纯形状对数值无影响
+            }
+        }
+
+        // 1) 线性层：Gemm / MatMul  —— 必须入栈并立刻 continue
+        if (op == "gemm" || op == "matmul") {
+            if (node.input_size() < 2)
+                throw std::runtime_error("Linear op needs >=2 inputs.");
+
+            const std::string& Wname = node.input(1);
+            auto itW = init.find(Wname);
+            if (itW == init.end()) throw std::runtime_error("Cannot find weight initializer: " + Wname);
+            const onnx::TensorProto* Wtp = itW->second;
+
+            bool   transB = false;
+            double alpha  = 1.0, beta = 1.0;
+            if (op == "gemm") {
+                for (const auto& a : node.attribute()) {
+                    std::string an = tolower_str(a.name());
+                    if (an=="transb") transB = (a.i()!=0);
+                    else if (an=="alpha") alpha = a.f();
+                    else if (an=="beta")  beta  = a.f();
+                }
+            }
+
+            // 读权重
+            int64_t Wr, Wc;
+            Matrix<Real> W = tensor_to_matrix(Wtp, Wr, Wc);
+
+            // 统一内部为 [out, in]
+            if (op == "gemm") {
+                if (transB == 0) { Matrix<Real> WT; W.transpose(WT); W = WT; std::swap(Wr, Wc); }
+                // transB==1: W 已是 [out,in]，不转置
+            } else { // matmul
+                // 常见导出 W 为 [in,out]，转置成 [out,in]
+                Matrix<Real> WT; W.transpose(WT); W = WT; std::swap(Wr, Wc);
+            }
+
+            // alpha
+            if (alpha != 1.0) {
+                const Real alphaR = Real(alpha);
+                for (unsigned r=0; r<(unsigned)Wr; ++r)
+                    for (unsigned c=0; c<(unsigned)Wc; ++c)
+                        W[r][c] *= alphaR;
+            }
+
+            // 初始化 bias，全 0
+            Matrix<Real> B((unsigned)Wr, 1u);
+            for (unsigned r=0; r<(unsigned)Wr; ++r) B[r][0] = Real(0.0);
+
+            // Gemm 的第三输入 bias（若有）
+            if (op == "gemm" && node.input_size() >= 3) {
+                const std::string& bname = node.input(2);
+                auto itb = init.find(bname);
+                if (itb != init.end()) {
+                    int64_t bdim;
+                    Matrix<Real> Bb = tensor_to_bias_col(itb->second, bdim);
+                    if (beta != 1.0) {
+                        const Real betaR = Real(beta);
+                        for (unsigned r=0; r<(unsigned)bdim; ++r) Bb[r][0] *= betaR;
+                    }
+                    if ((int)bdim != (int)Wr) throw std::runtime_error("Bias dim mismatch.");
+                    for (unsigned r=0; r<(unsigned)Wr; ++r) B[r][0] += Bb[r][0];
+                }
+            }
+
+            // 第一层：可选择折叠输入端仿射（如果 pre_s/pre_o ≠ 1/0）
+            if (!first_linear_seen) {
+                if (pre_s != 1.0) {
+                    for (unsigned r=0; r<(unsigned)Wr; ++r)
+                        for (unsigned c=0; c<(unsigned)Wc; ++c)
+                            W[r][c] *= pre_sR;
+                }
+                if (pre_o != 0.0) {
+                    for (unsigned r=0; r<(unsigned)Wr; ++r) {
+                        Real rowsum = Real(0.0);
+                        for (unsigned c=0; c<(unsigned)Wc; ++c) rowsum += W[r][c];
+                        B[r][0] += rowsum * pre_oR;
+                    }
+                }
+                first_linear_seen = true;
+            }
+
+            // 入栈并标记“等待激活或层内 bias 的 Add”
+            layers.emplace_back("Affine", W, B);
+            pending_activation = true;
+            out_dim_decl = (int)Wr;
+            continue;  // ←← 很重要：线性层处理完立刻跳下一个节点
+        }
+
+        // 2) 层内 bias：MatMul 后紧跟的 Add 常量（仅在 pending_activation==true 时合并）
+        if (op == "add" && pending_activation) {
+            if (node.input_size()==2) {
+                const std::string& a0 = node.input(0);
+                const std::string& a1 = node.input(1);
+                const onnx::TensorProto* t0 = init.count(a0)?init[a0]:nullptr;
+                const onnx::TensorProto* t1 = init.count(a1)?init[a1]:nullptr;
+                const onnx::TensorProto* btp = t0 ? t0 : t1;
+                if (btp) {
+                    int64_t bdim;
+                    Matrix<Real> Bb = tensor_to_bias_col(btp, bdim);
+                    Matrix<Real>& Bold = layers.back().bias;
+                    if (Bold.rows() != (unsigned)bdim || Bold.cols()!=1u)
+                        throw std::runtime_error("Bias add dim mismatch.");
+                    for (unsigned r=0;r<(unsigned)bdim;++r) Bold[r][0] += Bb[r][0];
+                    continue; // 合并完就跳过
+                }
+            }
+            // 如果不是常量 bias，不在这里处理，留给后面的输出仿射/忽略
+        }
+
+        // 3) 激活：只在 pending_activation==true 时接受
+        if ((op=="relu" || op=="tanh" || op=="sigmoid" || op=="identity") && pending_activation) {
+            layers.back().activation = map_act_from_onnx(node.op_type());
+            pending_activation = false;
+            continue;
+        }
+
+        // 4) 输出端仿射：在 first_linear_seen 之后吸收
+        // Mul/Sub：无论 pending_activation 是 true/false 都吸收；
+        // Add：只在 !pending_activation 时吸收（避免吞掉层内 bias）
+        if (first_linear_seen && (op=="mul" || op=="sub" || (op=="add" && !pending_activation))) {
+            if (node.input_size() == 2) {
+                double c; bool ok = false;
+                ok = read_uniform_const(node.input(0), c) || read_uniform_const(node.input(1), c);
+                if (ok) {
+                    if (op=="mul") { out_a *= c; out_b *= c; continue; }
+                    else if (op=="sub") {
+                        // 仅当常量在第二个输入时视为 y - c
+                        if (read_uniform_const(node.input(1), c)) { out_b -= c; continue; }
+                    } else if (op=="add") { out_b += c; continue; }
+                }
+            }
+        }
+
+        // 5) 其他（形状/Dropout 等）忽略
+        // ...
+    }
+
+    for (size_t i = 1; i < layers.size(); ++i) {
+        unsigned in_cols  = layers[i].weight.cols();
+        unsigned prev_out = layers[i-1].weight.rows();
+        if (in_cols != prev_out) {
+            std::ostringstream oss;
+            oss << "Layer dim mismatch at layer " << i
+                << ": W.cols=" << in_cols
+                << " but previous W.rows=" << prev_out;
+            throw std::runtime_error(oss.str());
+        }
+    }
+
+    if (layers.empty())
+        throw std::runtime_error("No layers parsed from ONNX (expect an MLP).");
+
+    // —— 将 y <- out_a * y + out_b 转换为 POLAR 的约定：scale*(y - offset) ——
+    // out_a * (y - (-out_b/out_a)) = out_a*y + out_b
+    scale_factor = out_a;
+    if (std::fabs(out_a) > 0.0) offset = -out_b / out_a;
+    else offset = 0.0; // 退化情况
+
+    
+    num_of_inputs       = (in_dim>0) ? in_dim : (int)layers.front().weight.cols();
+    num_of_outputs      = (out_dim_decl>0) ? out_dim_decl : (int)layers.back().weight.rows();
+    num_of_hidden_layers= std::max(0, (int)layers.size()-1);
+#endif
 }

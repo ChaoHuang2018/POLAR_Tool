@@ -79,10 +79,14 @@ PolarSetting::PolarSetting(string filename)
         cutoff_threshold = j["flowstar_setting"]["cutoff_threshold"];
         flowpipe_stepsize = j["flowstar_setting"]["flowpipe_stepsize"];
         symbolic_queue_size = j["flowstar_setting"]["symbolic_queue_size"];
+        interval_precision = j["flowstar_setting"]["interval_precision"];
+
         
         output_dim = j["output_setting"]["output_dimension"];
         output_filename = j["output_setting"]["output_filename"];
-        cout << "Succeed." << endl;
+        if_plot = j["output_setting"]["if_plot"];
+        fail_fill_width = j["output_setting"].value("fail_fill_width", fail_fill_width);
+        // cout << "Succeed." << endl;
     }
     else
     {
