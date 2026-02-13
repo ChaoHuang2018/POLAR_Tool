@@ -8,7 +8,7 @@
     },
     "flowstar_setting": {
         "cutoff_threshold": 1e-8,
-        "flowpipe_stepsize": 0.1,
+        "flowpipe_stepsize": 0.01,
         "symbolic_queue_size": 100,
         "interval_precision": 100
     },

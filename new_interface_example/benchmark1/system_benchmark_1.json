@@ -5,5 +5,5 @@
         "ode_list": ["x1", "u * x1^2 - x0"],
         "control_stepsize": 0.2
     },
-    "neural_network": "./new_interface_example/benchmark1/nn_1_tanh"
+    "neural_network": "./new_interface_example/benchmark1/nn_1_relu_tanh"
 }
