@@ -5,6 +5,11 @@ flowstar/
 # temo files
 *.tmp
 
+# POLAR onnx
+POLAR/_tmp_onnx/
+POLAR/build/
+POLAR/third_party/
+
 # Prerequisites
 *.d
 
